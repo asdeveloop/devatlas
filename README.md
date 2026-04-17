@@ -1,76 +1,165 @@
 # DevAtlas Platform
 
-DevAtlas is a pnpm monorepo for the DevAtlas web app, API, shared packages, and engineering documentation.
+DevAtlas یک پلتفرم دانش فنی برای دولوپرهاست که با تمرکز بر **پایداری در شرایط اینترنت محدود** و **local-first بودن** طراحی شده است. این مخزن یک **monorepo** مبتنی بر `pnpm` و `Turborepo` است که شامل سرویس‌های اصلی زیر می‌باشد:
 
-## Quick Start
+- `@devatlas/web` — فرانت‌اند (Next.js 16 + React 19 + TailwindCSS)
+- `@devatlas/api` — بک‌اند (NestJS 11 + Prisma 6 + PostgreSQL)
+- پکیج‌های مشترک در مسیر `packages/`
+  - `@devatlas/api-client`
+  - `@devatlas/types`
 
-### Prerequisites
+وضعیت فعلی: توسعه در حال انجام، تمرکز روی پایدارسازی core و حلقه اصلی محتوا.
 
-- Node.js 20+
-- `pnpm` 9+
-- Docker and Docker Compose
+---
+
+## Tech Stack
+
+### Frontend
+- Next.js 16.1.6
+- React 19.2.4
+- TailwindCSS 3
+- Radix UI + shadcn-like UI
+- lucide-react
+- framer-motion
+
+### Backend
+- NestJS 11
+- Prisma 6
 - PostgreSQL 15+
 
-### Setup
+### Monorepo / Tooling
+- pnpm@9
+- Turborepo
+- TypeScript 5.9
+- ESLint 9 + @typescript-eslint
+- Vitest 3
+- commitlint + lint-staged
+
+---
+
+## Monorepo Structure
+
+```text
+devatlas-main/
+  apps/
+    api/      # سرویس NestJS
+    web/      # اپ Next.js
+  packages/
+    api-client/
+    types/
+  prisma/
+    schema.prisma
+  scripts/
+    prepare-prisma-engines.mjs
+    combine-files.js
+  package.json
+  pnpm-workspace.yaml
+  turbo.json
+  .gitlab-ci.yml
+  README.md
+  CONTRIBUTING.md
+  LICENSE
+  CHANGELOG.md
+```
+
+---
+
+## Prerequisites
+
+- Node.js 20+
+- pnpm 9+
+- PostgreSQL 15+
+
+---
+
+## Installation
 
 ```bash
-git clone ssh://git@localhost:2222/admin/devatlas-platform.git
-cd devatlas-platform
 pnpm install
-docker compose -f infra/docker/docker-compose.yml up -d
-cp apps/api/.env.example apps/api/.env
-cp apps/web/.env.example apps/web/.env
-pnpm --filter @devatlas/api prisma migrate dev
+```
+
+---
+
+## Environment Setup
+
+نمونه فایل env برای API:
+
+```bash
+# apps/api/.env
+DATABASE_URL="postgresql://user:password@localhost:5432/devatlas"
+```
+
+سایر envها بسته به نیاز هر سرویس.
+
+---
+
+## Development
+
+اجرای هم‌زمان سرویس‌ها:
+
+```bash
 pnpm dev
 ```
 
-### Package Registry
-
-This repository is currently configured to use the Iranian npm mirror in `.npmrc`:
+اجرای مجزا:
 
 ```bash
-registry=https://npm.devneeds.ir/
+pnpm --filter @devatlas/api dev
+pnpm --filter @devatlas/web dev
 ```
 
-## Common Commands
+---
 
-| Command | Description |
-|---|---|
-| `pnpm dev` | Start API and web in development mode |
-| `pnpm build` | Build all workspace projects |
-| `pnpm lint` | Run lint tasks across the monorepo |
-| `pnpm test` | Run workspace tests |
-| `pnpm typecheck` | Run TypeScript checks across the workspace |
-| `pnpm health` | Run `typecheck` and `test` together |
-| `pnpm generate:api-client` | Regenerate the API client package |
-| `pnpm --filter @devatlas/api prisma:validate` | Validate the Prisma schema |
-| `pnpm --filter @devatlas/api prisma:generate` | Generate Prisma client artifacts |
+## Root Scripts
 
-## Workspace Layout
+```bash
+pnpm dev
+pnpm lint
+pnpm test
+pnpm typecheck
+pnpm build
+pnpm health
+pnpm prepare:prisma
+```
 
-- `apps/api` - NestJS API with Prisma and Swagger
-- `apps/web` - Next.js App Router frontend
-- `packages/api-client` - shared HTTP client utilities and generated client entrypoints
-- `packages/config` - shared configuration package scaffolding
-- `packages/content` - MDX/content loading, parsing, indexing, and validation pipeline
-- `packages/types` - shared contracts and Zod schemas
-- `packages/ui` - reusable UI components, tokens, and shared frontend primitives
-- `packages/utils` - shared utility and API helper functions
-- `docs` - architecture, roadmap, and engineering state documents
-- `scripts` - repository maintenance scripts currently used by install/build flows
+---
 
-## Current Product Surface
+## Testing
 
-- Web landing page with platform overview
-- Guide listing page and guide detail route
-- API modules for guides, tools, categories, tags, health, and database
-- Prisma schema and migrations for content, taxonomy, relations, search, AI cache, and analytics tables
-- Shared UI/component package and content indexing package
+```bash
+pnpm test
+pnpm --filter @devatlas/api test
+pnpm --filter @devatlas/web test
+```
 
-## Documentation
+---
 
-- `docs/ARCHITECTURE.md`
-- `docs/ENGINEERING-STATE.md`
-- `docs/ROADMAP.md`
-- `docs/VISION.md`
-- `docs/API Contract.md`
+## CI/CD
+
+این ریپو برای GitLab طراحی شده و شامل فایل `.gitlab-ci.yml` است که مراحل زیر را اجرا می‌کند:
+
+- prepare
+- lint
+- test
+- typecheck
+- build
+
+تنظیم Runner باید در GitLab UI انجام شود.
+
+---
+
+## Contributing
+
+راهنمای مشارکت در مسیر:
+
+[`CONTRIBUTING.md`](./CONTRIBUTING.md)
+
+---
+
+## License
+
+پروژه تحت لایسنس MIT منتشر شده است. متن کامل در:
+
+[`LICENSE`](./LICENSE)
+
+---

@@ -1,0 +1,92 @@
+stages:
+  - prepare
+  - lint
+  - test
+  - typecheck
+  - build
+
+default:
+  image: node:20-alpine
+  before_script:
+    - corepack enable
+    - corepack prepare pnpm@9.0.0 --activate
+    - pnpm config set store-dir .pnpm-store
+    - pnpm install --frozen-lockfile
+
+  cache:
+    key:
+      files:
+        - pnpm-lock.yaml
+    paths:
+      - .pnpm-store
+      - node_modules
+      - .turbo
+    policy: pull-push
+
+variables:
+  CI: "true"
+  NODE_ENV: "test"
+
+prepare:
+  stage: prepare
+  script:
+    - pnpm health
+  artifacts:
+    when: always
+    paths:
+      - .turbo
+  only:
+    - main
+    - develop
+    - merge_requests
+
+lint:
+  stage: lint
+  script:
+    - pnpm lint
+  needs:
+    - prepare
+  only:
+    - main
+    - develop
+    - merge_requests
+
+test:
+  stage: test
+  script:
+    - pnpm test
+  needs:
+    - prepare
+  only:
+    - main
+    - develop
+    - merge_requests
+
+typecheck:
+  stage: typecheck
+  script:
+    - pnpm typecheck
+  needs:
+    - prepare
+  only:
+    - main
+    - develop
+    - merge_requests
+
+build:
+  stage: build
+  script:
+    - pnpm build
+  needs:
+    - lint
+    - test
+    - typecheck
+  only:
+    - main
+    - develop
+    - merge_requests
+  artifacts:
+    when: on_success
+    paths:
+      - apps/web/.next
+      - apps/api/dist
