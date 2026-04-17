@@ -6,14 +6,30 @@
     "build": "node ../../scripts/link-next-eslint.mjs && next build",
     "dev": "next dev",
     "lint": "eslint . --max-warnings=0",
-    "test": "vitest run --passWithNoTests --config ../../vitest.config.ts",
+    "test": "vitest run --passWithNoTests --config vitest.config.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@devatlas/api-client": "workspace:^",
+    "@devatlas/ui": "workspace:^",
+    "cmdk": "^1.1.1",
+    "date-fns": "^4.1.0",
+    "embla-carousel-react": "^8.6.0",
+    "framer-motion": "^12.34.1",
+    "input-otp": "^1.4.2",
     "next": "16.1.6",
+    "next-themes": "^0.4.6",
     "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "react-day-picker": "^9.13.2",
+    "react-dom": "19.2.4",
+    "react-hook-form": "^7.71.1",
+    "react-resizable-panels": "4.9.0",
+    "recharts": "^3.7.0",
+    "sharp": "^0.34.5",
+    "sonner": "^2.0.7",
+    "tailwindcss-animate": "^1.0.7",
+    "vaul": "^1.1.2",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@types/node": "^25.6.0",

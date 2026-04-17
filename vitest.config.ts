@@ -1,20 +1,30 @@
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+// filepath: vitest.config.ts
+import { resolve } from 'path';
 import { defineConfig } from 'vitest/config';
-
-const rootDir = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
   test: {
-    environment: 'node',
     globals: true,
-    setupFiles: [path.join(rootDir, 'tests/setup/node.ts')],
-    include: [
-      'tests/**/*.test.ts',
-      'src/__tests__/**/*.test.ts',
-      '**/__tests__/**/*.test.ts',
-      'packages/**/tests/**/*.test.ts',
-      'packages/**/__tests__/**/*.test.ts',
-    ],
+    environment: 'node',
+    include: ['**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
+    exclude: ['**/node_modules/**', '**/dist/**', '**/.next/**'],
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json', 'html'],
+      exclude: [
+        '**/node_modules/**',
+        '**/dist/**',
+        '**/.next/**',
+        '**/vitest.config.ts',
+        '**/prisma/**',
+      ],
+    },
+  },
+  resolve: {
+    alias: {
+      '@devatlas/types': resolve(__dirname, './packages/types/src'),
+      '@devatlas/ui': resolve(__dirname, './packages/ui/src'),
+      '@devatlas/api-client': resolve(__dirname, './packages/api-client/src'),
+    },
   },
 });

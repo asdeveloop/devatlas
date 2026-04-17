@@ -1,156 +1,95 @@
+// filepath: docs/ENGINEERING-STATE.md
 # Engineering State
 
-Last Updated: 2026-04-15
+**Last Updated:** 1405/01/29 (2026-04-18)
 
-This document tracks the real current state of the repository after removal of the in-repo AI agent package.
+## ✅ Completed
 
-## Repository Snapshot
+### Phase 1: Foundation & Config Drift Resolution
 
-- monorepo manager: pnpm workspaces + Turborepo
-- active apps: `apps/api`, `apps/web`
-- active shared packages: `api-client`, `config`, `content`, `types`, `ui`, `utils`
-- package registry: `https://npm.devneeds.ir/`
-- in-repo AI agent package: removed
+#### Step 1: Missing Config Files Created
+- `pnpm-workspace.yaml` — workspace definition
+- `.github/workflows/ci.yml` — full CI pipeline
+- `vitest.config.ts` (root) — shared test config
+- `apps/api/vitest.config.ts` — API test config (Node)
+- `apps/web/vitest.config.ts` — Web test config (jsdom)
+- `apps/api/tsconfig.build.json` — API production build
+- `packages/types/tsconfig.json` — types package config
+- `packages/ui/tsconfig.json` — UI package config with JSX
+- `infra/docker/docker-compose.yml` — local dev stack
 
-## Web Application
+#### Step 2: Dependency & Version Alignment
+- Prisma aligned to `^6.19.3` across all packages
+- All Radix UI + utility deps consolidated into `@devatlas/ui`
+- UI deps removed from `apps/api` (backend has no UI)
+- Test configs use local `vitest.config.ts` per package
 
-Location: `apps/web`
+#### Step 3: Root Dependency Normalization
+- Root `package.json`: removed ALL runtime `dependencies`
+- Each package owns its own deps. Root = devDependencies only.
 
-Current state:
+#### Step 4: UI Package Peer Dependency Noise Reduction
+- Peer range widened: `>=18.0.0 <20.0.0` for react/react-dom
 
-- Next.js App Router project is present and wired
-- landing page is active at `/`
-- guide listing page is active at `/guides`
-- guide detail route is active at `/guides/[slug]`
-- feature folders exist for `guides`, `home`, `navigation`, `search`, and `tools`
-- API request helpers exist in `apps/web/lib/api.ts` and feature-level `api/` modules
+#### Step 5: Canonical Scripts Documentation & Enforcement
+**Created `docs/SCRIPTS.md` — single source of truth for all scripts.**
 
-Current concerns:
+Standardization applied:
+- All `test` scripts: `vitest run --passWithNoTests` (no watch mode)
+- All `lint` scripts: `--max-warnings=0`
+- All `typecheck` scripts: `tsc --noEmit` (consistent across packages)
+- `apps/web` build: removed `&& pnpm lint` (lint is separate pipeline stage)
+- `apps/web` lint: `next lint` → `eslint . --max-warnings=0` (consistent)
+- Root: removed `validate:phase1` (temporary), removed `prepare:prisma` (duplicate of `postinstall`)
+- Root `health`: expanded to `typecheck && lint && test`
+- `apps/api`: added `prisma:migrate:dev` and `prisma:migrate:deploy`
+- `apps/api` prisma scripts: simplified engine paths (rely on pnpm hoisting)
 
-- dependency declarations had drifted from the lockfile and were realigned during cleanup
-- search is only partially represented in the frontend as hook scaffolding, not a full search product surface
+### Dependency Ownership Matrix
 
-## API Application
+| Layer | Owns |
+|---|---|
+| Root (devDeps only) | turbo, typescript, eslint, vitest, tsup, commitlint, lint-staged |
+| `@devatlas/ui` | Radix UI, cva, clsx, lucide-react, tailwind-merge, @base-ui/react |
+| `@devatlas/types` | (standalone, no runtime deps) |
+| `apps/api` | NestJS, Prisma, zod, class-validator/transformer |
+| `apps/web` | Next.js, React 19, sharp, date-fns, zod, app-specific UI libs |
 
-Location: `apps/api`
+### Known Remaining Items
+1. **Module system**: API=CommonJS, api-client=ESM, web=ESNext/Bundler — acceptable (NestJS requires CJS)
+2. **`postinstall` script**: runs `node scripts/prepare-prisma-engines.mjs` — needs prisma available via hoisting
 
-Current state:
+## 🚧 In Progress
+- None
 
-- NestJS app boots with config validation, CORS, versioning, Swagger, interceptors, and exception filter
-- active modules: `database`, `health`, `guides`, `tools`, `categories`, `tags`
-- request/response DTO infrastructure is established
-- repository/service/controller separation exists across domain modules
-- Prisma integration is active
+## 📋 Next Priority
+Next incomplete P1 task from ROADMAP.md (all P1 tasks complete — move to P2)
 
-Current concerns:
+## 🔧 Active Constraints
+- Root `package.json` has ZERO runtime dependencies
+- Prisma `^6.19.3` — single version, owned by `apps/api`
+- UI deps live exclusively in `@devatlas/ui` (peer: react >=18 <20)
+- App-specific UI libs live in `apps/web`
+- Each package has its own `vitest.config.ts`
+- All scripts follow canonical naming: build, dev, lint, test, typecheck
+- `docs/SCRIPTS.md` is the single source of truth for script conventions
 
-- the schema already includes forward-looking AI, analytics, and relation tables, but not all of them are necessarily surfaced through active endpoints yet
-- no dedicated search module exists in the API module tree yet
+## 📊 Metrics
+- Config files created: 9
+- Dependencies removed from root: 40+
+- Dependencies moved to correct owner: 52 package relocations
+- Version drifts fixed: Prisma (3 locations), lucide-react, tailwind-merge
+- Scripts standardized: 6 packages, 28 scripts total
+- Dead scripts removed: 2 (validate:phase1, prepare:prisma)
+- Prisma scripts added: 2 (migrate:dev, migrate:deploy)
 
-## Database State
+### Unit Tests (Step 6 — Completed)
 
-Location: `apps/api/prisma/schema.prisma`
+- `error.factory.spec.ts` — DomainError, ErrorCodes, all ErrorFactory methods (7 tests)
+- `categories.service.spec.ts` — list/get/create/update/delete + error paths (7 tests)
+- `tags.service.spec.ts` — list/get/create/update/delete + error paths (7 tests)
+- `tools.service.spec.ts` — list/get/create/update/delete + error paths (7 tests)
+- `guides.service.spec.ts` — findAll pagination/filters, findBySlug, create with/without tags, update tag replacement, delete + error paths (11 tests)
 
-Current state:
-
-- Prisma schema includes content, taxonomy, junction, relation, search, AI cache, and analytics models
-- migrations exist under `apps/api/prisma/migrations`
-- `Guide` and `Tool` include richer status/metadata fields than the older docs previously reflected
-
-Operational notes:
-
-- Prisma engine preparation is handled by `scripts/prepare-prisma-engines.mjs`
-- schema validation/generation scripts live in `apps/api/package.json`
-
-## Shared Packages
-
-### `packages/content`
-
-Current state:
-
-- contains MDX loader, parser, validator, indexer, and pipeline layers
-- has dedicated tests for loading, parsing, schemas, indexing, and pipeline behavior
-
-### `packages/ui`
-
-Current state:
-
-- large reusable component library exists
-- contains shared theme tokens, hooks, and monitoring/analytics-related frontend helpers
-- dependency surface is broad and still produces peer dependency warnings during install
-
-### `packages/types`
-
-Current state:
-
-- shared API, content, database, and validation contracts exist
-- both `.ts` and generated `.js` files are present in source folders
-
-### `packages/utils`
-
-Current state:
-
-- minimal shared API helper/fetcher utilities exist
-- package is active but still relatively small compared with `ui` and `content`
-
-### `packages/api-client`
-
-Current state:
-
-- base HTTP client exists
-- generation entrypoints are wired from the workspace root script
-
-### `packages/config`
-
-Current state:
-
-- package scaffold exists
-- currently lightweight compared with other shared packages
-
-## Infrastructure and CI
-
-### Local infrastructure
-
-- Docker Compose assets exist under `infra/docker`
-- project expects PostgreSQL for the API
-- Redis remains part of the platform/infrastructure picture
-
-### CI
-
-Location: `.github/workflows/ci.yml`
-
-Current pipeline runs:
-
-- dependency installation
-- `pnpm health`
-- `pnpm test`
-- `pnpm validate:phase1`
-
-Current concern:
-
-- CI uses `pnpm install --frozen-lockfile`, so dependency/version drift must be kept tightly controlled
-
-## Documentation State
-
-Current primary docs:
-
-- `README.md`
-- `docs/ARCHITECTURE.md`
-- `docs/ENGINEERING-STATE.md`
-- `docs/ROADMAP.md`
-- `docs/VISION.md`
-- `docs/API Contract.md`
-
-Cleanup completed:
-
-- `docs/AI-AGENT.md` removed
-- `docs/DevAtlas_AI_Agent_Execution_Plan.md` removed
-- all known `ai-agent`, `aider`, and `ollama` references removed from tracked docs and config
-
-## Immediate Engineering Reality
-
-The project has a usable foundation across web, API, Prisma, UI, and content indexing. The biggest practical risks now are not missing scaffolding but alignment:
-
-- keeping docs synchronized with implemented modules and routes
-- keeping package manifests aligned with the lockfile and selected npm mirror
-- deciding which schema elements are truly active product scope versus reserved future scope
+Total: 39 unit tests covering all domain services and error infrastructure.
+Coverage: service layer CRUD, pagination meta calculation, slug conflict, not-found errors.

@@ -170,13 +170,6 @@ The Prisma schema currently includes both implemented and forward-looking tables
 - `EntityType`
 - `RelationType`
 
-## Build and Workspace Conventions
-
-- root orchestration uses `turbo.json`
-- install-time Prisma engine preparation runs from `scripts/prepare-prisma-engines.mjs`
-- web build links Next.js ESLint integration via `scripts/link-next-eslint.mjs`
-- package registry is pinned in `.npmrc` to `https://npm.devneeds.ir/`
-
 ## Current Constraints
 
 - the lockfile and workspace are currently aligned to the Iranian npm mirror

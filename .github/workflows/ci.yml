@@ -1,0 +1,64 @@
+// filepath: .github/workflows/ci.yml
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: devatlas
+          POSTGRES_PASSWORD: devatlas
+          POSTGRES_DB: devatlas
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 8
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma Client
+        run: pnpm --filter @devatlas/api prisma:generate
+        env:
+          DATABASE_URL: postgresql://devatlas:devatlas@localhost:5432/devatlas?schema=public
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Test
+        run: pnpm test
+        env:
+          DATABASE_URL: postgresql://devatlas:devatlas@localhost:5432/devatlas?schema=public
+
+      - name: Build
+        run: pnpm build
+        env:
+          DATABASE_URL: postgresql://devatlas:devatlas@localhost:5432/devatlas?schema=public

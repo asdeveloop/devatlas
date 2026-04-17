@@ -362,57 +362,59 @@
 - Owner: Platform / Workspace
 - Estimate: 1 تا 2 روز
 - Dependencies: ندارد
-- [ ] همه dependencyهای root، `apps/web`، `apps/api` و `packages/ui` فهرست و مقایسه شوند
-- [ ] dependencyهای تکراری یا با owner نامشخص مشخص شوند
-- [ ] dependencyهای ناسازگار با mirror فعلی pin یا downgrade شوند
-- [ ] `pnpm-lock.yaml` دوباره تولید و commit شود
-- [ ] `pnpm install`, `pnpm typecheck`, `pnpm test`, `pnpm build` بدون failure اجرا شوند
+- [x] همه dependencyهای root، `apps/web`، `apps/api` و `packages/ui` فهرست و مقایسه شوند
+- [x] dependencyهای تکراری یا با owner نامشخص مشخص شوند
+- [x] dependencyهای ناسازگار با mirror فعلی pin یا downgrade شوند
+- [x] `pnpm-lock.yaml` دوباره تولید و commit شود
+- [x] `pnpm install`, `pnpm typecheck`, `pnpm test`, `pnpm build` بدون failure اجرا شوند
 
 ### 2) کاهش Peer Dependency Warningهای مهم
 - Owner: Platform / Frontend Infrastructure
 - Estimate: 0.5 تا 1.5 روز
 - Dependencies: Task 1
-- [ ] خروجی کامل warningهای `pnpm install` ثبت شود
-- [ ] warningها به دو دسته `blocking` و `acceptable-for-now` تقسیم شوند
-- [ ] برای warningهای `packages/ui` تصمیم `upgrade`, `replace`, `pin`, یا `defer` ثبت شود
-- [ ] warningهای بحرانی حذف یا مستند شوند
+- [x] خروجی کامل warningهای `pnpm install` ثبت شود
+- [x] warningها به دو دسته `blocking` و `acceptable-for-now` تقسیم شوند
+- [x] برای warningهای `packages/ui` تصمیم `upgrade`, `replace`, `pin`, یا `defer` ثبت شود
+- [x] warningهای بحرانی حذف یا مستند شوند
 
 ### 3) بازبینی Root Scriptها و Canonical Command Set
 - Owner: Platform
 - Estimate: 0.5 روز
 - Dependencies: Task 1
-- [ ] همه scriptهای root در `package.json` بررسی شوند
-- [ ] scriptهای stale یا بدون implementation حذف شوند
-- [ ] scriptهای رسمی توسعه/CI در README و roadmap هم‌راستا شوند
-- [ ] command set نهایی برای local dev و CI تثبیت شود
+- [x] همه scriptهای root در `package.json` بررسی شوند
+- [x] scriptهای stale یا بدون implementation حذف شوند
+- [x] scriptهای رسمی توسعه/CI در README و roadmap هم‌راستا شوند
+- [x] command set نهایی برای local dev و CI تثبیت شود
 
 ### 4) هم‌راستاسازی CI با وضعیت واقعی Workspace
 - Owner: Platform / DevOps
 - Estimate: 0.5 تا 1 روز
 - Dependencies: Tasks 1, 3
-- [ ] `.github/workflows/ci.yml` با commandهای واقعی repo تطبیق داده شود
-- [ ] مشخص شود CI باید `lint`, `typecheck`, `test`, `build` یا `health` را با چه ترتیبی اجرا کند
-- [ ] از نبود script یا mismatch در pipeline اطمینان گرفته شود
-- [ ] workflow نهایی با lockfile و mirror فعلی سازگار باشد
+- [x] `.github/workflows/ci.yml` با commandهای واقعی repo تطبیق داده شود
+- [x] مشخص شود CI باید `lint`, `typecheck`, `test`, `build` یا `health` را با چه ترتیبی اجرا کند
+- [x] از نبود script یا mismatch در pipeline اطمینان گرفته شود
+- [x] workflow نهایی با lockfile و mirror فعلی سازگار باشد
 
 ### 5) تعریف Quality Gate رسمی برای فاز فعلی
 - Owner: Platform / Engineering
 - Estimate: 0.5 روز
 - Dependencies: Task 4
-- [ ] حداقل gate برای merge در docs تعریف شود
-- [ ] blocking conditionهای `lint`, `typecheck`, `test`, `build` مشخص شوند
-- [ ] relationship بین `health` و سایر commandها شفاف شود
-- [ ] quality gate در roadmap یا engineering docs ثبت شود
+- [x] حداقل gate برای merge در docs تعریف شود
+- [x] blocking conditionهای `lint`, `typecheck`, `test`, `build` مشخص شوند
+- [x] relationship بین `health` و سایر commandها شفاف شود
+- [x] quality gate در roadmap یا engineering docs ثبت شود
 
 ### 6) افزودن تست‌های هدفمند برای API Core Modules
 - Owner: Backend
 - Estimate: 1 تا 2 روز
 - Dependencies: Tasks 4, 5
-- [ ] از `guides` و `tools` به‌عنوان شروع انتخاب شود
-- [ ] سناریوهای list/detail/create/update/delete تعریف شوند
-- [ ] خطاهای domain و envelope response تست شوند
-- [ ] query behavior مثل pagination/filter/sort تا حد ممکن پوشش داده شود
-- [ ] تست‌ها وارد CI flow هدف شوند
+- [x] از `guides` و `tools` به‌عنوان شروع انتخاب شود
+- [x] سناریوهای list/detail/create/update/delete تعریف شوند
+- [x] خطاهای domain و envelope response تست شوند
+- [x] query behavior مثل pagination/filter/sort تا حد ممکن پوشش داده شود
+- [x] تست‌ها وارد CI flow هدف شوند
+- [x] Step 6: Unit tests for core API modules (guides, tools, categories, tags, error factory)
+
 
 ### 7) نهایی‌سازی Contract ماژول Guides
 - Owner: Backend

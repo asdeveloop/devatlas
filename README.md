@@ -49,9 +49,6 @@ devatlas-main/
     types/
   prisma/
     schema.prisma
-  scripts/
-    prepare-prisma-engines.mjs
-    combine-files.js
   package.json
   pnpm-workspace.yaml
   turbo.json

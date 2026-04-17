@@ -1,37 +1,56 @@
+// filepath: infra/docker/docker-compose.yml
+version: '3.9'
+
 services:
   postgres:
-    image: pgvector/pgvector:pg16
+    image: postgres:15-alpine
     container_name: devatlas-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_DB: devatlas
       POSTGRES_USER: devatlas
       POSTGRES_PASSWORD: devatlas
+      POSTGRES_DB: devatlas
     ports:
-      - "5432:5432"
+      - '5432:5432'
     volumes:
-      - postgres-data:/var/lib/postgresql/data
-      - ./postgres/init:/docker-entrypoint-initdb.d
+      - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U devatlas -d devatlas"]
+      test: ['CMD-SHELL', 'pg_isready -U devatlas']
       interval: 10s
       timeout: 5s
       retries: 5
 
-  redis:
-    image: redis:7-alpine
-    container_name: devatlas-redis
+  api:
+    build:
+      context: ../../
+      dockerfile: infra/docker/Dockerfile.api
+    container_name: devatlas-api
     restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://devatlas:devatlas@postgres:5432/devatlas?schema=public
+      NODE_ENV: production
+      PORT: 3001
     ports:
-      - "6379:6379"
+      - '3001:3001'
     volumes:
-      - redis-data:/data
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      - ../../apps/api/prisma:/app/apps/api/prisma:ro
+
+  web:
+    build:
+      context: ../../
+      dockerfile: infra/docker/Dockerfile.web
+    container_name: devatlas-web
+    restart: unless-stopped
+    depends_on:
+      - api
+    environment:
+      NEXT_PUBLIC_API_URL: http://api:3001
+      NODE_ENV: production
+    ports:
+      - '3000:3000'
 
 volumes:
-  postgres-data:
-  redis-data:
+  postgres_data:
