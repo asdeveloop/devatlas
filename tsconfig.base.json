@@ -1,0 +1,38 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "jsx": "preserve",
+
+    "strict": true,
+    "noImplicitOverride": true,
+    "noUncheckedIndexedAccess": true,
+    "noFallthroughCasesInSwitch": true,
+    "noPropertyAccessFromIndexSignature": true,
+
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "skipLibCheck": true,
+
+    "baseUrl": ".",
+    "paths": {
+      "@devatlas/types": ["packages/types/src"],
+      "@devatlas/types/*": ["packages/types/src/*"],
+      "@devatlas/ui": ["packages/ui/src"],
+      "@devatlas/ui/*": ["packages/ui/src/*"],
+      "@devatlas/config": ["packages/config/src"],
+      "@devatlas/config/*": ["packages/config/src/*"],
+      "@devatlas/utils": ["packages/utils/src"],
+      "@devatlas/utils/*": ["packages/utils/src/*"],
+      "@devatlas/content": ["packages/content/src"],
+      "@devatlas/content/": ["packages/content/src"],
+      "@devatlas/api-client": ["packages/api-client/src"],
+      "@devatlas/api-client/": ["packages/api-client/src"]
+    }
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "name": "@devatlas/api",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "tsc --project tsconfig.build.json --outDir dist --rootDir src --incremental false",
+    "dev": "nest start --watch",
+    "lint": "eslint src --ext .ts --max-warnings=0",
+    "prisma:generate": "pnpm --dir ../.. prepare:prisma && DATABASE_URL=${DATABASE_URL:-postgresql://devatlas:devatlas@localhost:5432/devatlas?schema=public} PRISMA_QUERY_ENGINE_LIBRARY=../../node_modules/.pnpm/@prisma+engines@6.19.3/node_modules/@prisma/engines/libquery_engine-debian-openssl-3.0.x.so.node PRISMA_SCHEMA_ENGINE_BINARY=../../node_modules/.pnpm/@prisma+engines@6.19.3/node_modules/@prisma/engines/schema-engine-debian-openssl-3.0.x prisma generate --schema prisma/schema.prisma",
+    "prisma:validate": "pnpm --dir ../.. prepare:prisma && DATABASE_URL=${DATABASE_URL:-postgresql://devatlas:devatlas@localhost:5432/devatlas?schema=public} PRISMA_SCHEMA_ENGINE_BINARY=../../node_modules/.pnpm/@prisma+engines@6.19.3/node_modules/@prisma/engines/schema-engine-debian-openssl-3.0.x prisma validate --schema prisma/schema.prisma",
+    "test": "vitest run --passWithNoTests --config ../../vitest.config.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@devatlas/types": "workspace:^",
+    "@nestjs/common": "11.1.18",
+    "@nestjs/config": "^4.0.2",
+    "@nestjs/core": "11.1.18",
+    "@nestjs/platform-express": "11.1.18",
+    "@prisma/client": "^6.6.0",
+    "@radix-ui/react-dialog": "^1.1.15",
+    "@radix-ui/react-dropdown-menu": "^2.1.16",
+    "@radix-ui/react-label": "^2.1.8",
+    "@radix-ui/react-popover": "^1.1.15",
+    "@radix-ui/react-select": "^2.2.6",
+    "@radix-ui/react-slot": "^1.2.4",
+    "@radix-ui/react-tabs": "^1.1.13",
+    "@radix-ui/react-tooltip": "^1.2.8",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.15.1",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^1.7.0",
+    "nestjs-zod": "^5.3.0",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.1",
+    "tailwind-merge": "^3.5.0",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@nestjs/cli": "^11.0.5",
+    "@nestjs/swagger": "^11.2.7",
+    "@types/express": "^5.0.6",
+    "@types/node": "^25.6.0",
+    "@types/swagger-ui-express": "^4.1.8",
+    "prisma": "^6.6.0",
+    "swagger-ui-express": "^5.0.1"
+  }
+}

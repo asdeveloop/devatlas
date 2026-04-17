@@ -1,0 +1,64 @@
+# --- Dependencies ---
+node_modules/
+**/node_modules/
+.pnpm-store/
+.pnp.*
+.yarn/
+
+# --- Build Outputs ---
+.next/
+/out/
+dist/
+build/
+.turbo/
+*.tsbuildinfo
+next-env.d.ts
+
+# --- Database (Prisma) ---
+# Ignore local SQLite files if used
+*.db
+*.db-journal
+# NOTE: We do NOT ignore /prisma/migrations/ - these must be committed.
+# If you generate prisma client in a custom path, ignore it here:
+# apps/api/prisma/generated-client/
+
+# --- Environment Variables ---
+.env
+.env.*
+!.env.example
+# Keep .env.example as a template for other developers
+
+# --- Logs & Debug ---
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+dev.log
+server.log
+.claude
+.z-ai-config
+
+# --- Testing & Coverage ---
+coverage/
+/test-results/
+/playwright-report/
+storybook-static/
+.nyc_output
+/artifacts
+
+# --- OS & IDEs ---
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.pem
+
+# --- System/Misc ---
+.vercel
+backups/
+_ops/
+/skills/
+prompt
+test
+all_contents.txt

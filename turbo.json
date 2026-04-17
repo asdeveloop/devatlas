@@ -1,0 +1,45 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+
+  "globalDependencies": [
+    "package.json",
+    "pnpm-lock.yaml",
+    "tsconfig.base.json",
+    "*.config.{js,mjs,ts,cjs}",
+    "eslint.config.mjs"
+  ],
+
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": [
+        "dist/**",
+        ".next/**",
+        "build/**",
+        "**/dist/**"
+      ],
+      "cache": true
+    },
+
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+
+    "lint": {
+      "outputs": [],
+      "cache": true
+    },
+
+    "test": {
+      "outputs": ["coverage/**"],
+      "cache": true
+    },
+
+    "typecheck": {
+      "dependsOn": ["^typecheck"],
+      "outputs": [],
+      "cache": true
+    }
+  }
+}

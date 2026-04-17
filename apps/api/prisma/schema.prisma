@@ -1,0 +1,289 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearch"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+//
+// ────────────────────────────────────────────────────────────────
+//   Taxonomy
+// ────────────────────────────────────────────────────────────────
+//
+
+model Category {
+  id        String     @id @default(uuid()) @db.Uuid
+  name      String
+  slug      String     @unique
+  icon      String?
+
+  guides    Guide[]
+  tools     Tool[]     @relation("ToolToCategory") // FIX 1
+
+  createdAt DateTime   @default(now()) @map("created_at")
+  updatedAt DateTime   @updatedAt @map("updated_at")
+}
+
+model Tag {
+  id        String      @id @default(uuid()) @db.Uuid
+  name      String
+  slug      String       @unique
+
+  guideTags GuideTag[]
+  toolTags  ToolTag[]
+
+  createdAt DateTime     @default(now()) @map("created_at")
+  updatedAt DateTime     @updatedAt @map("updated_at")
+}
+
+
+//
+// ────────────────────────────────────────────────────────────────
+//   Guides
+// ────────────────────────────────────────────────────────────────
+//
+
+model Guide {
+  id           String         @id @default(uuid()) @db.Uuid
+  slug         String         @unique
+  title        String
+  description  String?
+  content      String?
+  readingTime  Int?
+  difficulty   Difficulty?
+  status       ContentStatus  @default(DRAFT)
+
+  categoryId   String         @db.Uuid
+  category     Category       @relation(fields: [categoryId], references: [id])
+
+  tags         GuideTag[]
+
+  createdAt    DateTime       @default(now()) @map("created_at")
+  updatedAt    DateTime       @updatedAt @map("updated_at")
+}
+
+
+//
+// ────────────────────────────────────────────────────────────────
+//   Tools
+// ────────────────────────────────────────────────────────────────
+//
+
+model Tool {
+  id            String       @id @default(uuid()) @db.Uuid
+  slug          String       @unique
+  name          String
+  description   String?
+  website       String?
+  github        String?
+  icon          String?
+  active        Boolean      @default(true)
+  tier          ToolTier
+  price         ToolPrice
+  popularity    Int          @default(0)
+
+  categoryId    String       @db.Uuid
+  category      Category     @relation("ToolToCategory", fields: [categoryId], references: [id]) // FIX 2
+
+  tags          ToolTag[]
+
+  createdAt     DateTime     @default(now()) @map("created_at")
+  updatedAt     DateTime     @updatedAt @map("updated_at")
+}
+
+
+//
+// ────────────────────────────────────────────────────────────────
+//   Junction Tables — ONLY ONE VERSION (corrected)
+// ────────────────────────────────────────────────────────────────
+//
+
+model GuideTag {
+  id      String @id @default(uuid()) @db.Uuid
+  guideId String @map("guide_id") @db.Uuid
+  tagId   String @map("tag_id")   @db.Uuid
+
+  guide Guide @relation(fields: [guideId], references: [id], onDelete: Cascade)
+  tag   Tag   @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@unique([guideId, tagId])
+  @@index([guideId], name: "idx_guide_tags_guide")
+  @@index([tagId], name: "idx_guide_tags_tag")
+  @@map("guide_tags")
+}
+
+model ToolTag {
+  id     String @id @default(uuid()) @db.Uuid
+  toolId String @map("tool_id") @db.Uuid
+  tagId  String @map("tag_id") @db.Uuid
+
+  tool Tool @relation(fields: [toolId], references: [id], onDelete: Cascade)
+  tag  Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@unique([toolId, tagId])
+  @@index([toolId], name: "idx_tool_tags_tool")
+  @@index([tagId], name: "idx_tool_tags_tag")
+  @@map("tool_tags")
+}
+
+
+//
+// ────────────────────────────────────────────────────────────────
+//   Knowledge Graph
+// ────────────────────────────────────────────────────────────────
+//
+
+model ContentRelation {
+  id String @id @default(uuid()) @db.Uuid
+
+  sourceType   EntityType    @map("source_type")
+  sourceId     String        @map("source_id") @db.Uuid
+
+  targetType   EntityType    @map("target_type")
+  targetId     String        @map("target_id") @db.Uuid
+
+  relationType RelationType  @map("relation_type")
+  weight       Float?
+  createdAt    DateTime       @default(now())
+
+  @@index([sourceId], name: "idx_content_relations_source")
+  @@index([targetId], name: "idx_content_relations_target")
+  @@map("content_relations")
+}
+
+
+//
+// ────────────────────────────────────────────────────────────────
+//   Search
+// ────────────────────────────────────────────────────────────────
+//
+
+model SearchDocument {
+  id String @id @default(uuid()) @db.Uuid
+
+  contentType String  @map("content_type")
+  title       String
+  description String
+  content     String
+  status      String  @default("DRAFT")
+  tags        String[]
+  category    String
+  url         String
+
+  @@map("search_documents")
+}
+
+
+//
+// ────────────────────────────────────────────────────────────────
+//   AI Cache
+// ────────────────────────────────────────────────────────────────
+//
+
+model AiSummary {
+  id String @id @default(uuid()) @db.Uuid
+
+  contentType String @map("content_type")
+  contentId   String @map("content_id") @db.Uuid
+
+  summary String
+  model   String
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("ai_summaries")
+}
+
+model AiAnswer {
+  id String @id @default(uuid()) @db.Uuid
+
+  question String
+  answer   String
+  sources  Json
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("ai_answers")
+}
+
+
+//
+// ────────────────────────────────────────────────────────────────
+//   Analytics
+// ────────────────────────────────────────────────────────────────
+//
+
+model SearchQuery {
+  id String @id @default(uuid()) @db.Uuid
+
+  query        String
+  resultsCount Int      @map("results_count")
+
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@map("search_queries")
+}
+
+model ContentView {
+  id String @id @default(uuid()) @db.Uuid
+
+  contentType String @map("content_type")
+  contentId   String @map("content_id") @db.Uuid
+
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@map("content_views")
+}
+
+
+//
+// ────────────────────────────────────────────────────────────────
+//   Enums
+// ────────────────────────────────────────────────────────────────
+//
+
+enum Difficulty {
+  beginner
+  intermediate
+  advanced
+}
+
+enum ContentStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum ToolTier {
+  FREE
+  FREEMIUM
+  PRO
+  ENTERPRISE
+}
+
+enum ToolPrice {
+  FREE
+  PAID
+  MIXED
+}
+
+enum ToolStatus {
+  ACTIVE
+  DEPRECATED
+  ARCHIVED
+}
+
+enum EntityType {
+  GUIDE
+  TOOL
+}
+
+enum RelationType {
+  RELATES_TO
+  MENTIONS
+  PREREQUISITE
+  ALTERNATIVE
+}
