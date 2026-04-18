@@ -1,22 +1,35 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../database/prisma.service';
+import { DrizzleService } from '../database/drizzle.service';
 import { CreateTagDto } from './dto/create-tag.dto';
 import { TagQueryDto } from './dto/tag-query.dto';
 import { UpdateTagDto } from './dto/update-tag.dto';
+import { eq } from 'drizzle-orm';
+import { tags } from '../../db/schema';
 
 @Injectable()
 export class TagsRepository {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly drizzle: DrizzleService) {}
 
   async findAll(query: TagQueryDto) {
-    const skip = (query.page - 1) * query.pageSize;
-    const [items, total] = await this.prisma.$transaction([
-      this.prisma.tag.findMany({
-        skip,
-        take: query.pageSize,
-        orderBy: { name: 'asc' },
-      }),
-      this.prisma.tag.count(),
+    const offset = (query.page - 1) * query.pageSize;
+    const [items, total] = await Promise.all([
+      this.drizzle.db
+        .select({
+          id: tags.id,
+          name: tags.name,
+          slug: tags.slug,
+          createdAt: tags.createdAt,
+          updatedAt: tags.updatedAt,
+        })
+        .from(tags)
+        .orderBy(tags.name)
+        .limit(query.pageSize)
+        .offset(offset),
+      this.drizzle.db
+        .select({ count: tags.id })
+        .from(tags)
+        .execute()
+        .then(([result]) => result.count),
     ]);
 
     return {
@@ -33,18 +46,46 @@ export class TagsRepository {
   }
 
   async findBySlug(slug: string) {
-    return this.prisma.tag.findUnique({ where: { slug } });
+    const [result] = await this.drizzle.db
+      .select()
+      .from(tags)
+      .where(eq(tags.slug, slug))
+      .execute();
+    return result ?? null;
   }
 
   async create(data: CreateTagDto) {
-    return this.prisma.tag.create({ data });
+    const [result] = await this.drizzle.db
+      .insert(tags)
+      .values({
+        name: data.name,
+        slug: data.slug,
+      })
+      .returning()
+      .execute();
+    return result;
   }
 
   async update(slug: string, data: UpdateTagDto) {
-    return this.prisma.tag.update({ where: { slug }, data });
+    const updateData: Record<string, unknown> = {};
+    if (data.name !== undefined) updateData.name = data.name;
+    if (data.slug !== undefined) updateData.slug = data.slug;
+
+    const [result] = await this.drizzle.db
+      .update(tags)
+      .set(updateData)
+      .where(eq(tags.slug, slug))
+      .returning()
+      .execute();
+    return result;
   }
 
   async delete(slug: string) {
-    return this.prisma.tag.delete({ where: { slug } });
+    const [result] = await this.drizzle.db
+      .delete(tags)
+      .where(eq(tags.slug, slug))
+      .returning()
+      .execute();
+    return result;
   }
 }

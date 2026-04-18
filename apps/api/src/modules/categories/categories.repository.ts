@@ -1,22 +1,36 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../database/prisma.service';
+import { DrizzleService } from '../database/drizzle.service';
 import { CategoryQueryDto } from './dto/category-query.dto';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
+import { eq } from 'drizzle-orm';
+import { categories } from '../../db/schema';
 
 @Injectable()
 export class CategoriesRepository {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly drizzle: DrizzleService) {}
 
   async findAll(query: CategoryQueryDto) {
-    const skip = (query.page - 1) * query.pageSize;
-    const [items, total] = await this.prisma.$transaction([
-      this.prisma.category.findMany({
-        skip,
-        take: query.pageSize,
-        orderBy: { name: 'asc' },
-      }),
-      this.prisma.category.count(),
+    const offset = (query.page - 1) * query.pageSize;
+    const [items, total] = await Promise.all([
+      this.drizzle.db
+        .select({
+          id: categories.id,
+          name: categories.name,
+          slug: categories.slug,
+          icon: categories.icon,
+          createdAt: categories.createdAt,
+          updatedAt: categories.updatedAt,
+        })
+        .from(categories)
+        .orderBy(categories.name)
+        .limit(query.pageSize)
+        .offset(offset),
+      this.drizzle.db
+        .select({ count: categories.id })
+        .from(categories)
+        .execute()
+        .then(([result]) => result.count),
     ]);
 
     return {
@@ -33,18 +47,48 @@ export class CategoriesRepository {
   }
 
   async findBySlug(slug: string) {
-    return this.prisma.category.findUnique({ where: { slug } });
+    const [result] = await this.drizzle.db
+      .select()
+      .from(categories)
+      .where(eq(categories.slug, slug))
+      .execute();
+    return result ?? null;
   }
 
   async create(data: CreateCategoryDto) {
-    return this.prisma.category.create({ data });
+    const [result] = await this.drizzle.db
+      .insert(categories)
+      .values({
+        name: data.name,
+        slug: data.slug,
+        icon: data.icon ?? null,
+      })
+      .returning()
+      .execute();
+    return result;
   }
 
   async update(slug: string, data: UpdateCategoryDto) {
-    return this.prisma.category.update({ where: { slug }, data });
+    const updateData: Record<string, unknown> = {};
+    if (data.name !== undefined) updateData.name = data.name;
+    if (data.slug !== undefined) updateData.slug = data.slug;
+    if (data.icon !== undefined) updateData.icon = data.icon ?? null;
+
+    const [result] = await this.drizzle.db
+      .update(categories)
+      .set(updateData)
+      .where(eq(categories.slug, slug))
+      .returning()
+      .execute();
+    return result;
   }
 
   async delete(slug: string) {
-    return this.prisma.category.delete({ where: { slug } });
+    const [result] = await this.drizzle.db
+      .delete(categories)
+      .where(eq(categories.slug, slug))
+      .returning()
+      .execute();
+    return result;
   }
 }

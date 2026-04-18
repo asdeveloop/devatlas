@@ -1,4 +1,4 @@
-import { ContentStatus, Difficulty, Prisma } from '@prisma/client';
+import { guides as guidesSchema, categories as categoriesSchema, tags as tagsSchema } from '../../../db/schema';
 
 type GuideRecord = {
   id: string;
@@ -7,11 +7,11 @@ type GuideRecord = {
   description: string;
   content: string;
   readingTime: number;
-  difficulty: Difficulty;
-  status: ContentStatus;
+  difficulty: string | null;
+  status: string;
   categoryId: string;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date;
+  updatedAt: Date;
 };
 
 type GuideSummaryRecord = GuideRecord & {
@@ -33,31 +33,44 @@ type GuideDetailRecord = GuideRecord & {
     slug: string;
     name: string;
     description: string | null;
-    createdAt: string;
-    updatedAt: string;
+    createdAt: Date;
+    updatedAt: Date;
   };
   tags: Array<{
     id: string;
     slug: string;
     name: string;
-    createdAt: string;
-    updatedAt: string;
+    createdAt: Date;
+    updatedAt: Date;
   }>;
 };
 
-type GuideWithRelations = Prisma.GuideGetPayload<{
-  include: {
-    category: true;
-    tags: { include: { tag: true } };
-  };
-}>;
+type GuideWithRelations = Awaited<ReturnType<typeof guidesSchema.$inferSelect>> & {
+  tags: Array<{
+    tag: {
+      id: string;
+      name: string;
+      slug: string;
+      createdAt: Date;
+      updatedAt: Date;
+    };
+  }>;
+  category: {
+    id: string;
+    name: string;
+    slug: string;
+    icon: string | null;
+    createdAt: Date;
+    updatedAt: Date;
+  } | null;
+};
 
-function toIsoString(value: Date): string {
-  return value.toISOString();
+function toIsoString(value: Date | string): string {
+  return new Date(value).toISOString();
 }
 
 export class GuideMapper {
-  static toDomain(entity: GuideWithRelations | Prisma.GuideGetPayload<Record<string, never>>): GuideRecord {
+  static toDomain(entity: GuideWithRelations): GuideRecord {
     return {
       id: entity.id,
       slug: entity.slug,
@@ -65,11 +78,11 @@ export class GuideMapper {
       description: entity.description ?? '',
       content: entity.content ?? '',
       readingTime: entity.readingTime ?? 1,
-      difficulty: entity.difficulty ?? Difficulty.beginner,
-      status: entity.status ?? ContentStatus.DRAFT,
+      difficulty: entity.difficulty ?? null,
+      status: entity.status ?? 'DRAFT',
       categoryId: entity.categoryId,
-      createdAt: toIsoString(entity.createdAt),
-      updatedAt: toIsoString(entity.updatedAt),
+      createdAt: entity.createdAt,
+      updatedAt: entity.updatedAt,
     };
   }
 
@@ -81,11 +94,7 @@ export class GuideMapper {
         slug: entity.category.slug,
         name: entity.category.name,
       },
-      tags: entity.tags.map(({ tag }) => ({
-        id: tag.id,
-        slug: tag.slug,
-        name: tag.name,
-      })),
+      tags: entity.tags.map((t) => t.tag),
     };
   }
 
@@ -96,17 +105,11 @@ export class GuideMapper {
         id: entity.category.id,
         slug: entity.category.slug,
         name: entity.category.name,
-        description: null,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+        description: entity.category.icon,
+        createdAt: entity.category.createdAt,
+        updatedAt: entity.category.updatedAt,
       },
-      tags: entity.tags.map(({ tag }) => ({
-        id: tag.id,
-        slug: tag.slug,
-        name: tag.name,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      })),
+      tags: entity.tags.map((t) => t.tag),
     };
   }
 }

@@ -1,5 +1,5 @@
 import { Controller, Get } from '@nestjs/common';
-import { PrismaService } from '../database/prisma.service';
+import { DrizzleService } from '../database/drizzle.service';
 
 interface HealthResponse {
   status: 'ok' | 'error';
@@ -12,14 +12,14 @@ interface HealthResponse {
 
 @Controller('health')
 export class HealthController {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly drizzle: DrizzleService) {}
 
   @Get()
   async check(): Promise<HealthResponse> {
     let dbStatus: 'connected' | 'disconnected' = 'disconnected';
 
     try {
-      await this.prisma.$queryRaw`SELECT 1`;
+      await this.drizzle.db.execute('SELECT 1');
       dbStatus = 'connected';
     } catch {
       dbStatus = 'disconnected';
