@@ -10,7 +10,6 @@
     "test": "turbo run test",
     "typecheck": "turbo run typecheck",
     "health": "pnpm typecheck && pnpm lint && pnpm test",
-    "postinstall": "node scripts/prepare-prisma-engines.mjs",
     "combine": "node scripts/combine-files.js",
     "generate:api-client": "pnpm --filter @devatlas/api-client generate"
   },
