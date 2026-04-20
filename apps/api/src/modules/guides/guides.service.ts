@@ -2,10 +2,11 @@ import { Injectable } from '@nestjs/common';
 
 import { ErrorFactory } from '../../common/errors/error.factory';
 
-import { CreateGuideDto } from './dto/create-guide.dto';
-import { GuideQueryDto } from './dto/guide-query.dto';
-import { UpdateGuideDto } from './dto/update-guide.dto';
-import { GuidesRepository, type GuideRecord, type GuidesListResult } from './guides.repository';
+import type { CreateGuideDto } from './dto/create-guide.dto';
+import type { GuideQueryDto } from './dto/guide-query.dto';
+import type { UpdateGuideDto } from './dto/update-guide.dto';
+import type { GuidesRepository } from './guides.repository';
+import { type GuideRecord, type GuidesListResult } from './guides.repository';
 import { GuideMapper } from './mapper/guide.mapper';
 
 @Injectable()

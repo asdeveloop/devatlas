@@ -1,5 +1,6 @@
 // filepath: apps/api/src/modules/database/drizzle.service.ts
-import { Injectable, OnModuleDestroy } from '@nestjs/common';
+import type { OnModuleDestroy } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';
 

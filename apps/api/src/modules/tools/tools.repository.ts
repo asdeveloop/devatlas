@@ -2,11 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { and, eq, sql } from 'drizzle-orm';
 
 import { categories, tags, toolTags, tools, tools as toolsSchema } from '../../db/schema';
-import { DrizzleService } from '../database/drizzle.service';
+import type { DrizzleService } from '../database/drizzle.service';
 
-import { CreateToolDto } from './dto/create-tool.dto';
-import { ToolQueryDto } from './dto/tool-query.dto';
-import { UpdateToolDto } from './dto/update-tool.dto';
+import type { CreateToolDto } from './dto/create-tool.dto';
+import type { ToolQueryDto } from './dto/tool-query.dto';
+import type { UpdateToolDto } from './dto/update-tool.dto';
 
 export type ToolTag = {
   id: string;

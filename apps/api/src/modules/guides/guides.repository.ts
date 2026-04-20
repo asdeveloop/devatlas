@@ -2,11 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { and, eq } from 'drizzle-orm';
 
 import { categories, guideTags, guides as guidesSchema, tags } from '../../db/schema';
-import { DrizzleService } from '../database/drizzle.service';
+import type { DrizzleService } from '../database/drizzle.service';
 
-import { CreateGuideDto } from './dto/create-guide.dto';
-import { GuideQueryDto } from './dto/guide-query.dto';
-import { UpdateGuideDto } from './dto/update-guide.dto';
+import type { CreateGuideDto } from './dto/create-guide.dto';
+import type { GuideQueryDto } from './dto/guide-query.dto';
+import type { UpdateGuideDto } from './dto/update-guide.dto';
 
 export type GuideTag = {
   id: string;

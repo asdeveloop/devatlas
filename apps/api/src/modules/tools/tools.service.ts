@@ -2,14 +2,16 @@ import { Injectable } from '@nestjs/common';
 
 import { ErrorFactory } from '../../common/errors/error.factory';
 
-import { CreateToolDto } from './dto/create-tool.dto';
-import { ToolQueryDto } from './dto/tool-query.dto';
-import { UpdateToolDto } from './dto/update-tool.dto';
+import type { CreateToolDto } from './dto/create-tool.dto';
+import type { ToolQueryDto } from './dto/tool-query.dto';
+import type { UpdateToolDto } from './dto/update-tool.dto';
+import type {
+  ToolsRepository,
+} from './tools.repository';
 import {
   type ToolListResult,
   type ToolRecord,
   type ToolWithRelations,
-  ToolsRepository,
 } from './tools.repository';
 
 @Injectable()

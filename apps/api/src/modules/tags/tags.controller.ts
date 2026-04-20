@@ -1,9 +1,9 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, Query } from '@nestjs/common';
 
-import { CreateTagDto } from './dto/create-tag.dto';
-import { TagQueryDto } from './dto/tag-query.dto';
-import { UpdateTagDto } from './dto/update-tag.dto';
-import { TagsService } from './tags.service';
+import type { CreateTagDto } from './dto/create-tag.dto';
+import type { TagQueryDto } from './dto/tag-query.dto';
+import type { UpdateTagDto } from './dto/update-tag.dto';
+import type { TagsService } from './tags.service';
 
 @Controller('tags')
 export class TagsController {

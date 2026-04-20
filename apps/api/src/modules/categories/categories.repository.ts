@@ -2,11 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { eq } from 'drizzle-orm';
 
 import { categories } from '../../db/schema';
-import { DrizzleService } from '../database/drizzle.service';
+import type { DrizzleService } from '../database/drizzle.service';
 
-import { CategoryQueryDto } from './dto/category-query.dto';
-import { CreateCategoryDto } from './dto/create-category.dto';
-import { UpdateCategoryDto } from './dto/update-category.dto';
+import type { CategoryQueryDto } from './dto/category-query.dto';
+import type { CreateCategoryDto } from './dto/create-category.dto';
+import type { UpdateCategoryDto } from './dto/update-category.dto';
 
 @Injectable()
 export class CategoriesRepository {

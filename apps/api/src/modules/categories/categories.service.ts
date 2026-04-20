@@ -2,10 +2,10 @@ import { Injectable } from '@nestjs/common';
 
 import { ErrorFactory } from '../../common/errors/error.factory';
 
-import { CategoriesRepository } from './categories.repository';
-import { CategoryQueryDto } from './dto/category-query.dto';
-import { CreateCategoryDto } from './dto/create-category.dto';
-import { UpdateCategoryDto } from './dto/update-category.dto';
+import type { CategoriesRepository } from './categories.repository';
+import type { CategoryQueryDto } from './dto/category-query.dto';
+import type { CreateCategoryDto } from './dto/create-category.dto';
+import type { UpdateCategoryDto } from './dto/update-category.dto';
 
 @Injectable()
 export class CategoriesService {

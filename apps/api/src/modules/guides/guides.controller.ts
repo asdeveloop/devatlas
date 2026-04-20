@@ -1,9 +1,9 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
 
-import { CreateGuideDto } from './dto/create-guide.dto';
-import { GuideQueryDto } from './dto/guide-query.dto';
-import { UpdateGuideDto } from './dto/update-guide.dto';
-import { GuidesService } from './guides.service';
+import type { CreateGuideDto } from './dto/create-guide.dto';
+import type { GuideQueryDto } from './dto/guide-query.dto';
+import type { UpdateGuideDto } from './dto/update-guide.dto';
+import type { GuidesService } from './guides.service';
 
 @Controller('guides')
 export class GuidesController {

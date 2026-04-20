@@ -2,10 +2,10 @@ import { Injectable } from '@nestjs/common';
 
 import { ErrorFactory } from '../../common/errors/error.factory';
 
-import { CreateTagDto } from './dto/create-tag.dto';
-import { TagQueryDto } from './dto/tag-query.dto';
-import { UpdateTagDto } from './dto/update-tag.dto';
-import { TagsRepository } from './tags.repository';
+import type { CreateTagDto } from './dto/create-tag.dto';
+import type { TagQueryDto } from './dto/tag-query.dto';
+import type { UpdateTagDto } from './dto/update-tag.dto';
+import type { TagsRepository } from './tags.repository';
 
 @Injectable()
 export class TagsService {

@@ -1,10 +1,10 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, Query } from '@nestjs/common';
 
-import { CreateToolDto } from './dto/create-tool.dto';
-import { ToolQueryDto } from './dto/tool-query.dto';
-import { UpdateToolDto } from './dto/update-tool.dto';
+import type { CreateToolDto } from './dto/create-tool.dto';
+import type { ToolQueryDto } from './dto/tool-query.dto';
+import type { UpdateToolDto } from './dto/update-tool.dto';
 import type { ToolListResult, ToolRecord, ToolWithRelations } from './tools.repository';
-import { ToolsService } from './tools.service';
+import type { ToolsService } from './tools.service';
 
 @Controller('tools')
 export class ToolsController {

@@ -2,11 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { eq } from 'drizzle-orm';
 
 import { tags } from '../../db/schema';
-import { DrizzleService } from '../database/drizzle.service';
+import type { DrizzleService } from '../database/drizzle.service';
 
-import { CreateTagDto } from './dto/create-tag.dto';
-import { TagQueryDto } from './dto/tag-query.dto';
-import { UpdateTagDto } from './dto/update-tag.dto';
+import type { CreateTagDto } from './dto/create-tag.dto';
+import type { TagQueryDto } from './dto/tag-query.dto';
+import type { UpdateTagDto } from './dto/update-tag.dto';
 
 @Injectable()
 export class TagsRepository {
