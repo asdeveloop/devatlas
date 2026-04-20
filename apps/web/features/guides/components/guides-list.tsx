@@ -1,4 +1,5 @@
 import type { GuideListItem } from '@devatlas/types';
+
 import { GuideCard } from './guide-card';
 
 interface GuidesListProps {

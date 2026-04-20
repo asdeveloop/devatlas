@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+
 import { PageShell } from "../../../components/layout/page-shell";
 import { getGuideBySlug } from "../../../features/guides/api/get-guide-by-slug";
 import { GuideDetailContent } from "../../../features/guides/components/guide-detail-content";

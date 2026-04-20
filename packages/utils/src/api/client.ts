@@ -1,9 +1,9 @@
-import { fetchJson, type ApiSuccessResponse, type FetchJsonOptions } from "./fetcher";
 import {
   resolveEndpoint,
   type ApiEndpointDefinition,
   type ApiEndpointKey
 } from "./endpoints";
+import { fetchJson, type ApiSuccessResponse, type FetchJsonOptions } from "./fetcher";
 
 export type ApiClientConfig = {
   baseUrl: string;

@@ -1,5 +1,6 @@
 import type { GuideListParams } from '@devatlas/types';
 import type { Metadata } from 'next';
+
 import { PageShell } from '../../components/layout/page-shell';
 import { getGuides } from '../../features/guides/api/get-guides';
 import { GuidesList } from '../../features/guides/components/guides-list';

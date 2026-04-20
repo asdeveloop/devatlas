@@ -1,5 +1,6 @@
-import type { GuideDetail } from '@devatlas/types';
 import { GuidesClient, HttpClient } from '@devatlas/api-client';
+import type { GuideDetail } from '@devatlas/types';
+
 import { webEnv } from '../../../lib/env';
 
 const guidesClient = new GuidesClient(

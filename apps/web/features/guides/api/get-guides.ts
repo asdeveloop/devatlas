@@ -1,5 +1,6 @@
-import type { GuideListParams, GuideListItem, PaginationMeta } from '@devatlas/types';
 import { GuidesClient, HttpClient } from '@devatlas/api-client';
+import type { GuideListParams, GuideListItem, PaginationMeta } from '@devatlas/types';
+
 import { webEnv } from '../../../lib/env';
 
 export interface GuideListResponse {
