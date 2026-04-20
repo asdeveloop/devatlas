@@ -1,342 +1,118 @@
 # DevAtlas Platform
 
-DevAtlas یک پلتفرم دانش فنی برای دولوپرهاست که با تمرکز بر **پایداری در شرایط اینترنت محدود** و **local-first بودن** طراحی شده است. این مخزن یک **monorepo** مبتنی بر `pnpm` و `Turborepo` است که شامل سرویس‌های اصلی زیر می‌باشد:
+DevAtlas یک monorepo مبتنی بر `pnpm` و `turbo` برای یک پلتفرم محتوای فنی است. وضعیت فعلی پروژه روی دو اپ عملیاتی و چند پکیج مشترک متمرکز است:
 
-- `@devatlas/web` — فرانت‌اند (Next.js 16 + React 19 + TailwindCSS)
-- `@devatlas/api` — بک‌اند (NestJS 11 + Drizzle ORM + PostgreSQL)
-- پکیج‌های مشترک در مسیر `packages/`
-  - `@devatlas/shared-types`
-  - `@devatlas/ui`
+- `@devatlas/web` — فرانت‌اند عمومی با Next.js 16 و React 19
+- `@devatlas/api` — API مبتنی بر NestJS 11 و Drizzle ORM
+- `packages/*` — پکیج‌های مشترک برای `types`، `ui`، `utils`، `config`، `content` و `api-client`
 
-وضعیت فعلی: **Phase 1 (ORM Migration)** — در حال جایگزینی Prisma با Drizzle ORM.
+## Workspace Snapshot
 
----
+```text
+devatlas/
+  apps/
+    api/
+    web/
+  packages/
+    api-client/
+    config/
+    content/
+    types/
+    ui/
+    utils/
+  docs/
+  scripts/
+```
 
 ## Tech Stack
 
-### Frontend
-- Next.js 16.1.6
+### Web
+- Next.js 16.2.3
 - React 19.2.4
-- TailwindCSS 3.4.17
-- Radix UI + shadcn-like UI
-- lucide-react
-- framer-motion
-
-### Backend
-- NestJS 11
-- Drizzle ORM 0.36+
-- PostgreSQL 15+
-- Zod (validation)
-
-### Monorepo / Tooling
-- pnpm 9+
-- Turborepo
-- TypeScript 5.9+
-- ESLint 9 + @typescript-eslint
+- Tailwind CSS 3.4.17
 - Vitest 3
-- commitlint + lint-staged
 
----
-
-## Monorepo Structure
-
-```text
-devatlas-platform/
-  apps/
-    api/                    # NestJS + Drizzle ORM
-      src/
-        database/
-          schema/           # Drizzle schema definitions
-        modules/            # Feature modules
-      drizzle/              # Migration files
-      drizzle.config.ts
-    web/                    # Next.js 16 + React 19
-      src/
-        app/
-        components/
-  packages/
-    shared-types/           # Shared TypeScript types
-    ui/                     # Shared React components
-  package.json
-  pnpm-workspace.yaml
-  turbo.json
-  .gitlab-ci.yml
-  README.md
-  CONTRIBUTING.md
-  ROADMAP.md
-  ENGINEERING-STATE.md
-  LICENSE
-
----
-
-## Prerequisites
-
-- Node.js 20+
-- pnpm 9+
+### API
+- NestJS 11.1.x
+- Drizzle ORM 0.45.x
 - PostgreSQL 15+
-- Git 2.40+
+- class-validator + class-transformer
+- Swagger
 
----
+### Tooling
+- pnpm 10.33.0
+- Turborepo 2.9.x
+- TypeScript 5.9.x
+- ESLint 9.39.x
+- Vitest 3.2.x
+
+## Active Runtime Surface
+
+### API
+- Base prefix: `/api`
+- Versioning: URI versioning with default `v1`
+- Swagger: `/docs`
+- Modules: `health`, `guides`, `tools`, `categories`, `tags`, `database`
+
+### Web
+- Routes:
+  - `/`
+  - `/guides`
+  - `/guides/[slug]`
+- Data access currently exists for guides and tools, but only guides are exposed as routed pages right now.
 
 ## Quick Start
 
-### 1. Clone و نصب
-
-bash
-git clone <repository-url>
-cd devatlas-platform
-pnpm install
-
-### 2. تنظیم دیتابیس
-
-فایل `.env` در `apps/api` بساز:
-
-bash
-cp apps/api/.env.example apps/api/.env
-
-محتوای `.env`:
-
-env
-DATABASE_URL="postgresql://user:password@localhost:5432/devatlas_dev"
-NODE_ENV="development"
-PORT=3001
-
-### 3. اجرای migration ها
-
-bash
-cd apps/api
-pnpm db:migrate
-
-### 4. Seed دیتابیس (اختیاری)
-
-bash
-cd apps/api
-pnpm db:seed
-
-### 5. اجرای dev server
-
-bash
-# از root پروژه
-pnpm dev
-
-این دستور هر دو `apps/api` (port 3001) و `apps/web` (port 3000) را به صورت همزمان اجرا می‌کنه.
-
----
-
-## Root Scripts
-
-| Script       | Description                              |
-| ------------ | ---------------------------------------- |
-| `pnpm dev`   | اجرای همزمان تمام سرویس‌ها در dev mode   |
-| `pnpm build` | Build تمام پکیج‌ها                       |
-| `pnpm lint`  | Lint تمام پکیج‌ها                        |
-| `pnpm test`  | اجرای تمام تست‌ها                        |
-| `pnpm typecheck` | Type-check تمام پکیج‌ها               |
-| `pnpm health` | اجرای typecheck + lint + test          |
-| `pnpm clean` | پاک کردن build artifacts                |
-| `pnpm format` | Format کردن کل codebase                |
-
----
-
-## Development
-
-### اجرای همزمان سرویس‌ها
-
-bash
-pnpm dev
-
-### اجرای مجزا
-
-bash
-# فقط API
-pnpm --filter @devatlas/api dev
-
-# فقط Web
-pnpm --filter @devatlas/web dev
-
-### اضافه کردن dependency
-
-bash
-# به api
-pnpm --filter @devatlas/api add <package-name>
-
-# به web
-pnpm --filter @devatlas/web add <package-name>
-
-# به root (dev dependency)
-pnpm add -D -w <package-name>
-
----
-
-## Database Management (Drizzle)
-
-### تغییر schema
-
-bash
-cd apps/api
-
-# 1. ویرایش schema در src/database/schema/
-# 2. تولید migration
-pnpm db:generate
-
-# 3. review فایل migration در drizzle/
-# 4. اعمال migration
-pnpm db:migrate
-
-### Drizzle Studio
-
-bash
-cd apps/api
-pnpm db:studio
-# باز می‌شه در: https://local.drizzle.studio
-
-### Push مستقیم schema (فقط dev)
-
-bash
-cd apps/api
-pnpm db:push
-
-⚠️ **هشدار:** این دستور destructive هست — فقط در dev استفاده کن.
-
-### Reset دیتابیس (فقط dev)
-
-bash
-cd apps/api
-pnpm db:reset
-
----
-
-## Testing
-
-bash
-# تمام تست‌ها
-pnpm test
-
-# فقط API
-pnpm --filter @devatlas/api test
-
-# فقط Web
-pnpm --filter @devatlas/web test
-
-# با coverage
-pnpm --filter @devatlas/api test:cov
-
----
-
-## Build
-
-bash
-# تمام پکیج‌ها
-pnpm build
-
-# فقط API
-pnpm --filter @devatlas/api build
-
-# فقط Web
-pnpm --filter @devatlas/web build
-
----
-
-## CI/CD
-
-این ریپو برای GitLab طراحی شده و شامل فایل `.gitlab-ci.yml` است که مراحل زیر را اجرا می‌کند:
-
-yaml
-stages:
-  - prepare
-  - lint
-  - test
-  - typecheck
-  - build
-
-### Pipeline Steps
-
-1. `pnpm install --frozen-lockfile`
-2. `pnpm typecheck`
-3. `pnpm lint`
-4. `pnpm test`
-5. `pnpm build`
-
-تنظیم Runner باید در GitLab UI انجام شود.
-
----
-
-## Project Status
-
-وضعیت فعلی پروژه در:
-
-- [`ROADMAP.md`](./ROADMAP.md) — فازبندی و اهداف
-- [`ENGINEERING-STATE.md`](./ENGINEERING-STATE.md) — وضعیت فنی و آیتم‌های باقی‌مانده
-
-**Phase فعلی:** Phase 1 — ORM Migration (Prisma → Drizzle)
-
----
-
-## Documentation
-
-- [`CONTRIBUTING.md`](./CONTRIBUTING.md) — راهنمای مشارکت
-- [`ROADMAP.md`](./ROADMAP.md) — نقشه راه پروژه
-- [`ENGINEERING-STATE.md`](./ENGINEERING-STATE.md) — وضعیت فنی
-- [`SCRIPTS.md`](./SCRIPTS.md) — مرجع اسکریپت‌ها
-- [`API Contract.md`](./API%20Contract.md) — قرارداد API
-- [`STANDARDS.md`](./STANDARDS.md) — استانداردها و محدودیت‌ها
-- [`ARCHITECTURE.md`](./ARCHITECTURE.md) — معماری سیستم
-- [`VISION.md`](./VISION.md) — چشم‌انداز پروژه
-
----
-
-## Contributing
-
-راهنمای مشارکت در:
-
-[`CONTRIBUTING.md`](./CONTRIBUTING.md)
-
-خلاصه:
-
-- Conventional Commits
-- Branching: `feat/`, `fix/`, `chore/`, `docs/`
-- Quality checks: `pnpm typecheck && pnpm lint && pnpm test`
-- Drizzle migration ها باید review شن
-
----
-
-## License
-
-پروژه تحت لایسنس MIT منتشر شده است. متن کامل در:
-
-[`LICENSE`](./LICENSE)
-
----
-
-## Contact & Support
-
-برای گزارش باگ یا درخواست فیچر، issue باز کنید.
-
----
-
-**Last updated:** 1405/01/29 (2026-04-18)
-
----
-
-# دستور نصب نهایی + dedupe + audit clean
+### Prerequisites
+- Node.js 20+
+- pnpm 10+
+- PostgreSQL 15+
+
+### Install
 
 ```bash
-# enable pnpm
-corepack enable
-
-# install everything
 pnpm install
+```
 
-# fix duplicated packages
-pnpm dedupe
+### Run locally
 
-# audit & autofix
-pnpm audit --fix
+```bash
+pnpm dev
+```
 
-# reset turbo cache
-pnpm turbo prune --reset
+Or per app:
 
-# ensure monorepo is healthy
+```bash
+pnpm dev:api
+pnpm dev:web
+```
+
+## Common Commands
+
+```bash
+pnpm lint:api
+pnpm lint:web
+pnpm test:api
+pnpm test:web
+pnpm typecheck:api
+pnpm typecheck:web
+pnpm verify:api
+pnpm verify:web
 pnpm doctor
+pnpm health
+```
 
----
+## Notes
+
+- `apps/api` uses Drizzle schemas under `apps/api/src/db/schema`.
+- Global API responses are normalized through `TransformInterceptor` and `HttpExceptionFilter`.
+- The repo contains helper scripts under `scripts/`, including `agent:context`, `agent:verify`, `doctor`, and `health`.
+- Shared package imports should always use workspace package names, not internal `src/` paths.
+
+## Docs
+
+- `docs/ARCHITECTURE.md`
+- `docs/API-CONTRACE.md`
+- `docs/STANDARDS.md`
+- `docs/ENGINEERING-STATE.md`
+- `docs/SCRIPTS.md`
