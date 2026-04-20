@@ -1,5 +1,7 @@
-import matter from 'gray-matter';
 import fs from 'node:fs/promises';
+
+import matter from 'gray-matter';
+
 import type { ContentType, RawContent } from '../types/common';
 
 /**

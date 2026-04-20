@@ -1,5 +1,7 @@
-import { describe, it, expect } from 'vitest';
 import { join } from 'node:path';
+
+import { describe, it, expect } from 'vitest';
+
 import { buildContentIndex } from '../pipeline/';
 
 const fixturesDir = join(__dirname, 'fixtures');

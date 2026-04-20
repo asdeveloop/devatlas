@@ -1,5 +1,6 @@
 import { readdir, readFile } from 'node:fs/promises';
 import { extname, join } from 'node:path';
+
 import { parseMdx } from '../parser';
 import type { ParsedContent } from '../types';
 

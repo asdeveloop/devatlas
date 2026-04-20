@@ -1,6 +1,8 @@
-import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
+
+import { describe, it, expect } from 'vitest';
+
 import { parseMdx, ContentParseError } from '../parser';
 
 const fixturesDir = join(__dirname, 'fixtures');

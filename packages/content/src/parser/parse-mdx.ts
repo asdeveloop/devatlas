@@ -1,4 +1,5 @@
 import matter from 'gray-matter';
+
 import { guideFrontmatterSchema } from '../schemas/guide.schema';
 import { toolFrontmatterSchema } from '../schemas/tool.schema';
 import type { ParsedContent, GuideFrontmatter, ToolFrontmatter, ContentKind } from '../types';

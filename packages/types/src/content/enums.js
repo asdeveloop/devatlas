@@ -1,50 +1,54 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.EntityType = exports.RelationType = exports.ToolPrice = exports.ToolTier = exports.ToolStatus = exports.ContentStatus = exports.Difficulty = void 0;
 /** سطح دشواری محتوا */
-export var Difficulty;
+var Difficulty;
 (function (Difficulty) {
     Difficulty["BEGINNER"] = "beginner";
     Difficulty["INTERMEDIATE"] = "intermediate";
     Difficulty["ADVANCED"] = "advanced";
-})(Difficulty || (Difficulty = {}));
+})(Difficulty || (exports.Difficulty = Difficulty = {}));
 /** وضعیت انتشار محتوا */
-export var ContentStatus;
+var ContentStatus;
 (function (ContentStatus) {
     ContentStatus["DRAFT"] = "DRAFT";
     ContentStatus["PUBLISHED"] = "PUBLISHED";
     ContentStatus["ARCHIVED"] = "ARCHIVED";
-})(ContentStatus || (ContentStatus = {}));
+})(ContentStatus || (exports.ContentStatus = ContentStatus = {}));
 /** وضعیت ابزار */
-export var ToolStatus;
+var ToolStatus;
 (function (ToolStatus) {
     ToolStatus["ACTIVE"] = "ACTIVE";
     ToolStatus["DEPRECATED"] = "DEPRECATED";
     ToolStatus["ARCHIVED"] = "ARCHIVED";
-})(ToolStatus || (ToolStatus = {}));
+})(ToolStatus || (exports.ToolStatus = ToolStatus = {}));
 /** سطح دسترسی ابزار */
-export var ToolTier;
+var ToolTier;
 (function (ToolTier) {
     ToolTier["FREE"] = "FREE";
     ToolTier["FREEMIUM"] = "FREEMIUM";
     ToolTier["PRO"] = "PRO";
     ToolTier["ENTERPRISE"] = "ENTERPRISE";
-})(ToolTier || (ToolTier = {}));
+})(ToolTier || (exports.ToolTier = ToolTier = {}));
 /** مدل قیمت‌گذاری ابزار */
-export var ToolPrice;
+var ToolPrice;
 (function (ToolPrice) {
     ToolPrice["FREE"] = "FREE";
     ToolPrice["PAID"] = "PAID";
     ToolPrice["MIXED"] = "MIXED";
-})(ToolPrice || (ToolPrice = {}));
+})(ToolPrice || (exports.ToolPrice = ToolPrice = {}));
 /** نوع رابطه بین محتواها */
-export var RelationType;
+var RelationType;
 (function (RelationType) {
     RelationType["RELATES_TO"] = "RELATES_TO";
     RelationType["MENTIONS"] = "MENTIONS";
     RelationType["PREREQUISITE"] = "PREREQUISITE";
     RelationType["ALTERNATIVE"] = "ALTERNATIVE";
-})(RelationType || (RelationType = {}));
+})(RelationType || (exports.RelationType = RelationType = {}));
 /** نوع entity در سیستم */
-export var EntityType;
+var EntityType;
 (function (EntityType) {
     EntityType["GUIDE"] = "GUIDE";
     EntityType["TOOL"] = "TOOL";
-})(EntityType || (EntityType = {}));
+})(EntityType || (exports.EntityType = EntityType = {}));
+//# sourceMappingURL=enums.js.map

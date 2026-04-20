@@ -1,5 +1,6 @@
 import type { ContentStatus, Difficulty } from '../content/enums';
 import type { GuideSummary, GuideWithRelations } from '../content/guide';
+
 import type { PaginationParams } from './pagination';
 
 // ── Query Params ─────────────────────────────────────

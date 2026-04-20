@@ -1,4 +1,5 @@
 import type { PrismaClient } from "@prisma/client";
+
 import { indexGuide } from "../indexer/guide-indexer.js";
 import { indexRelations } from "../indexer/relation-indexer.js";
 import { indexSearchDocument } from "../indexer/search-indexer.js";

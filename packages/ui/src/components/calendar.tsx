@@ -3,12 +3,10 @@
 import * as React from "react"
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react"
 import {
+  type ChevronProps,
   DayPicker,
-  type DayContentProps,
   type DayPickerProps,
-  type DayProps,
   type Formatters,
-  type StyledComponent,
   type WeekNumberProps,
 } from "react-day-picker"
 
@@ -32,7 +30,7 @@ function Calendar({
   className,
   classNames,
   showOutsideDays = true,
-  captionLayout = "buttons",
+  captionLayout = "label",
   buttonVariant = "ghost",
   formatters,
   components,
@@ -49,7 +47,7 @@ function Calendar({
     <DayPicker
       showOutsideDays={showOutsideDays}
       className={cn(
-        "bg-background group/calendar p-3 [--cell-size:--spacing(8)] [[data-slot=card-content]_&]:bg-transparent [[data-slot=popover-content]_&]:bg-transparent",
+        "bg-background group/calendar p-3 [--cell-size:2rem] [[data-slot=card-content]_&]:bg-transparent [[data-slot=popover-content]_&]:bg-transparent",
         String.raw`rtl:**:[.rdp-button_left>svg]:rotate-180`,
         String.raw`rtl:**:[.rdp-button_right>svg]:rotate-180`,
         className,
@@ -61,13 +59,13 @@ function Calendar({
       }}
       classNames={mergedClassNames}
       components={{
-        IconLeft: (props: StyledComponent) => {
-          return <ChevronLeftIcon className={cn("size-4", props.className)} />
+        Chevron: ({ className, orientation }: ChevronProps) => {
+          if (orientation === "left") {
+            return <ChevronLeftIcon className={cn("size-4", className)} />
+          }
+
+          return <ChevronRightIcon className={cn("size-4", className)} />
         },
-        IconRight: (props: StyledComponent) => {
-          return <ChevronRightIcon className={cn("size-4", props.className)} />
-        },
-        Day: CalendarDayButton as unknown as CalendarComponents["Day"],
         WeekNumber: ({ children, ...props }: React.ComponentProps<"td"> & WeekNumberProps) => {
           return (
             <td {...props}>
@@ -77,7 +75,6 @@ function Calendar({
             </td>
           )
         },
-        DayContent: ({ date }: DayContentProps) => <span>{date.getDate()}</span>,
         ...components,
       }}
       {...(props as DayPickerProps)}
@@ -85,26 +82,4 @@ function Calendar({
   )
 }
 
-function CalendarDayButton({
-  className,
-  date,
-  displayMonth,
-  ...props
-}: React.ComponentProps<"button"> & Partial<Pick<DayProps, "date" | "displayMonth">>) {
-  return (
-    <Button
-      {...(props as React.ComponentPropsWithoutRef<"button">)}
-      ref={(props as { ref?: React.Ref<HTMLButtonElement> }).ref}
-      variant="ghost"
-      size="icon"
-      data-day={date ? date.toLocaleDateString() : undefined}
-      data-display-month={displayMonth?.toISOString()}
-      className={cn(
-        "data-[selected-single=true]:bg-primary data-[selected-single=true]:text-primary-foreground data-[range-middle=true]:bg-accent data-[range-middle=true]:text-accent-foreground data-[range-start=true]:bg-primary data-[range-start=true]:text-primary-foreground data-[range-end=true]:bg-primary data-[range-end=true]:text-primary-foreground",
-        className,
-      )}
-    />
-  )
-}
-
-export { Calendar, CalendarDayButton }
+export { Calendar }

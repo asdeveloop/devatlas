@@ -1,4 +1,5 @@
 import { z } from 'zod';
+
 import { slugSchema } from './common';
 
 export const createTagSchema = z.object({

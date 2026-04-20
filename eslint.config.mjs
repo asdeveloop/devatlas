@@ -3,9 +3,6 @@ import globals from "globals";
 import tseslint from "typescript-eslint";
 import pluginImport from "eslint-plugin-import";
 import pluginBoundaries from "eslint-plugin-boundaries";
-import { fileURLToPath } from "node:url";
-
-const tsconfigRootDir = fileURLToPath(new URL(".", import.meta.url));
 
 export default tseslint.config(
   {
@@ -16,6 +13,8 @@ export default tseslint.config(
       "**/node_modules/**",
       "**/.turbo/**",
       "**/build/**",
+      "**/*.d.ts",
+      "packages/types/src/**/*.js",
       "**/*.lock"
     ]
   },
@@ -33,21 +32,10 @@ export default tseslint.config(
   },
 
   js.configs.recommended,
-  ...tseslint.configs.recommendedTypeChecked,
-
-  {
-    files: ["**/*.{js,mjs,cjs}"],
-    extends: [tseslint.configs.disableTypeChecked],
-  },
+  ...tseslint.configs.recommended,
 
   {
     files: ["**/*.{ts,tsx}"],
-    languageOptions: {
-      parserOptions: {
-        projectService: true,
-        tsconfigRootDir
-      }
-    },
     rules: {
       "@typescript-eslint/consistent-type-imports": "error",
       "@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_" }]

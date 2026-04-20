@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build": "tsc --project tsconfig.build.json --outDir dist --rootDir src --incremental false",
+    "build": "tsc --project tsconfig.build.json --outDir dist --incremental false",
     "dev": "nest start --watch",
     "lint": "eslint src --ext .ts --max-warnings=0",
     "test": "vitest run --passWithNoTests --config vitest.config.ts",

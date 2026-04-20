@@ -1,15 +1,14 @@
 export { buildContentIndex, type ContentIndex } from './pipeline/build-content-index';
+import { mapGuideToRecord, mapToolToRecord } from './indexer';
 import { buildRelationsFromGuide, buildRelationsFromTool, type ContentRelation } from './indexer/relation-builder';
 import { buildGuideSearchDoc, buildToolSearchDoc, type SearchDocument } from './indexer/search-indexer';
+import { scanContentFiles, type ScanOptions } from './loader/file-scanner';
+import { loadMdxFiles } from './loader/mdx-loader';
 import type {
   ContentError
 } from './types/common';
 import type { GuideRecord } from './types/guide';
 import type { ToolRecord } from './types/tool';
-
-import { mapGuideToRecord, mapToolToRecord } from './indexer';
-import { scanContentFiles, type ScanOptions } from './loader/file-scanner';
-import { loadMdxFiles } from './loader/mdx-loader';
 import { validateGuideFrontmatter, validateToolFrontmatter } from './validator';
 
 // ─────────────────────────────────────────────

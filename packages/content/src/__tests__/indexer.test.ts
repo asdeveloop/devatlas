@@ -1,8 +1,10 @@
-import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { parseMdx } from '../parser';
+
+import { describe, it, expect } from 'vitest';
+
 import { indexGuide, indexTool, buildSearchDocument, buildRelations } from '../indexer';
+import { parseMdx } from '../parser';
 import type { GuideFrontmatter, ToolFrontmatter, ParsedContent, ContentType } from '../types';
 
 const fixturesDir = join(__dirname, 'fixtures');

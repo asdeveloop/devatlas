@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto';
+
 import type { SearchDocument, Guide, Tool, ContentType } from '../types';
 
 export function buildSearchDocument(

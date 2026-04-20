@@ -1,4 +1,5 @@
 import type { PrismaClient } from "@prisma/client";
+
 import type { RelationType } from "../types/index.js";
 
 export interface RelationIndexInput {

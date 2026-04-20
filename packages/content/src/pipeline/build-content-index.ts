@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
-import { loadContent } from '../loader';
+
 import { indexGuide, indexTool, buildSearchDocument, buildRelations } from '../indexer';
+import { loadContent } from '../loader';
 import type {
   Guide, Tool, Category, Tag, GuideTag, ToolTag,
   ContentRelation, SearchDocument, GuideFrontmatter,

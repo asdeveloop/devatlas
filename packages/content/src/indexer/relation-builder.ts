@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto';
+
 import type { ContentRelation, ContentType, RelationType, GuideFrontmatter, ToolFrontmatter } from '../types';
 
 interface RelationInput {
