@@ -317,3 +317,26 @@ stages:
 **Last updated:** 1405/01/29 (2026-04-18)
 
 ---
+
+# دستور نصب نهایی + dedupe + audit clean
+
+```bash
+# enable pnpm
+corepack enable
+
+# install everything
+pnpm install
+
+# fix duplicated packages
+pnpm dedupe
+
+# audit & autofix
+pnpm audit --fix
+
+# reset turbo cache
+pnpm turbo prune --reset
+
+# ensure monorepo is healthy
+pnpm doctor
+
+---

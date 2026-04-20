@@ -194,3 +194,20 @@ pnpm build
 6. `db:push` و `db:reset` فقط در dev — هرگز در production یا CI.
 
 ---
+
+## scripts/doctor.mjs
+
+این اسکریپت سلامت کل monorepo را بررسی می‌کند:
+
+- نسخه Node
+- نصب بودن pnpm
+- سالم بودن lockfile
+- عدم وجود بسته‌های duplicated
+- اعتبار tsconfig.base.json
+- بررسی turbo cache
+
+### اجرا:
+```bash
+pnpm doctor
+
+---

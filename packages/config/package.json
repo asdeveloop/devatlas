@@ -12,5 +12,12 @@
     "lint": "eslint src --ext .ts --max-warnings=0",
     "test": "vitest run --passWithNoTests --config ../../vitest.config.ts",
     "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "5.9.3",
+    "eslint": "9.39.4",
+    "@typescript-eslint/eslint-plugin": "8.0.0",
+    "@typescript-eslint/parser": "8.0.0",
+    "vitest": "3.2.4"
   }
 }

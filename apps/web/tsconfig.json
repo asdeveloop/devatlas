@@ -3,17 +3,9 @@
   "compilerOptions": {
     "allowJs": false,
     "incremental": true,
-    "module": "ESNext",
-    "moduleResolution": "Bundler",
     "noEmit": true,
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ],
-    "types": [
-      "node"
-    ]
+    "types": ["node"],
+    "plugins": [{ "name": "next" }]
   },
   "include": [
     "**/*.ts",
@@ -21,7 +13,5 @@
     "next-env.d.ts",
     ".next/types/**/*.ts"
   ],
-  "exclude": [
-    "node_modules"
-  ]
+  "exclude": ["node_modules"]
 }

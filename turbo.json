@@ -6,24 +6,22 @@
     "pnpm-lock.yaml",
     "tsconfig.base.json",
     "*.config.{js,mjs,ts,cjs}",
+    "**/.env",
+    "**/.env.*",
     "eslint.config.mjs"
   ],
 
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": [
-        "dist/**",
-        ".next/**",
-        "build/**",
-        "**/dist/**"
-      ],
+      "outputs": ["dist/**", ".next/**"],
       "cache": true
     },
 
     "dev": {
       "cache": false,
-      "persistent": true
+      "persistent": true,
+      "dependsOn": ["^dev"]
     },
 
     "lint": {
