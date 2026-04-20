@@ -4,6 +4,7 @@
     "allowJs": false,
     "incremental": true,
     "noEmit": true,
+    "jsx": "react-jsx",
     "types": ["node"],
     "plugins": [{ "name": "next" }]
   },

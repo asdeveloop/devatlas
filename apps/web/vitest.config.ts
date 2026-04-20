@@ -1,5 +1,6 @@
 // filepath: apps/web/vitest.config.ts
 import { resolve } from 'path';
+
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({

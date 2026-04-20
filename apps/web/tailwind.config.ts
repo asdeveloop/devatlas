@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss";
+
 import { tailwindThemeExtension } from "../../packages/ui/src/theme";
 
 const config: Config = {

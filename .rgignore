@@ -1,0 +1,14 @@
+node_modules
+.next
+dist
+build
+.turbo
+coverage
+storybook-static
+playwright-report
+test-results
+.pnpm-store
+.yarn
+artifacts
+backups
+_ops
