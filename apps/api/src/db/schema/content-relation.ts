@@ -6,6 +6,7 @@ import {
   timestamp,
   uuid,
 } from 'drizzle-orm/pg-core';
+
 import { entityTypeEnum, relationTypeEnum } from './enums';
 
 export const contentRelations = pgTable(

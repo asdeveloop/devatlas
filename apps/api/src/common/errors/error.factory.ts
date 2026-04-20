@@ -42,10 +42,10 @@ export class ErrorFactory {
     );
   }
 
-  static Unknown(error: any) {
+  static Unknown(error: { message?: string } | null | undefined) {
     return new DomainError(
       ErrorCodes.UNKNOWN,
-      error.message || 'Unknown error',
+      error?.message || 'Unknown error',
       500,
     );
   }

@@ -1,14 +1,30 @@
-// filepath: apps/api/src/modules/guides/__tests__/guides.service.spec.ts
+import { ContentStatus, Difficulty } from '@devatlas/types';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 import { DomainError } from '../../../common/errors/domain-error';
-import { GuidesRepository } from '../guides.repository';
+import type { CreateGuideDto } from '../dto/create-guide.dto';
+import type { GuideQueryDto } from '../dto/guide-query.dto';
+import type { UpdateGuideDto } from '../dto/update-guide.dto';
+import type { GuidesRepository } from '../guides.repository';
 import { GuidesService } from '../guides.service';
-import { GuideMapper } from '../mapper/guide.mapper';
+
+type GuideMapperInput = {
+  id: string;
+  title: string;
+  content?: string;
+};
+
+const { toSummaryMock, toDetailMock, toDomainMock } = vi.hoisted(() => ({
+  toSummaryMock: vi.fn((item: GuideMapperInput) => ({ id: item.id, title: item.title })),
+  toDetailMock: vi.fn((item: GuideMapperInput) => ({ id: item.id, title: item.title, content: item.content })),
+  toDomainMock: vi.fn((item: GuideMapperInput) => item),
+}));
 
 vi.mock('../mapper/guide.mapper', () => ({
   GuideMapper: {
-    toSummary: vi.fn((item: any) => ({ id: item.id, title: item.title })),
-    toDetail: vi.fn((item: any) => ({ id: item.id, title: item.title, content: item.content })),
+    toSummary: toSummaryMock,
+    toDetail: toDetailMock,
+    toDomain: toDomainMock,
   },
 }));
 
@@ -25,6 +41,7 @@ const mockRepo = (): Record<keyof GuidesRepository, ReturnType<typeof vi.fn>> =>
 describe('GuidesService', () => {
   let service: GuidesService;
   let repo: ReturnType<typeof mockRepo>;
+  const emptyUpdateDto: UpdateGuideDto = {};
 
   beforeEach(() => {
     repo = mockRepo();
@@ -33,52 +50,23 @@ describe('GuidesService', () => {
   });
 
   describe('findAll', () => {
-    it('should return paginated data with meta', async () => {
-      const items = [
-        { id: '1', title: 'Guide 1' },
-        { id: '2', title: 'Guide 2' },
-      ];
-      repo.findAll.mockResolvedValue(items);
-      repo.count.mockResolvedValue(25);
+    it('should delegate to repo.findAll', async () => {
+      const query: GuideQueryDto = { skip: 0, take: 10, status: ContentStatus.PUBLISHED };
+      const result = {
+        data: [{ id: '1', title: 'Guide 1' }],
+        meta: {
+          page: 1,
+          limit: 10,
+          total: 1,
+          totalPages: 1,
+          hasNextPage: false,
+          hasPrevPage: false,
+        },
+      };
+      repo.findAll.mockResolvedValue(result);
 
-      const query = { skip: 0, take: 10, status: 'published', difficulty: undefined, categoryId: undefined, sortBy: 'createdAt', order: 'desc' };
-      const result = await service.findAll(query as any);
-
-      expect(result.meta).toEqual({
-        page: 1,
-        limit: 10,
-        total: 25,
-        totalPages: 3,
-        hasNextPage: true,
-        hasPrevPage: false,
-      });
-      expect(result.data).toHaveLength(2);
-      expect(GuideMapper.toSummary).toHaveBeenCalledTimes(2);
-    });
-
-    it('should calculate page from skip', async () => {
-      repo.findAll.mockResolvedValue([]);
-      repo.count.mockResolvedValue(50);
-
-      const query = { skip: 20, take: 10 };
-      const result = await service.findAll(query as any);
-
-      expect(result.meta.page).toBe(3);
-      expect(result.meta.totalPages).toBe(5);
-      expect(result.meta.hasNextPage).toBe(true);
-      expect(result.meta.hasPrevPage).toBe(true);
-    });
-
-    it('should default take to 20 when undefined', async () => {
-      repo.findAll.mockResolvedValue([]);
-      repo.count.mockResolvedValue(0);
-
-      const query = { skip: undefined, take: undefined };
-      const result = await service.findAll(query as any);
-
-      expect(result.meta.limit).toBe(20);
-      expect(result.meta.page).toBe(1);
-      expect(result.meta.totalPages).toBe(1);
+      expect(await service.findAll(query)).toBe(result);
+      expect(repo.findAll).toHaveBeenCalledWith(query);
     });
   });
 
@@ -88,7 +76,7 @@ describe('GuidesService', () => {
       repo.findBySlug.mockResolvedValue(entity);
 
       const result = await service.findBySlug('my-guide');
-      expect(GuideMapper.toDetail).toHaveBeenCalledWith(entity);
+      expect(toDetailMock.mock.calls[0]).toEqual([entity]);
       expect(result).toEqual({ id: '1', title: 'Guide', content: 'body' });
     });
 
@@ -110,65 +98,53 @@ describe('GuidesService', () => {
       const created = { id: '1', title: 'New', content: 'c' };
       repo.create.mockResolvedValue(created);
 
-      const dto = {
+      const dto: CreateGuideDto = {
         title: 'New',
         slug: 'new-guide',
         description: 'desc',
         content: 'c',
-        difficulty: 'beginner',
+        difficulty: Difficulty.BEGINNER,
         readingTime: 5,
-        status: 'draft',
-        categoryId: 'cat1',
-        tagIds: ['t1', 't2'],
+        status: ContentStatus.DRAFT,
+        categoryId: '550e8400-e29b-41d4-a716-446655440000',
+        tagIds: [
+          '550e8400-e29b-41d4-a716-446655440001',
+          '550e8400-e29b-41d4-a716-446655440002',
+        ],
       };
 
-      await service.create(dto as any);
+      await service.create(dto);
 
-      expect(repo.create).toHaveBeenCalledWith({
-        title: 'New',
-        slug: 'new-guide',
-        description: 'desc',
-        content: 'c',
-        difficulty: 'beginner',
-        readingTime: 5,
-        status: 'draft',
-        category: { connect: { id: 'cat1' } },
-        tags: {
-          create: [
-            { tag: { connect: { id: 't1' } } },
-            { tag: { connect: { id: 't2' } } },
-          ],
-        },
-      });
-      expect(GuideMapper.toDetail).toHaveBeenCalledWith(created);
+      expect(repo.create).toHaveBeenCalledWith(dto);
+      expect(toDetailMock.mock.calls[0]).toEqual([created]);
     });
 
     it('should create guide without tags when tagIds is empty', async () => {
       repo.findBySlug.mockResolvedValue(null);
       repo.create.mockResolvedValue({ id: '1' });
 
-      const dto = {
+      const dto: CreateGuideDto = {
         title: 'No Tags',
         slug: 'no-tags',
         description: 'd',
         content: 'c',
-        difficulty: 'beginner',
+        difficulty: Difficulty.BEGINNER,
         readingTime: 3,
-        status: 'draft',
-        categoryId: 'cat1',
+        status: ContentStatus.DRAFT,
+        categoryId: '550e8400-e29b-41d4-a716-446655440000',
         tagIds: [],
       };
 
-      await service.create(dto as any);
+      await service.create(dto);
 
-      const createArg = repo.create.mock.calls[0][0];
-      expect(createArg.tags).toBeUndefined();
+      const createArg = repo.create.mock.calls[0]?.[0] as CreateGuideDto | undefined;
+      expect(createArg?.tagIds).toEqual([]);
     });
 
     it('should throw SlugConflict when slug exists', async () => {
       repo.findBySlug.mockResolvedValue({ id: '1' });
 
-      await expect(service.create({ slug: 'existing' } as any)).rejects.toMatchObject({
+      await expect(service.create({ slug: 'existing' } as CreateGuideDto)).rejects.toMatchObject({
         code: 'SLUG_CONFLICT',
         status: 409,
       });
@@ -177,41 +153,35 @@ describe('GuidesService', () => {
   });
 
   describe('update', () => {
-    it('should update guide with new tags (deleteMany + create)', async () => {
+    it('should update guide with new tags', async () => {
       repo.findById.mockResolvedValue({ id: 'g1' });
       repo.update.mockResolvedValue({ id: 'g1', title: 'Updated' });
 
-      const dto = {
+      const dto: UpdateGuideDto = {
         title: 'Updated',
-        tagIds: ['t3'],
-        categoryId: 'cat2',
+        tagIds: ['550e8400-e29b-41d4-a716-446655440003'],
+        categoryId: '550e8400-e29b-41d4-a716-446655440004',
       };
 
-      await service.update('g1', dto as any);
+      await service.update('g1', dto);
 
-      const updateArg = repo.update.mock.calls[0][1];
-      expect(updateArg.tags).toEqual({
-        deleteMany: {},
-        create: [{ tag: { connect: { id: 't3' } } }],
-      });
-      expect(updateArg.category).toEqual({ connect: { id: 'cat2' } });
+      expect(repo.update).toHaveBeenCalledWith('g1', dto);
     });
 
     it('should not touch tags when tagIds is undefined', async () => {
       repo.findById.mockResolvedValue({ id: 'g1' });
       repo.update.mockResolvedValue({ id: 'g1' });
 
-      await service.update('g1', { title: 'X' } as any);
+      const dto: UpdateGuideDto = { title: 'X' };
+      await service.update('g1', dto);
 
-      const updateArg = repo.update.mock.calls[0][1];
-      expect(updateArg.tags).toBeUndefined();
-      expect(updateArg.category).toBeUndefined();
+      expect(repo.update).toHaveBeenCalledWith('g1', dto);
     });
 
     it('should throw GuideNotFound when not found', async () => {
       repo.findById.mockResolvedValue(null);
 
-      await expect(service.update('nope', {} as any)).rejects.toMatchObject({
+      await expect(service.update('nope', emptyUpdateDto)).rejects.toMatchObject({
         code: 'GUIDE_NOT_FOUND',
         status: 404,
       });
@@ -222,10 +192,11 @@ describe('GuidesService', () => {
   describe('delete', () => {
     it('should delete when guide exists', async () => {
       repo.findById.mockResolvedValue({ id: 'g1' });
-      repo.delete.mockResolvedValue(undefined);
+      repo.delete.mockResolvedValue({ id: 'g1' });
 
       await service.delete('g1');
       expect(repo.delete).toHaveBeenCalledWith('g1');
+      expect(toDomainMock.mock.calls[0]).toEqual([{ id: 'g1' }]);
     });
 
     it('should throw GuideNotFound when not found', async () => {

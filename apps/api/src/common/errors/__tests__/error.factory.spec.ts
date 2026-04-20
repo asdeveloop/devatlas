@@ -1,5 +1,6 @@
 // filepath: apps/api/src/common/errors/__tests__/error.factory.spec.ts
 import { describe, expect, it } from 'vitest';
+
 import { DomainError } from '../domain-error';
 import { ErrorCodes } from '../error-codes';
 import { ErrorFactory } from '../error.factory';

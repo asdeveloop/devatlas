@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common';
+
 import { ErrorFactory } from '../../common/errors/error.factory';
+
 import { CategoriesRepository } from './categories.repository';
 import { CategoryQueryDto } from './dto/category-query.dto';
 import { CreateCategoryDto } from './dto/create-category.dto';

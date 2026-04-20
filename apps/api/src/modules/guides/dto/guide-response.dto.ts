@@ -1,4 +1,4 @@
-import { ContentStatus, Difficulty } from '@prisma/client';
+import { ContentStatus, Difficulty } from '@devatlas/types';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class GuideResponseDto {

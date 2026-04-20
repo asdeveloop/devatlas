@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import type { Request } from 'express';
 import { map, Observable } from 'rxjs';
+
 import { ensureTraceId } from '../http/trace-id';
 
 @Injectable()

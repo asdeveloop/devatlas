@@ -19,6 +19,21 @@ export var ToolStatus;
     ToolStatus["DEPRECATED"] = "DEPRECATED";
     ToolStatus["ARCHIVED"] = "ARCHIVED";
 })(ToolStatus || (ToolStatus = {}));
+/** سطح دسترسی ابزار */
+export var ToolTier;
+(function (ToolTier) {
+    ToolTier["FREE"] = "FREE";
+    ToolTier["FREEMIUM"] = "FREEMIUM";
+    ToolTier["PRO"] = "PRO";
+    ToolTier["ENTERPRISE"] = "ENTERPRISE";
+})(ToolTier || (ToolTier = {}));
+/** مدل قیمت‌گذاری ابزار */
+export var ToolPrice;
+(function (ToolPrice) {
+    ToolPrice["FREE"] = "FREE";
+    ToolPrice["PAID"] = "PAID";
+    ToolPrice["MIXED"] = "MIXED";
+})(ToolPrice || (ToolPrice = {}));
 /** نوع رابطه بین محتواها */
 export var RelationType;
 (function (RelationType) {

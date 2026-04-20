@@ -7,6 +7,7 @@ import {
   timestamp,
   uuid,
 } from 'drizzle-orm/pg-core';
+
 import { categories } from './category';
 import { contentStatusEnum, difficultyEnum } from './enums';
 import { guideTags } from './guide-tag';

@@ -1,18 +1,4 @@
-import { guides as guidesSchema, categories as categoriesSchema, tags as tagsSchema } from '../../../db/schema';
-
-type GuideRecord = {
-  id: string;
-  slug: string;
-  title: string;
-  description: string;
-  content: string;
-  readingTime: number;
-  difficulty: string | null;
-  status: string;
-  categoryId: string;
-  createdAt: Date;
-  updatedAt: Date;
-};
+import type { GuideRecord, GuideWithRelations } from '../guides.repository';
 
 type GuideSummaryRecord = GuideRecord & {
   category: {
@@ -45,32 +31,8 @@ type GuideDetailRecord = GuideRecord & {
   }>;
 };
 
-type GuideWithRelations = Awaited<ReturnType<typeof guidesSchema.$inferSelect>> & {
-  tags: Array<{
-    tag: {
-      id: string;
-      name: string;
-      slug: string;
-      createdAt: Date;
-      updatedAt: Date;
-    };
-  }>;
-  category: {
-    id: string;
-    name: string;
-    slug: string;
-    icon: string | null;
-    createdAt: Date;
-    updatedAt: Date;
-  } | null;
-};
-
-function toIsoString(value: Date | string): string {
-  return new Date(value).toISOString();
-}
-
 export class GuideMapper {
-  static toDomain(entity: GuideWithRelations): GuideRecord {
+  static toDomain(entity: GuideRecord | GuideWithRelations): GuideRecord {
     return {
       id: entity.id,
       slug: entity.slug,
@@ -87,6 +49,10 @@ export class GuideMapper {
   }
 
   static toSummary(entity: GuideWithRelations): GuideSummaryRecord {
+    if (!entity.category) {
+      throw new Error('Guide category is required');
+    }
+
     return {
       ...GuideMapper.toDomain(entity),
       category: {
@@ -94,11 +60,15 @@ export class GuideMapper {
         slug: entity.category.slug,
         name: entity.category.name,
       },
-      tags: entity.tags.map((t) => t.tag),
+      tags: entity.tags,
     };
   }
 
   static toDetail(entity: GuideWithRelations): GuideDetailRecord {
+    if (!entity.category) {
+      throw new Error('Guide category is required');
+    }
+
     return {
       ...GuideMapper.toDomain(entity),
       category: {
@@ -109,7 +79,7 @@ export class GuideMapper {
         createdAt: entity.category.createdAt,
         updatedAt: entity.category.updatedAt,
       },
-      tags: entity.tags.map((t) => t.tag),
+      tags: entity.tags,
     };
   }
 }

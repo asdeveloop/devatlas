@@ -1,4 +1,5 @@
 import { Controller, Get } from '@nestjs/common';
+
 import { DrizzleService } from '../database/drizzle.service';
 
 interface HealthResponse {

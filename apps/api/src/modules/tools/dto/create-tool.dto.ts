@@ -1,5 +1,5 @@
+import { ToolPrice, ToolTier } from '@devatlas/types';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { ToolPrice, ToolTier } from '@prisma/client';
 import {
   ArrayNotEmpty,
   ArrayUnique,

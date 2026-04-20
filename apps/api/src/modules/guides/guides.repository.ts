@@ -1,16 +1,79 @@
 import { Injectable } from '@nestjs/common';
+import { and, eq } from 'drizzle-orm';
+
+import { categories, guideTags, guides as guidesSchema, tags } from '../../db/schema';
 import { DrizzleService } from '../database/drizzle.service';
+
 import { CreateGuideDto } from './dto/create-guide.dto';
 import { GuideQueryDto } from './dto/guide-query.dto';
 import { UpdateGuideDto } from './dto/update-guide.dto';
-import { and, eq, sql } from 'drizzle-orm';
-import { guides as guidesSchema, guidesRelations, guideTags, tags, categories, contentStatusEnum, difficultyEnum } from '../../db/schema';
+
+export type GuideTag = {
+  id: string;
+  slug: string;
+  name: string;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export type GuideCategory = {
+  id: string;
+  name: string;
+  slug: string;
+  icon: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export type GuideRecord = {
+  id: string;
+  slug: string;
+  title: string;
+  description: string | null;
+  content: string | null;
+  readingTime: number | null;
+  difficulty: string | null;
+  status: string;
+  categoryId: string;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export type GuideWithRelations = GuideRecord & {
+  tags: GuideTag[];
+  category: GuideCategory | null;
+};
+
+type GuideQueryRow = GuideRecord & {
+  tags: {
+    id: string;
+    guideId: string;
+    tagId: string;
+    name: string;
+    slug: string;
+    createdAt: Date;
+    updatedAt: Date;
+  } | null;
+  category: GuideCategory | null;
+};
+
+export type GuidesListResult = {
+  data: GuideRecord[];
+  meta: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+    hasNextPage: boolean;
+    hasPrevPage: boolean;
+  };
+};
 
 @Injectable()
 export class GuidesRepository {
   constructor(private readonly drizzle: DrizzleService) {}
 
-  async findAll(query: GuideQueryDto) {
+  async findAll(query: GuideQueryDto): Promise<GuidesListResult> {
     const offset = (query.skip ?? 0);
     const limit = query.take ?? 20;
 
@@ -20,13 +83,9 @@ export class GuidesRepository {
       query.categoryId ? eq(guidesSchema.categoryId, query.categoryId) : undefined,
     ].filter(Boolean);
 
-    const where = whereConditions.length > 0 
-      ? and(...whereConditions as never) 
+    const where = whereConditions.length > 0
+      ? and(...(whereConditions as Parameters<typeof and>))
       : undefined;
-
-    const orderBy = query.sortBy 
-      ? { [query.sortBy === 'createdAt' ? guidesSchema.createdAt : query.sortBy]: query.order || 'desc' }
-      : { [guidesSchema.createdAt]: 'desc' };
 
     const [items, total] = await Promise.all([
       this.drizzle.db
@@ -52,7 +111,7 @@ export class GuidesRepository {
         .from(guidesSchema)
         .where(where)
         .execute()
-        .then(([result]) => result.count),
+        .then(([result]) => Number(result.count)),
     ]);
 
     return {
@@ -68,8 +127,8 @@ export class GuidesRepository {
     };
   }
 
-  async findBySlug(slug: string) {
-    const result = await this.drizzle.db
+  async findBySlug(slug: string): Promise<GuideWithRelations | null> {
+    const result = (await this.drizzle.db
       .select({
         id: guidesSchema.id,
         slug: guidesSchema.slug,
@@ -86,13 +145,10 @@ export class GuidesRepository {
           id: guideTags.id,
           guideId: guideTags.guideId,
           tagId: guideTags.tagId,
-          tag: {
-            id: tags.id,
-            name: tags.name,
-            slug: tags.slug,
-            createdAt: tags.createdAt,
-            updatedAt: tags.updatedAt,
-          },
+          name: tags.name,
+          slug: tags.slug,
+          createdAt: tags.createdAt,
+          updatedAt: tags.updatedAt,
         },
         category: {
           id: categories.id,
@@ -108,27 +164,51 @@ export class GuidesRepository {
       .leftJoin(tags, eq(guideTags.tagId, tags.id))
       .leftJoin(categories, eq(guidesSchema.categoryId, categories.id))
       .where(eq(guidesSchema.slug, slug))
-      .execute();
+      .execute()) as unknown as GuideQueryRow[];
 
     // Group by guide
-    const grouped = result.reduce((acc, item) => {
-      if (!acc[item.id]) {
-        acc[item.id] = {
-          ...item,
-          tags: [],
-          category: item.category || null,
-        };
-      }
-      if (item.tags) {
-        acc[item.id].tags.push(item.tags.tag);
-      }
-      return acc;
-    }, {} as Record<string, any>);
+    type GroupedGuide = Omit<GuideQueryRow, 'tags' | 'category'> & {
+      tags: GuideTag[];
+      category: GuideCategory | null;
+    };
 
-    return Object.values(grouped)[0] ?? null;
+    const grouped = new Map<string, GroupedGuide>();
+
+    for (const item of result) {
+      const existing = grouped.get(item.id);
+      if (existing) {
+        if (item.tags) {
+          existing.tags.push({
+            id: item.tags.tagId,
+            name: item.tags.name,
+            slug: item.tags.slug,
+            createdAt: item.tags.createdAt,
+            updatedAt: item.tags.updatedAt,
+          });
+        }
+        continue;
+      }
+
+      grouped.set(item.id, {
+        ...item,
+        tags: item.tags
+          ? [{
+              id: item.tags.tagId,
+              name: item.tags.name,
+              slug: item.tags.slug,
+              createdAt: item.tags.createdAt,
+              updatedAt: item.tags.updatedAt,
+            }]
+          : [],
+        category: item.category || null,
+      });
+    }
+
+    const firstGuide = grouped.values().next().value as GroupedGuide | undefined;
+    return firstGuide ?? null;
   }
 
-  async findById(id: string) {
+  async findById(id: string): Promise<GuideRecord | null> {
     const [result] = await this.drizzle.db
       .select()
       .from(guidesSchema)
@@ -137,7 +217,7 @@ export class GuidesRepository {
     return result ?? null;
   }
 
-  async create(data: CreateGuideDto) {
+  async create(data: CreateGuideDto): Promise<GuideWithRelations | null> {
     const drizzle = this.drizzle.db;
 
     // Insert guide
@@ -173,7 +253,7 @@ export class GuidesRepository {
     return await this.findBySlug(guide.slug);
   }
 
-  async update(id: string, data: UpdateGuideDto) {
+  async update(id: string, data: UpdateGuideDto): Promise<GuideWithRelations | null> {
     const drizzle = this.drizzle.db;
 
     // Update guide
@@ -217,7 +297,7 @@ export class GuidesRepository {
     return await this.findBySlug(data.slug ?? result.slug);
   }
 
-  async delete(id: string) {
+  async delete(id: string): Promise<GuideRecord | null> {
     const [result] = await this.drizzle.db
       .delete(guidesSchema)
       .where(eq(guidesSchema.id, id))
@@ -226,12 +306,11 @@ export class GuidesRepository {
     return result;
   }
 
-  async count(where: Record<string, unknown> = {}) {
+  async count() {
     const result = await this.drizzle.db
       .select({ count: guidesSchema.id })
       .from(guidesSchema)
-      .where(where)
       .execute();
-    return result[0]?.count || 0;
+    return Number(result[0]?.count ?? 0);
   }
 }

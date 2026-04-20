@@ -1,19 +1,76 @@
 import { Injectable } from '@nestjs/common';
+import { and, eq, sql } from 'drizzle-orm';
+
+import { categories, tags, toolTags, tools, tools as toolsSchema } from '../../db/schema';
 import { DrizzleService } from '../database/drizzle.service';
+
 import { CreateToolDto } from './dto/create-tool.dto';
 import { ToolQueryDto } from './dto/tool-query.dto';
 import { UpdateToolDto } from './dto/update-tool.dto';
-import { and, eq, sql } from 'drizzle-orm';
-import { tools } from '../../db/schema';
-import { tools as toolsSchema, toolTags, tags, categories } from '../../db/schema';
+
+export type ToolTag = {
+  id: string;
+  name: string;
+  slug: string;
+};
+
+type ToolCategory = {
+  id: string;
+  name: string;
+  slug: string;
+};
+
+export type ToolRecord = {
+  id: string;
+  slug: string;
+  name: string;
+  description: string | null;
+  website: string | null;
+  github: string | null;
+  icon: string | null;
+  active: boolean;
+  tier: string;
+  price: string;
+  popularity: number;
+  categoryId: string;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export type ToolWithRelations = ToolRecord & {
+  tags: ToolTag[];
+  category: ToolCategory | null;
+};
+
+type ToolQueryRow = ToolRecord & {
+  tags: {
+    id: string;
+    tagId: string;
+    name: string;
+    slug: string;
+  } | null;
+  category: ToolCategory | null;
+};
+
+export type ToolListResult = {
+  data: ToolRecord[];
+  meta: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+    hasNextPage: boolean;
+    hasPrevPage: boolean;
+  };
+};
 
 @Injectable()
 export class ToolsRepository {
   constructor(private readonly drizzle: DrizzleService) {}
 
-  async findAll(query: ToolQueryDto) {
+  async findAll(query: ToolQueryDto): Promise<ToolListResult> {
     const offset = (query.page - 1) * query.pageSize;
-    
+
     const whereConditions = [
       query.tier ? eq(tools.tier, query.tier) : undefined,
       query.price ? eq(tools.price, query.price) : undefined,
@@ -25,8 +82,8 @@ export class ToolsRepository {
         : undefined,
     ].filter(Boolean);
 
-    const where = whereConditions.length > 0 
-      ? and(...whereConditions as never) 
+    const where = whereConditions.length > 0
+      ? and(...(whereConditions as Parameters<typeof and>))
       : undefined;
 
     const [items, total] = await Promise.all([
@@ -57,7 +114,7 @@ export class ToolsRepository {
         .from(tools)
         .where(where)
         .execute()
-        .then(([result]) => result.count),
+        .then(([result]) => Number(result.count)),
     ]);
 
     return {
@@ -73,8 +130,8 @@ export class ToolsRepository {
     };
   }
 
-  async findBySlug(slug: string) {
-    const result = await this.drizzle.db
+  async findBySlug(slug: string): Promise<ToolWithRelations | null> {
+    const result = (await this.drizzle.db
       .select({
         id: toolsSchema.id,
         slug: toolsSchema.slug,
@@ -93,11 +150,8 @@ export class ToolsRepository {
         tags: {
           id: toolTags.id,
           tagId: toolTags.tagId,
-          tag: {
-            id: tags.id,
-            name: tags.name,
-            slug: tags.slug,
-          },
+          name: tags.name,
+          slug: tags.slug,
         },
         category: {
           id: categories.id,
@@ -110,27 +164,47 @@ export class ToolsRepository {
       .leftJoin(tags, eq(toolTags.tagId, tags.id))
       .leftJoin(categories, eq(toolsSchema.categoryId, categories.id))
       .where(eq(toolsSchema.slug, slug))
-      .execute();
+      .execute()) as unknown as ToolQueryRow[];
 
     // Group tags by tool
-    const grouped = result.reduce((acc, item) => {
-      if (!acc[item.id]) {
-        acc[item.id] = {
-          ...item,
-          tags: [],
-          category: item.category || null,
-        };
-      }
-      if (item.tags) {
-        acc[item.id].tags.push(item.tags);
-      }
-      return acc;
-    }, {} as Record<string, any>);
+    type GroupedTool = Omit<ToolQueryRow, 'tags' | 'category'> & {
+      tags: ToolTag[];
+      category: ToolCategory | null;
+    };
 
-    return Object.values(grouped)[0] ?? null;
+    const grouped = new Map<string, GroupedTool>();
+
+    for (const item of result) {
+      const existing = grouped.get(item.id);
+      if (existing) {
+        if (item.tags) {
+          existing.tags.push({
+            id: item.tags.tagId,
+            name: item.tags.name,
+            slug: item.tags.slug,
+          });
+        }
+        continue;
+      }
+
+      grouped.set(item.id, {
+        ...item,
+        tags: item.tags
+          ? [{
+              id: item.tags.tagId,
+              name: item.tags.name,
+              slug: item.tags.slug,
+            }]
+          : [],
+        category: item.category || null,
+      });
+    }
+
+    const firstTool = grouped.values().next().value as GroupedTool | undefined;
+    return firstTool ?? null;
   }
 
-  async create(data: CreateToolDto) {
+  async create(data: CreateToolDto): Promise<ToolWithRelations | null> {
     const drizzle = this.drizzle.db;
 
     // Insert tool
@@ -168,7 +242,7 @@ export class ToolsRepository {
     return await this.findBySlug(tool.slug);
   }
 
-  async update(slug: string, data: UpdateToolDto) {
+  async update(slug: string, data: UpdateToolDto): Promise<ToolWithRelations | null> {
     const drizzle = this.drizzle.db;
 
     // Update tool
@@ -214,7 +288,7 @@ export class ToolsRepository {
     return await this.findBySlug(data.slug ?? slug);
   }
 
-  async delete(slug: string) {
+  async delete(slug: string): Promise<ToolRecord | null> {
     const [result] = await this.drizzle.db
       .delete(toolsSchema)
       .where(eq(toolsSchema.slug, slug))

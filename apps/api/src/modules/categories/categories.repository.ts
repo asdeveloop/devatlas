@@ -1,10 +1,12 @@
 import { Injectable } from '@nestjs/common';
+import { eq } from 'drizzle-orm';
+
+import { categories } from '../../db/schema';
 import { DrizzleService } from '../database/drizzle.service';
+
 import { CategoryQueryDto } from './dto/category-query.dto';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
-import { eq } from 'drizzle-orm';
-import { categories } from '../../db/schema';
 
 @Injectable()
 export class CategoriesRepository {
@@ -30,7 +32,7 @@ export class CategoriesRepository {
         .select({ count: categories.id })
         .from(categories)
         .execute()
-        .then(([result]) => result.count),
+        .then(([result]) => Number(result.count)),
     ]);
 
     return {
@@ -71,7 +73,6 @@ export class CategoriesRepository {
   async update(slug: string, data: UpdateCategoryDto) {
     const updateData: Record<string, unknown> = {};
     if (data.name !== undefined) updateData.name = data.name;
-    if (data.slug !== undefined) updateData.slug = data.slug;
     if (data.icon !== undefined) updateData.icon = data.icon ?? null;
 
     const [result] = await this.drizzle.db

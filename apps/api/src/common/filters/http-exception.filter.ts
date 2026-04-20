@@ -6,6 +6,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import type { Request, Response } from 'express';
+
 import { DomainError } from '../errors/domain-error';
 import { ensureTraceId } from '../http/trace-id';
 

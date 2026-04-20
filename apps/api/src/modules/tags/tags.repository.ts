@@ -1,10 +1,12 @@
 import { Injectable } from '@nestjs/common';
+import { eq } from 'drizzle-orm';
+
+import { tags } from '../../db/schema';
 import { DrizzleService } from '../database/drizzle.service';
+
 import { CreateTagDto } from './dto/create-tag.dto';
 import { TagQueryDto } from './dto/tag-query.dto';
 import { UpdateTagDto } from './dto/update-tag.dto';
-import { eq } from 'drizzle-orm';
-import { tags } from '../../db/schema';
 
 @Injectable()
 export class TagsRepository {
@@ -29,7 +31,7 @@ export class TagsRepository {
         .select({ count: tags.id })
         .from(tags)
         .execute()
-        .then(([result]) => result.count),
+        .then(([result]) => Number(result.count)),
     ]);
 
     return {
@@ -69,8 +71,6 @@ export class TagsRepository {
   async update(slug: string, data: UpdateTagDto) {
     const updateData: Record<string, unknown> = {};
     if (data.name !== undefined) updateData.name = data.name;
-    if (data.slug !== undefined) updateData.slug = data.slug;
-
     const [result] = await this.drizzle.db
       .update(tags)
       .set(updateData)

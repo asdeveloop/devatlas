@@ -1,4 +1,4 @@
-import { ApiResponse } from './response';
+import type { ApiResponse } from './response';
 
 /** پاسخ خطای استاندارد — مطابق HttpExceptionFilter */
 export interface ApiErrorResponse {

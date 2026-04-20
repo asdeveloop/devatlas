@@ -1,5 +1,6 @@
-import type { Request, Response } from 'express';
 import { randomUUID } from 'node:crypto';
+
+import type { Request, Response } from 'express';
 
 const TRACE_HEADER = 'x-trace-id';
 

@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common';
+
 import { ErrorFactory } from '../../common/errors/error.factory';
+
 import { CreateTagDto } from './dto/create-tag.dto';
 import { TagQueryDto } from './dto/tag-query.dto';
 import { UpdateTagDto } from './dto/update-tag.dto';

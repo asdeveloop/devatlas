@@ -19,6 +19,21 @@ export enum ToolStatus {
   ARCHIVED = 'ARCHIVED',
 }
 
+/** سطح دسترسی ابزار */
+export enum ToolTier {
+  FREE = 'FREE',
+  FREEMIUM = 'FREEMIUM',
+  PRO = 'PRO',
+  ENTERPRISE = 'ENTERPRISE',
+}
+
+/** مدل قیمت‌گذاری ابزار */
+export enum ToolPrice {
+  FREE = 'FREE',
+  PAID = 'PAID',
+  MIXED = 'MIXED',
+}
+
 /** نوع رابطه بین محتواها */
 export enum RelationType {
   RELATES_TO = 'RELATES_TO',

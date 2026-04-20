@@ -1,6 +1,7 @@
 // filepath: apps/api/src/db/schema/guide-tag.ts
 import { relations } from 'drizzle-orm';
 import { index, pgTable, uniqueIndex, uuid } from 'drizzle-orm/pg-core';
+
 import { guides } from './guide';
 import { tags } from './tag';
 

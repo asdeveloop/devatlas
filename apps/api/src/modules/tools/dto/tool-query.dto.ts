@@ -1,5 +1,5 @@
+import { ToolPrice, ToolTier } from '@devatlas/types';
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { ToolPrice, ToolTier } from '@prisma/client';
 import { IsEnum, IsNumber, IsOptional, IsString, Min } from 'class-validator';
 
 export class ToolQueryDto {

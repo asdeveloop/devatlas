@@ -1,5 +1,5 @@
+import { ContentStatus, Difficulty } from '@devatlas/types';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { ContentStatus, Difficulty } from '@prisma/client';
 import {
   IsArray,
   IsEnum,

@@ -1,7 +1,10 @@
-// filepath: apps/api/src/modules/tags/__tests__/tags.service.spec.ts
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 import { DomainError } from '../../../common/errors/domain-error';
-import { TagsRepository } from '../tags.repository';
+import type { CreateTagDto } from '../dto/create-tag.dto';
+import type { TagQueryDto } from '../dto/tag-query.dto';
+import type { UpdateTagDto } from '../dto/update-tag.dto';
+import type { TagsRepository } from '../tags.repository';
 import { TagsService } from '../tags.service';
 
 const mockRepo = (): Record<keyof TagsRepository, ReturnType<typeof vi.fn>> => ({
@@ -15,6 +18,7 @@ const mockRepo = (): Record<keyof TagsRepository, ReturnType<typeof vi.fn>> => (
 describe('TagsService', () => {
   let service: TagsService;
   let repo: ReturnType<typeof mockRepo>;
+  const emptyUpdateDto: UpdateTagDto = {};
 
   beforeEach(() => {
     repo = mockRepo();
@@ -23,11 +27,11 @@ describe('TagsService', () => {
 
   describe('list', () => {
     it('should delegate to repo.findAll', async () => {
-      const query = { page: 1, pageSize: 10 };
+      const query: TagQueryDto = { page: 1, pageSize: 10 };
       const result = { data: [], meta: { page: 1, limit: 10, total: 0, totalPages: 1, hasNextPage: false, hasPrevPage: false } };
       repo.findAll.mockResolvedValue(result);
 
-      expect(await service.list(query as any)).toBe(result);
+      expect(await service.list(query)).toBe(result);
       expect(repo.findAll).toHaveBeenCalledWith(query);
     });
   });
@@ -55,18 +59,19 @@ describe('TagsService', () => {
   describe('create', () => {
     it('should create when slug is unique', async () => {
       repo.findBySlug.mockResolvedValue(null);
-      const dto = { name: 'Vue', slug: 'vue' };
+      const dto: CreateTagDto = { name: 'Vue', slug: 'vue' };
       const created = { id: '2', ...dto };
       repo.create.mockResolvedValue(created);
 
-      expect(await service.create(dto as any)).toBe(created);
+      expect(await service.create(dto)).toBe(created);
       expect(repo.create).toHaveBeenCalledWith(dto);
     });
 
     it('should throw SlugConflict when slug exists', async () => {
       repo.findBySlug.mockResolvedValue({ id: '1', slug: 'vue' });
+      const dto: CreateTagDto = { name: 'Vue', slug: 'vue' };
 
-      await expect(service.create({ name: 'Vue', slug: 'vue' } as any)).rejects.toMatchObject({
+      await expect(service.create(dto)).rejects.toMatchObject({
         code: 'SLUG_CONFLICT',
         status: 409,
         message: 'Slug already exists',
@@ -78,18 +83,18 @@ describe('TagsService', () => {
   describe('update', () => {
     it('should update when tag exists', async () => {
       repo.findBySlug.mockResolvedValue({ id: '1', slug: 'react' });
-      const dto = { name: 'React.js' };
+      const dto: UpdateTagDto = { name: 'React.js' };
       const updated = { id: '1', slug: 'react', name: 'React.js' };
       repo.update.mockResolvedValue(updated);
 
-      expect(await service.update('react', dto as any)).toBe(updated);
+      expect(await service.update('react', dto)).toBe(updated);
       expect(repo.update).toHaveBeenCalledWith('react', dto);
     });
 
     it('should throw TagNotFound when not found', async () => {
       repo.findBySlug.mockResolvedValue(null);
 
-      await expect(service.update('nope', {} as any)).rejects.toMatchObject({
+      await expect(service.update('nope', emptyUpdateDto)).rejects.toMatchObject({
         code: 'TAG_NOT_FOUND',
         status: 404,
       });
