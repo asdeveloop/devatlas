@@ -33,7 +33,7 @@
     "vitest": "^3.2.4",
     "whatwg-encoding": "3.1.1"
   },
-  "packageManager": "pnpm@9.0.0",
+  "packageManager": "pnpm@10.33.0",
   "lint-staged": {
     "*.{ts,tsx,js,jsx}": [
       "eslint --fix",
