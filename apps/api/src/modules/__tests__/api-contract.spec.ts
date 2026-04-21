@@ -1,8 +1,8 @@
-import { ContentStatus, Difficulty, ToolPrice, ToolTier } from '@devatlas/types';
+import { ContentStatus, Difficulty, EntityType, RelationType, ToolPrice, ToolTier } from '@devatlas/types';
 import { sql } from 'drizzle-orm';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
-import { categories, guides, searchQueries, tags, tools } from '../../db/schema';
+import { categories, contentRelations, guides, searchQueries, tags, tools } from '../../db/schema';
 import { createTestApp } from '../../testing/test-app';
 import { createTestDatabase } from '../../testing/test-db';
 
@@ -276,6 +276,128 @@ describe('API contract', () => {
     });
   });
 
+  it('verifies content relation creation and related lookups', async () => {
+    const [category] = await testDb.db.insert(categories).values({ name: 'Frontend', slug: 'frontend' }).returning();
+    const [tag] = await testDb.db.insert(tags).values({ name: 'React', slug: 'react' }).returning();
+    const [sourceGuide] = await testDb.db.insert(guides).values({
+      title: 'React Foundations',
+      slug: 'react-foundations',
+      description: 'Core guide',
+      content: 'Start here',
+      readingTime: 5,
+      difficulty: Difficulty.BEGINNER,
+      status: ContentStatus.PUBLISHED,
+      categoryId: category.id,
+    }).returning();
+    const [relatedGuide] = await testDb.db.insert(guides).values({
+      title: 'Advanced Hooks',
+      slug: 'advanced-hooks',
+      description: 'Deep dive',
+      content: 'Hooks content',
+      readingTime: 9,
+      difficulty: Difficulty.ADVANCED,
+      status: ContentStatus.PUBLISHED,
+      categoryId: category.id,
+    }).returning();
+    await testDb.db.execute(sql`insert into guide_tags (guide_id, tag_id) values (${relatedGuide.id}, ${tag.id})`);
+
+    const [tool] = await testDb.db.insert(tools).values({
+      name: 'Hook Inspector',
+      slug: 'hook-inspector',
+      description: 'Inspect React hooks',
+      website: 'https://example.com/hook-inspector',
+      tier: ToolTier.FREE,
+      price: ToolPrice.FREE,
+      active: true,
+      categoryId: category.id,
+      popularity: 15,
+    }).returning();
+
+    const createRes = await fetch(`${baseUrl}/api/v1/content-relations`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        sourceType: EntityType.GUIDE,
+        sourceId: sourceGuide.id,
+        targetType: EntityType.GUIDE,
+        targetId: relatedGuide.id,
+        relationType: RelationType.PREREQUISITE,
+        weight: 0.9,
+      }),
+    });
+    const createJson = await createRes.json();
+    expect(createRes.status).toBe(201);
+    expect(createJson.data).toMatchObject({
+      sourceType: EntityType.GUIDE,
+      sourceId: sourceGuide.id,
+      targetType: EntityType.GUIDE,
+      targetId: relatedGuide.id,
+      relationType: RelationType.PREREQUISITE,
+      weight: 0.9,
+    });
+
+    await testDb.db.insert(contentRelations).values({
+      sourceType: EntityType.GUIDE,
+      sourceId: sourceGuide.id,
+      targetType: EntityType.TOOL,
+      targetId: tool.id,
+      relationType: RelationType.ALTERNATIVE,
+      weight: 0.7,
+    });
+
+    const guideRelationsRes = await fetch(`${baseUrl}/api/v1/guides/${sourceGuide.id}/related`);
+    const guideRelationsJson = await guideRelationsRes.json();
+    expect(guideRelationsRes.status).toBe(200);
+    expect(guideRelationsJson.data).toEqual([
+      expect.objectContaining({
+        id: relatedGuide.id,
+        slug: 'advanced-hooks',
+        contentType: 'guide',
+        relationType: RelationType.PREREQUISITE,
+        category: { slug: 'frontend', name: 'Frontend', id: category.id },
+        tags: [{ slug: 'react', name: 'React', id: tag.id }],
+      }),
+      expect.objectContaining({
+        id: tool.id,
+        slug: 'hook-inspector',
+        contentType: 'tool',
+        relationType: RelationType.ALTERNATIVE,
+      }),
+    ]);
+
+    const [sourceTool] = await testDb.db.insert(tools).values({
+      name: 'React Starter',
+      slug: 'react-starter',
+      description: 'Starter tool',
+      website: 'https://example.com/react-starter',
+      tier: ToolTier.FREE,
+      price: ToolPrice.FREE,
+      active: true,
+      categoryId: category.id,
+      popularity: 3,
+    }).returning();
+    await testDb.db.insert(contentRelations).values({
+      sourceType: EntityType.TOOL,
+      sourceId: sourceTool.id,
+      targetType: EntityType.GUIDE,
+      targetId: relatedGuide.id,
+      relationType: RelationType.MENTIONS,
+      weight: 0.4,
+    });
+
+    const toolRelationsRes = await fetch(`${baseUrl}/api/v1/tools/${sourceTool.id}/related`);
+    const toolRelationsJson = await toolRelationsRes.json();
+    expect(toolRelationsRes.status).toBe(200);
+    expect(toolRelationsJson.data).toEqual([
+      expect.objectContaining({
+        id: relatedGuide.id,
+        slug: 'advanced-hooks',
+        contentType: 'guide',
+        relationType: RelationType.MENTIONS,
+      }),
+    ]);
+  });
+
   it('verifies category and tag list/create endpoints', async () => {
     const categoryRes = await fetch(`${baseUrl}/api/v1/categories`, {
       method: 'POST',
@@ -316,6 +438,9 @@ describe('API contract', () => {
     expect(swaggerDocument.paths['/api/v1/guides/{slug}']).toMatchObject({
       get: expect.any(Object),
     });
+    expect(swaggerDocument.paths['/api/v1/guides/{id}/related']).toMatchObject({
+      get: expect.any(Object),
+    });
     expect(swaggerDocument.paths['/api/v1/guides/{id}']).toMatchObject({
       patch: expect.any(Object),
       delete: expect.any(Object),
@@ -328,6 +453,12 @@ describe('API contract', () => {
       get: expect.any(Object),
       put: expect.any(Object),
       delete: expect.any(Object),
+    });
+    expect(swaggerDocument.paths['/api/v1/tools/{id}/related']).toMatchObject({
+      get: expect.any(Object),
+    });
+    expect(swaggerDocument.paths['/api/v1/content-relations']).toMatchObject({
+      post: expect.any(Object),
     });
     expect(swaggerDocument.paths['/api/v1/categories']).toMatchObject({
       get: expect.any(Object),

@@ -32,6 +32,11 @@ export class GuidesService {
     return GuideMapper.toDetail(entity);
   }
 
+  async existsById(id: string): Promise<boolean> {
+    const entity = await this.repo.findById(id);
+    return Boolean(entity);
+  }
+
   async create(dto: CreateGuideDto): Promise<GuideDetail> {
     const exists = await this.repo.findBySlug(dto.slug);
     if (exists) {

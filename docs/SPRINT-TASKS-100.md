@@ -143,11 +143,11 @@
 
 | # | Task | Module/File | Status |
 |---|------|-------------|--------|
-| 89 | Create `content-relations.module.ts` + service + repository | modules/content-relations | ⬜ |
-| 90 | Implement `POST /content-relations` — create relation | content-relations | ⬜ |
-| 91 | Implement `GET /guides/:id/related` — query by source | content-relations | ⬜ |
-| 92 | Implement `GET /tools/:id/related` — query by source | content-relations | ⬜ |
-| 93 | Add relation suggestions to guide/tool detail pages | web | ⬜ |
+| 89 | Create `content-relations.module.ts` + service + repository | modules/content-relations | ✅ |
+| 90 | Implement `POST /content-relations` — create relation | content-relations | ✅ |
+| 91 | Implement `GET /guides/:id/related` — query by source | content-relations | ✅ |
+| 92 | Implement `GET /tools/:id/related` — query by source | content-relations | ✅ |
+| 93 | Add relation suggestions to guide/tool detail pages | web | ✅ |
 
 ## Phase 10 — AI Layer Preparation (Tasks 94–100)
 

@@ -10,6 +10,7 @@ import { ToolsService } from '../tools.service';
 
 const mockRepo = (): Record<keyof ToolsRepository, ReturnType<typeof vi.fn>> => ({
   findAll: vi.fn(),
+  findById: vi.fn(),
   findBySlug: vi.fn(),
   create: vi.fn(),
   update: vi.fn(),

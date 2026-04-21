@@ -222,6 +222,31 @@ export class ToolsRepository {
     return firstTool ?? null;
   }
 
+  async findById(id: string): Promise<ToolRecord | null> {
+    const [result] = await this.drizzle.db
+      .select({
+        id: toolsSchema.id,
+        slug: toolsSchema.slug,
+        name: toolsSchema.name,
+        description: toolsSchema.description,
+        website: toolsSchema.website,
+        github: toolsSchema.github,
+        icon: toolsSchema.icon,
+        active: toolsSchema.active,
+        tier: toolsSchema.tier,
+        price: toolsSchema.price,
+        popularity: toolsSchema.popularity,
+        categoryId: toolsSchema.categoryId,
+        createdAt: toolsSchema.createdAt,
+        updatedAt: toolsSchema.updatedAt,
+      })
+      .from(toolsSchema)
+      .where(eq(toolsSchema.id, id))
+      .execute();
+
+    return result ?? null;
+  }
+
   async create(data: CreateToolDto): Promise<ToolWithRelations | null> {
     const drizzle = this.drizzle.db;
 

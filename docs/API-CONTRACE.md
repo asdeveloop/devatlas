@@ -189,6 +189,25 @@ Current list payload contains flat guide records plus pagination meta:
 
 Returns guide detail mapped with related category and tags.
 
+### `GET /api/v1/guides/:id/related`
+
+Returns related guides/tools for the source guide id:
+
+```ts
+Array<{
+  id: string;
+  slug: string;
+  contentType: 'guide' | 'tool';
+  title: string;
+  description: string;
+  category: { id: string; slug: string; name: string };
+  tags: Array<{ id: string; slug: string; name: string }>;
+  relationType: RelationType;
+  weight: number | null;
+  url: string;
+}>
+```
+
 ### `POST /api/v1/guides`
 
 ```ts
@@ -255,7 +274,27 @@ List payload:
 ```
 
 ### `GET /api/v1/tools/:slug`
+
+### `GET /api/v1/tools/:id/related`
+
+Returns related guides/tools for the source tool id using the same payload shape as guide relations.
+
 ### `POST /api/v1/tools`
+
+## Content Relations
+
+### `POST /api/v1/content-relations`
+
+```ts
+{
+  sourceType: EntityType;
+  sourceId: string;
+  targetType: EntityType;
+  targetId: string;
+  relationType: RelationType;
+  weight?: number;
+}
+```
 
 ## Search
 

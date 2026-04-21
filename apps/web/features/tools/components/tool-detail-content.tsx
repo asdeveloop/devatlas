@@ -1,10 +1,13 @@
-import type { ToolDetail } from '@devatlas/types';
+import type { RelatedContentItem, ToolDetail } from '@devatlas/types';
+
+import { RelatedContentSection } from '../../content-relations/components/related-content-section';
 
 interface ToolDetailContentProps {
   tool: ToolDetail;
+  related?: RelatedContentItem[];
 }
 
-export function ToolDetailContent({ tool }: ToolDetailContentProps) {
+export function ToolDetailContent({ tool, related = [] }: ToolDetailContentProps) {
   return (
     <article className="mx-auto max-w-3xl px-4 py-10">
       <header className="mb-8 space-y-4">
@@ -61,6 +64,8 @@ export function ToolDetailContent({ tool }: ToolDetailContentProps) {
           </div>
         </div>
       </section>
+
+      <RelatedContentSection items={related} title="Related guides and alternatives" />
     </article>
   );
 }

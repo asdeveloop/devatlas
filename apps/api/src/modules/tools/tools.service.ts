@@ -39,6 +39,11 @@ export class ToolsService {
     return ToolMapper.toDetail(tool);
   }
 
+  async existsById(id: string): Promise<boolean> {
+    const tool = await this.repo.findById(id);
+    return Boolean(tool);
+  }
+
   async create(dto: CreateToolDto): Promise<ToolDetail> {
     if (await this.repo.findBySlug(dto.slug)) {
       throw ErrorFactory.SlugConflict();

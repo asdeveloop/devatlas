@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 
 import { PageShell } from '../../../components/layout/page-shell';
 import { SiteHeader } from '../../navigation';
+import { getRelatedTools } from '../api/get-related-tools';
 import { getToolBySlug } from '../api/get-tool-by-slug';
 import { ToolDetailContent } from '../components/tool-detail-content';
 
@@ -42,8 +43,10 @@ export default async function ToolPage({ params }: ToolPageProps) {
   const { slug } = await params;
 
   let tool;
+  let related = [];
   try {
     tool = await getToolBySlug(slug);
+    related = await getRelatedTools(tool.id);
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Unknown error';
 
@@ -57,7 +60,7 @@ export default async function ToolPage({ params }: ToolPageProps) {
   return (
     <PageShell>
       <SiteHeader />
-      <ToolDetailContent tool={tool} />
+      <ToolDetailContent tool={tool} related={related} />
     </PageShell>
   );
 }

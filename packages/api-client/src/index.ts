@@ -4,13 +4,16 @@ import type {
   CategoryDetail,
   CategoryListItem,
   CategoryListParams,
+  ContentRelation,
   CreateCategoryBody,
+  CreateContentRelationBody,
   CreateTagBody,
   CreateToolBody,
   GuideDetail,
   GuideListItem,
   GuideListParams,
   PaginationParams,
+  RelatedContentItem,
   TagDetail,
   TagListItem,
   TagListParams,
@@ -64,6 +67,10 @@ export class GuidesClient {
   getBySlug(slug: string) {
     return this.http.request<ApiResponse<GuideDetail>>(`/api/v1/guides/${encodeURIComponent(slug)}`);
   }
+
+  getRelated(id: string) {
+    return this.http.request<ApiResponse<RelatedContentItem[]>>(`/api/v1/guides/${encodeURIComponent(id)}/related`);
+  }
 }
 
 export class ToolsClient {
@@ -83,6 +90,10 @@ export class ToolsClient {
     return this.http.request<ApiResponse<ToolDetail>>(`/api/v1/tools/${encodeURIComponent(slug)}`);
   }
 
+  getRelated(id: string) {
+    return this.http.request<ApiResponse<RelatedContentItem[]>>(`/api/v1/tools/${encodeURIComponent(id)}/related`);
+  }
+
   create(body: CreateToolBody) {
     return this.http.request<ApiResponse<ToolDetail>>('/api/v1/tools', {
       method: 'POST',
@@ -93,6 +104,17 @@ export class ToolsClient {
   update(slug: string, body: UpdateToolBody) {
     return this.http.request<ApiResponse<ToolDetail>>(`/api/v1/tools/${encodeURIComponent(slug)}`, {
       method: 'PUT',
+      body: JSON.stringify(body),
+    });
+  }
+}
+
+export class ContentRelationsClient {
+  constructor(private readonly http: HttpClient) {}
+
+  create(body: CreateContentRelationBody) {
+    return this.http.request<ApiResponse<ContentRelation>>('/api/v1/content-relations', {
+      method: 'POST',
       body: JSON.stringify(body),
     });
   }

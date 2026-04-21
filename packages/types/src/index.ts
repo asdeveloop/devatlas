@@ -6,6 +6,7 @@ export type {
   CreateCategoryBody,
   UpdateCategoryBody,
 } from './api/category';
+export type { CreateContentRelationBody, RelatedContentItem } from './api/content-relation';
 export type { CreateGuideBody, UpdateGuideBody, GuideListItem, GuideDetail, GuideListParams } from './api/guide';
 export type { PaginationMeta, PaginatedResponse, PaginationParams } from './api/pagination';
 export type { ApiResponse, ApiPaginatedResponse } from './api/response';

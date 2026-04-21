@@ -1,4 +1,5 @@
 export * from './category';
+export * from './content-relation';
 export * from './error';
 export * from './guide';
 export * from './pagination';

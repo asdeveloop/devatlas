@@ -1,4 +1,6 @@
-import { Difficulty, type GuideDetail } from '@devatlas/types';
+import { Difficulty, type GuideDetail, type RelatedContentItem } from '@devatlas/types';
+
+import { RelatedContentSection } from '../../content-relations/components/related-content-section';
 
 const difficultyLabels: Record<Difficulty, string> = {
   [Difficulty.BEGINNER]: 'Beginner',
@@ -8,9 +10,10 @@ const difficultyLabels: Record<Difficulty, string> = {
 
 interface GuideDetailContentProps {
   guide: GuideDetail;
+  related?: RelatedContentItem[];
 }
 
-export function GuideDetailContent({ guide }: GuideDetailContentProps) {
+export function GuideDetailContent({ guide, related = [] }: GuideDetailContentProps) {
   return (
     <article className="mx-auto max-w-3xl px-4 py-10">
       <header className="mb-8 space-y-3">
@@ -26,6 +29,8 @@ export function GuideDetailContent({ guide }: GuideDetailContentProps) {
       <div className="prose prose-neutral max-w-none dark:prose-invert">
         <div dangerouslySetInnerHTML={{ __html: guide.content }} />
       </div>
+
+      <RelatedContentSection items={related} title="Continue with related content" />
     </article>
   );
 }
