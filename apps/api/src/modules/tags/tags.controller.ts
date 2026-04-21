@@ -1,13 +1,13 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Inject, Param, Post, Put, Query } from '@nestjs/common';
 
 import type { CreateTagDto } from './dto/create-tag.dto';
 import type { TagQueryDto } from './dto/tag-query.dto';
 import type { UpdateTagDto } from './dto/update-tag.dto';
-import type { TagsService } from './tags.service';
+import { TagsService } from './tags.service';
 
 @Controller('tags')
 export class TagsController {
-  constructor(private readonly service: TagsService) {}
+  constructor(@Inject(TagsService) private readonly service: TagsService) {}
 
   @Get()
   async list(@Query() query: TagQueryDto) {

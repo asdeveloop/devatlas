@@ -1,17 +1,18 @@
 import type { Guide, GuideDetail, GuideListItem } from '@devatlas/types';
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
 import { ErrorFactory } from '../../common/errors/error.factory';
 
 import type { CreateGuideDto } from './dto/create-guide.dto';
 import type { GuideQueryDto } from './dto/guide-query.dto';
 import type { UpdateGuideDto } from './dto/update-guide.dto';
-import type { GuidesListResult, GuidesRepository } from './guides.repository';
+import type { GuidesListResult } from './guides.repository';
+import { GuidesRepository } from './guides.repository';
 import { GuideMapper } from './mapper/guide.mapper';
 
 @Injectable()
 export class GuidesService {
-  constructor(private readonly repo: GuidesRepository) {}
+  constructor(@Inject(GuidesRepository) private readonly repo: GuidesRepository) {}
 
   async findAll(query: GuideQueryDto): Promise<GuidesListResult<GuideListItem>> {
     const result = await this.repo.findAll(query);

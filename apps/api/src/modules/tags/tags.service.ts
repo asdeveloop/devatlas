@@ -1,5 +1,5 @@
 import type { Tag, TagListItem } from '@devatlas/types';
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
 import { ErrorFactory } from '../../common/errors/error.factory';
 
@@ -7,11 +7,11 @@ import type { CreateTagDto } from './dto/create-tag.dto';
 import type { TagQueryDto } from './dto/tag-query.dto';
 import type { UpdateTagDto } from './dto/update-tag.dto';
 import { TagMapper } from './mapper/tag.mapper';
-import type { TagsRepository } from './tags.repository';
+import { TagsRepository } from './tags.repository';
 
 @Injectable()
 export class TagsService {
-  constructor(private readonly repo: TagsRepository) {}
+  constructor(@Inject(TagsRepository) private readonly repo: TagsRepository) {}
 
   async list(query: TagQueryDto): Promise<{
     data: TagListItem[];

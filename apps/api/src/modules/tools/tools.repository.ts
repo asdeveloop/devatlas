@@ -1,8 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { and, eq, sql } from 'drizzle-orm';
 
 import { categories, tags, toolTags, tools, tools as toolsSchema } from '../../db/schema';
-import type { DrizzleService } from '../database/drizzle.service';
+import { DrizzleService } from '../database/drizzle.service';
 
 import type { CreateToolDto } from './dto/create-tool.dto';
 import type { ToolQueryDto } from './dto/tool-query.dto';
@@ -73,10 +73,12 @@ export type ToolListResult = {
 
 @Injectable()
 export class ToolsRepository {
-  constructor(private readonly drizzle: DrizzleService) {}
+  constructor(@Inject(DrizzleService) private readonly drizzle: DrizzleService) {}
 
   async findAll(query: ToolQueryDto): Promise<ToolListResult> {
-    const offset = (query.page - 1) * query.pageSize;
+    const page = Number(query.page ?? 1);
+    const pageSize = Number(query.pageSize ?? 20);
+    const offset = (page - 1) * pageSize;
 
     const whereConditions = [
       query.tier ? eq(tools.tier, query.tier) : undefined,
@@ -114,10 +116,10 @@ export class ToolsRepository {
         .from(tools)
         .where(where)
         .orderBy(sql`${tools.popularity} DESC`)
-        .limit(query.pageSize)
+        .limit(pageSize)
         .offset(offset),
       this.drizzle.db
-        .select({ count: tools.id })
+        .select({ count: sql<number>`count(*)` })
         .from(tools)
         .where(where)
         .execute()
@@ -127,12 +129,12 @@ export class ToolsRepository {
     return {
       data: items,
       meta: {
-        page: query.page,
-        limit: query.pageSize,
+        page,
+        limit: pageSize,
         total,
-        totalPages: Math.max(1, Math.ceil(total / query.pageSize)),
-        hasNextPage: query.page * query.pageSize < total,
-        hasPrevPage: query.page > 1,
+        totalPages: Math.max(1, Math.ceil(total / pageSize)),
+        hasNextPage: page * pageSize < total,
+        hasPrevPage: page > 1,
       },
     };
   }

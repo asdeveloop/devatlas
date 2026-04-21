@@ -1,9 +1,9 @@
 import type { Category, CategoryListItem } from '@devatlas/types';
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
 import { ErrorFactory } from '../../common/errors/error.factory';
 
-import type { CategoriesRepository } from './categories.repository';
+import { CategoriesRepository } from './categories.repository';
 import type { CategoryQueryDto } from './dto/category-query.dto';
 import type { CreateCategoryDto } from './dto/create-category.dto';
 import type { UpdateCategoryDto } from './dto/update-category.dto';
@@ -11,7 +11,7 @@ import { CategoryMapper } from './mapper/category.mapper';
 
 @Injectable()
 export class CategoriesService {
-  constructor(private readonly repo: CategoriesRepository) {}
+  constructor(@Inject(CategoriesRepository) private readonly repo: CategoriesRepository) {}
 
   async list(query: CategoryQueryDto): Promise<{
     data: CategoryListItem[];

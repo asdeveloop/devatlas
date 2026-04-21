@@ -1,13 +1,13 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Inject, Param, Patch, Post, Query } from '@nestjs/common';
 
 import type { CreateGuideDto } from './dto/create-guide.dto';
 import type { GuideQueryDto } from './dto/guide-query.dto';
 import type { UpdateGuideDto } from './dto/update-guide.dto';
-import type { GuidesService } from './guides.service';
+import { GuidesService } from './guides.service';
 
 @Controller('guides')
 export class GuidesController {
-  constructor(private readonly service: GuidesService) {}
+  constructor(@Inject(GuidesService) private readonly service: GuidesService) {}
 
   @Get()
   findAll(@Query() query: GuideQueryDto) {

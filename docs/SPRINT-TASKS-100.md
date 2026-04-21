@@ -2,6 +2,7 @@
 
 > Source of truth: current repo code, `docs/ROADMAP.md`, `docs/ENGINEERING-STATE.md`, `docs/ARCHITECTURE.md`, package scripts, and executed local checks
 > Synced: 1405/09/01
+> Update: API contract coverage now exercises guides/tools/categories/tags/swagger against local PostgreSQL; Nest DI for controllers/services/repositories is fixed with explicit runtime injection and list metadata is normalized to numeric pagination values
 
 ---
 
@@ -86,31 +87,31 @@
 
 | # | Task | Module/File | Status |
 |---|------|-------------|--------|
-| 53 | Create test DB setup utility — Drizzle + test pool | apps/api/test | ⬜ |
-| 54 | Write unit tests: `categories.repository.ts` (CRUD) | categories | ⬜ |
-| 55 | Write unit tests: `guides.repository.ts` (CRUD + joins) | guides | ⬜ |
-| 56 | Write unit tests: `tags.repository.ts` (CRUD) | tags | ⬜ |
-| 57 | Write unit tests: `tools.repository.ts` (CRUD + joins) | tools | ⬜ |
+| 53 | Create test DB setup utility — Drizzle + test pool | apps/api/test | ✅ |
+| 54 | Write unit tests: `categories.repository.ts` (CRUD) | categories | ✅ |
+| 55 | Write unit tests: `guides.repository.ts` (CRUD + joins) | guides | ✅ |
+| 56 | Write unit tests: `tags.repository.ts` (CRUD) | tags | ✅ |
+| 57 | Write unit tests: `tools.repository.ts` (CRUD + joins) | tools | ✅ |
 | 58 | Write unit tests: `categories.service.ts` | categories | ✅ |
 | 59 | Write unit tests: `guides.service.ts` | guides | ✅ |
 | 60 | Write unit tests: `tags.service.ts` | tags | ✅ |
 | 61 | Write unit tests: `tools.service.ts` | tools | ✅ |
-| 62 | Write integration test: health endpoint + DB connection | health | ⬜ |
+| 62 | Write integration test: health endpoint + DB connection | health | ✅ |
 
 ## Phase 6 — API Contract Completion (Tasks 63–72)
 
 | # | Task | Module/File | Status |
 |---|------|-------------|--------|
-| 63 | Verify `GET /guides` — pagination, filtering, sorting | guides | ⬜ |
-| 64 | Verify `GET /guides/:slug` — full detail + tags + category | guides | ⬜ |
-| 65 | Verify `POST /guides` — create with tags | guides | ⬜ |
-| 66 | Verify `PATCH /guides/:id` — partial update | guides | ⬜ |
-| 67 | Verify `GET /tools` — pagination, filtering, sorting | tools | ⬜ |
-| 68 | Verify `GET /tools/:slug` — full detail + tags + category | tools | ⬜ |
-| 69 | Verify `POST /tools` + `PATCH /tools/:id` | tools | ⬜ |
-| 70 | Verify `GET /categories` + `POST /categories` | categories | ⬜ |
-| 71 | Verify `GET /tags` + `POST /tags` | tags | ⬜ |
-| 72 | Verify Swagger `/docs` reflects all endpoints correctly | app | ⬜ |
+| 63 | Verify `GET /guides` — pagination, filtering, sorting | guides | ✅ |
+| 64 | Verify `GET /guides/:slug` — full detail + tags + category | guides | ✅ |
+| 65 | Verify `POST /guides` — create with tags | guides | ✅ |
+| 66 | Verify `PATCH /guides/:id` — partial update | guides | ✅ |
+| 67 | Verify `GET /tools` — pagination, filtering, sorting | tools | ✅ |
+| 68 | Verify `GET /tools/:slug` — full detail + tags + category | tools | ✅ |
+| 69 | Verify `POST /tools` + `PATCH /tools/:id` | tools | ⚠️ |
+| 70 | Verify `GET /categories` + `POST /categories` | categories | ✅ |
+| 71 | Verify `GET /tags` + `POST /tags` | tags | ✅ |
+| 72 | Verify Swagger `/docs` reflects all endpoints correctly | app | ✅ |
 
 ## Phase 7 — Frontend Data Integration (Tasks 73–82)
 
@@ -214,6 +215,7 @@ If migration fails:
 - Drizzle is active in `apps/api` and shared Prisma-era type remnants have been removed from the affected packages
 - Local verification confirms `apps/api`, `apps/web`, and root lint are healthy for this migration slice
 - Local PostgreSQL `devatlas` was validated with the generated Drizzle SQL and matching tables/enums/indexes
+- `apps/api/src/modules/__tests__/api-contract.spec.ts` now covers guides/tools/categories/tags plus Swagger path/method exposure; tools are currently verified against the implemented `PUT /tools/:slug` contract, while sprint task 69 still names `PATCH /tools/:id`
 
 ---
 

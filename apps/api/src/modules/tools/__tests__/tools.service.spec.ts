@@ -16,6 +16,40 @@ const mockRepo = (): Record<keyof ToolsRepository, ReturnType<typeof vi.fn>> => 
   delete: vi.fn(),
 });
 
+const now = new Date('2026-01-01T00:00:00.000Z');
+const toolRecord = (overrides: Record<string, unknown> = {}) => ({
+  id: '550e8400-e29b-41d4-a716-446655440003',
+  slug: 'vscode',
+  name: 'VS Code',
+  description: 'Editor',
+  website: 'https://example.com',
+  github: 'https://github.com/example/repo',
+  icon: null,
+  active: true,
+  tier: ToolTier.FREE,
+  price: ToolPrice.FREE,
+  popularity: 10,
+  categoryId: '550e8400-e29b-41d4-a716-446655440010',
+  category: {
+    id: '550e8400-e29b-41d4-a716-446655440010',
+    slug: 'developer-tools',
+    name: 'Developer Tools',
+    icon: 'code',
+    createdAt: now,
+    updatedAt: now,
+  },
+  tags: [{
+    id: '550e8400-e29b-41d4-a716-446655440011',
+    slug: 'editor',
+    name: 'Editor',
+    createdAt: now,
+    updatedAt: now,
+  }],
+  createdAt: now,
+  updatedAt: now,
+  ...overrides,
+});
+
 describe('ToolsService', () => {
   let service: ToolsService;
   let repo: ReturnType<typeof mockRepo>;
@@ -29,20 +63,35 @@ describe('ToolsService', () => {
   describe('list', () => {
     it('should delegate to repo.findAll', async () => {
       const query: ToolQueryDto = { page: 1, pageSize: 10 };
-      const result = { data: [], meta: { page: 1, limit: 10, total: 0, totalPages: 1, hasNextPage: false, hasPrevPage: false } };
-      repo.findAll.mockResolvedValue(result);
+      repo.findAll.mockResolvedValue({
+        data: [toolRecord()],
+        meta: { page: 1, limit: 10, total: 1, totalPages: 1, hasNextPage: false, hasPrevPage: false },
+      });
+      repo.findBySlug.mockResolvedValue(toolRecord());
 
-      expect(await service.list(query)).toBe(result);
+      await expect(service.list(query)).resolves.toMatchObject({
+        data: [{
+          slug: 'vscode',
+          name: 'VS Code',
+          category: { slug: 'developer-tools' },
+          tags: [{ slug: 'editor' }],
+        }],
+        meta: { page: 1, limit: 10, total: 1, totalPages: 1, hasNextPage: false, hasPrevPage: false },
+      });
       expect(repo.findAll).toHaveBeenCalledWith(query);
+      expect(repo.findBySlug).toHaveBeenCalledWith('vscode');
     });
   });
 
   describe('get', () => {
     it('should return tool when found', async () => {
-      const tool = { id: '1', slug: 'vscode', name: 'VS Code' };
-      repo.findBySlug.mockResolvedValue(tool);
+      repo.findBySlug.mockResolvedValue(toolRecord());
 
-      expect(await service.get('vscode')).toBe(tool);
+      await expect(service.get('vscode')).resolves.toMatchObject({
+        slug: 'vscode',
+        name: 'VS Code',
+        category: { slug: 'developer-tools' },
+      });
     });
 
     it('should throw ToolNotFound when not found', async () => {
@@ -59,7 +108,7 @@ describe('ToolsService', () => {
 
   describe('create', () => {
     it('should create when slug is unique', async () => {
-      repo.findBySlug.mockResolvedValue(null);
+      repo.findBySlug.mockResolvedValueOnce(null);
       const dto: CreateToolDto = {
         name: 'Prettier',
         slug: 'prettier',
@@ -67,16 +116,15 @@ describe('ToolsService', () => {
         tier: ToolTier.FREE,
         price: ToolPrice.FREE,
       };
-      const created = { id: '2', ...dto };
-      repo.create.mockResolvedValue(created);
+      repo.create.mockResolvedValue(toolRecord({ slug: 'prettier', name: 'Prettier' }));
 
-      expect(await service.create(dto)).toBe(created);
+      await expect(service.create(dto)).resolves.toMatchObject({ slug: 'prettier', name: 'Prettier' });
       expect(repo.findBySlug).toHaveBeenCalledWith('prettier');
       expect(repo.create).toHaveBeenCalledWith(dto);
     });
 
     it('should throw SlugConflict when slug exists', async () => {
-      repo.findBySlug.mockResolvedValue({ id: '1', slug: 'prettier' });
+      repo.findBySlug.mockResolvedValue(toolRecord({ slug: 'prettier', name: 'Prettier' }));
 
       await expect(
         service.create({ name: 'Prettier', slug: 'prettier' } as CreateToolDto),
@@ -91,13 +139,14 @@ describe('ToolsService', () => {
 
   describe('update', () => {
     it('should update when tool exists', async () => {
-      const existing = { id: '1', slug: 'vscode', name: 'VS Code' };
-      repo.findBySlug.mockResolvedValue(existing);
+      repo.findBySlug.mockResolvedValue(toolRecord());
       const dto: UpdateToolDto = { name: 'Visual Studio Code' };
-      const updated = { ...existing, ...dto };
-      repo.update.mockResolvedValue(updated);
+      repo.update.mockResolvedValue(toolRecord({ name: 'Visual Studio Code' }));
 
-      expect(await service.update('vscode', dto)).toBe(updated);
+      await expect(service.update('vscode', dto)).resolves.toMatchObject({
+        slug: 'vscode',
+        name: 'Visual Studio Code',
+      });
       expect(repo.update).toHaveBeenCalledWith('vscode', dto);
     });
 
@@ -114,10 +163,10 @@ describe('ToolsService', () => {
 
   describe('delete', () => {
     it('should delete when tool exists', async () => {
-      repo.findBySlug.mockResolvedValue({ id: '1', slug: 'vscode' });
-      repo.delete.mockResolvedValue(undefined);
+      repo.findBySlug.mockResolvedValue(toolRecord());
+      repo.delete.mockResolvedValue(toolRecord());
 
-      await service.delete('vscode');
+      await expect(service.delete('vscode')).resolves.toMatchObject({ slug: 'vscode' });
       expect(repo.delete).toHaveBeenCalledWith('vscode');
     });
 

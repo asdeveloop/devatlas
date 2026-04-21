@@ -1,5 +1,5 @@
 import type { Tool, ToolDetail, ToolListItem } from '@devatlas/types';
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
 import { ErrorFactory } from '../../common/errors/error.factory';
 
@@ -7,11 +7,11 @@ import type { CreateToolDto } from './dto/create-tool.dto';
 import type { ToolQueryDto } from './dto/tool-query.dto';
 import type { UpdateToolDto } from './dto/update-tool.dto';
 import { ToolMapper } from './mapper/tool.mapper';
-import type { ToolsRepository } from './tools.repository';
+import { ToolsRepository } from './tools.repository';
 
 @Injectable()
 export class ToolsService {
-  constructor(private readonly repo: ToolsRepository) {}
+  constructor(@Inject(ToolsRepository) private readonly repo: ToolsRepository) {}
 
   async list(query: ToolQueryDto): Promise<{
     data: ToolListItem[];

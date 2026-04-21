@@ -1,8 +1,8 @@
-import { Injectable } from '@nestjs/common';
-import { and, asc, desc, eq, type SQL } from 'drizzle-orm';
+import { Inject, Injectable } from '@nestjs/common';
+import { and, asc, desc, eq, sql, type SQL } from 'drizzle-orm';
 
 import { categories, guideTags, guides as guidesSchema, tags } from '../../db/schema';
-import type { DrizzleService } from '../database/drizzle.service';
+import { DrizzleService } from '../database/drizzle.service';
 
 import type { CreateGuideDto } from './dto/create-guide.dto';
 import type { GuideQueryDto, GuideSortField } from './dto/guide-query.dto';
@@ -70,11 +70,11 @@ export type GuidesListResult<TGuide = GuideRecord> = {
 
 @Injectable()
 export class GuidesRepository {
-  constructor(private readonly drizzle: DrizzleService) {}
+  constructor(@Inject(DrizzleService) private readonly drizzle: DrizzleService) {}
 
   async findAll(query: GuideQueryDto): Promise<GuidesListResult<GuideWithRelations>> {
-    const offset = query.skip ?? 0;
-    const limit = query.take ?? 20;
+    const offset = Number(query.skip ?? 0);
+    const limit = Number(query.take ?? 20);
 
     const whereConditions = [
       query.difficulty ? eq(guidesSchema.difficulty, query.difficulty) : undefined,
@@ -128,7 +128,7 @@ export class GuidesRepository {
         .limit(limit)
         .offset(offset),
       this.drizzle.db
-        .select({ count: guidesSchema.id })
+        .select({ count: sql<number>`count(*)` })
         .from(guidesSchema)
         .where(where)
         .execute()
@@ -285,7 +285,7 @@ export class GuidesRepository {
 
   async count() {
     const result = await this.drizzle.db
-      .select({ count: guidesSchema.id })
+      .select({ count: sql<number>`count(*)` })
       .from(guidesSchema)
       .execute();
     return Number(result[0]?.count ?? 0);

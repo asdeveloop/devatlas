@@ -15,6 +15,17 @@ const mockRepo = (): Record<keyof CategoriesRepository, ReturnType<typeof vi.fn>
   delete: vi.fn(),
 });
 
+const now = new Date('2026-01-01T00:00:00.000Z');
+const categoryRecord = (overrides: Record<string, unknown> = {}) => ({
+  id: '550e8400-e29b-41d4-a716-446655440001',
+  slug: 'frontend',
+  name: 'Frontend',
+  icon: 'sparkles',
+  createdAt: now,
+  updatedAt: now,
+  ...overrides,
+});
+
 describe('CategoriesService', () => {
   let service: CategoriesService;
   let repo: ReturnType<typeof mockRepo>;
@@ -28,20 +39,35 @@ describe('CategoriesService', () => {
   describe('list', () => {
     it('should delegate to repo.findAll', async () => {
       const query: CategoryQueryDto = { page: 1, pageSize: 10 };
-      const result = { data: [], meta: { page: 1, limit: 10, total: 0, totalPages: 1, hasNextPage: false, hasPrevPage: false } };
-      repo.findAll.mockResolvedValue(result);
+      repo.findAll.mockResolvedValue({
+        data: [categoryRecord()],
+        meta: { page: 1, limit: 10, total: 1, totalPages: 1, hasNextPage: false, hasPrevPage: false },
+      });
 
-      expect(await service.list(query)).toBe(result);
+      await expect(service.list(query)).resolves.toStrictEqual({
+        data: [{
+          id: '550e8400-e29b-41d4-a716-446655440001',
+          slug: 'frontend',
+          name: 'Frontend',
+          description: 'sparkles',
+          createdAt: now.toISOString(),
+          updatedAt: now.toISOString(),
+        }],
+        meta: { page: 1, limit: 10, total: 1, totalPages: 1, hasNextPage: false, hasPrevPage: false },
+      });
       expect(repo.findAll).toHaveBeenCalledWith(query);
     });
   });
 
   describe('get', () => {
     it('should return category when found', async () => {
-      const cat = { id: '1', slug: 'frontend', name: 'Frontend' };
-      repo.findBySlug.mockResolvedValue(cat);
+      repo.findBySlug.mockResolvedValue(categoryRecord());
 
-      expect(await service.get('frontend')).toBe(cat);
+      await expect(service.get('frontend')).resolves.toMatchObject({
+        slug: 'frontend',
+        name: 'Frontend',
+        description: 'sparkles',
+      });
       expect(repo.findBySlug).toHaveBeenCalledWith('frontend');
     });
 
@@ -61,16 +87,19 @@ describe('CategoriesService', () => {
     it('should create when slug is unique', async () => {
       repo.findBySlug.mockResolvedValue(null);
       const dto: CreateCategoryDto = { name: 'Backend', slug: 'backend' };
-      const created = { id: '2', ...dto };
-      repo.create.mockResolvedValue(created);
+      repo.create.mockResolvedValue(categoryRecord({ slug: 'backend', name: 'Backend', icon: null }));
 
-      expect(await service.create(dto)).toBe(created);
+      await expect(service.create(dto)).resolves.toMatchObject({
+        slug: 'backend',
+        name: 'Backend',
+        description: null,
+      });
       expect(repo.findBySlug).toHaveBeenCalledWith('backend');
       expect(repo.create).toHaveBeenCalledWith(dto);
     });
 
     it('should throw SlugConflict when slug exists', async () => {
-      repo.findBySlug.mockResolvedValue({ id: '2', slug: 'backend' });
+      repo.findBySlug.mockResolvedValue(categoryRecord({ slug: 'backend', name: 'Backend' }));
       const dto: CreateCategoryDto = { name: 'Backend', slug: 'backend' };
 
       await expect(service.create(dto)).rejects.toMatchObject({
@@ -84,13 +113,14 @@ describe('CategoriesService', () => {
 
   describe('update', () => {
     it('should update when category exists', async () => {
-      const existing = { id: '1', slug: 'frontend', name: 'Frontend' };
-      repo.findBySlug.mockResolvedValue(existing);
+      repo.findBySlug.mockResolvedValue(categoryRecord());
       const dto: UpdateCategoryDto = { name: 'Frontend Updated' };
-      const updated = { ...existing, ...dto };
-      repo.update.mockResolvedValue(updated);
+      repo.update.mockResolvedValue(categoryRecord({ name: 'Frontend Updated' }));
 
-      expect(await service.update('frontend', dto)).toBe(updated);
+      await expect(service.update('frontend', dto)).resolves.toMatchObject({
+        slug: 'frontend',
+        name: 'Frontend Updated',
+      });
       expect(repo.update).toHaveBeenCalledWith('frontend', dto);
     });
 
@@ -107,10 +137,10 @@ describe('CategoriesService', () => {
 
   describe('delete', () => {
     it('should delete when category exists', async () => {
-      repo.findBySlug.mockResolvedValue({ id: '1', slug: 'frontend' });
-      repo.delete.mockResolvedValue(undefined);
+      repo.findBySlug.mockResolvedValue(categoryRecord());
+      repo.delete.mockResolvedValue(categoryRecord());
 
-      await service.delete('frontend');
+      await expect(service.delete('frontend')).resolves.toMatchObject({ slug: 'frontend' });
       expect(repo.delete).toHaveBeenCalledWith('frontend');
     });
 

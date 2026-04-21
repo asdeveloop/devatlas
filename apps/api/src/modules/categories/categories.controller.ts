@@ -1,13 +1,13 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Inject, Param, Post, Put, Query } from '@nestjs/common';
 
-import type { CategoriesService } from './categories.service';
+import { CategoriesService } from './categories.service';
 import type { CategoryQueryDto } from './dto/category-query.dto';
 import type { CreateCategoryDto } from './dto/create-category.dto';
 import type { UpdateCategoryDto } from './dto/update-category.dto';
 
 @Controller('categories')
 export class CategoriesController {
-  constructor(private readonly service: CategoriesService) {}
+  constructor(@Inject(CategoriesService) private readonly service: CategoriesService) {}
 
   @Get()
   async list(@Query() query: CategoryQueryDto) {

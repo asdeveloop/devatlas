@@ -1,9 +1,9 @@
-import { Injectable } from '@nestjs/common';
-import { eq } from 'drizzle-orm';
+import { Inject, Injectable } from '@nestjs/common';
+import { eq, sql } from 'drizzle-orm';
 
 import { categories } from '../../db/schema';
 export type CategoryRecord = typeof categories.$inferSelect;
-import type { DrizzleService } from '../database/drizzle.service';
+import { DrizzleService } from '../database/drizzle.service';
 
 import type { CategoryQueryDto } from './dto/category-query.dto';
 import type { CreateCategoryDto } from './dto/create-category.dto';
@@ -11,10 +11,12 @@ import type { UpdateCategoryDto } from './dto/update-category.dto';
 
 @Injectable()
 export class CategoriesRepository {
-  constructor(private readonly drizzle: DrizzleService) {}
+  constructor(@Inject(DrizzleService) private readonly drizzle: DrizzleService) {}
 
   async findAll(query: CategoryQueryDto) {
-    const offset = (query.page - 1) * query.pageSize;
+    const page = Number(query.page ?? 1);
+    const pageSize = Number(query.pageSize ?? 50);
+    const offset = (page - 1) * pageSize;
     const [items, total] = await Promise.all([
       this.drizzle.db
         .select({
@@ -27,10 +29,10 @@ export class CategoriesRepository {
         })
         .from(categories)
         .orderBy(categories.name)
-        .limit(query.pageSize)
+        .limit(pageSize)
         .offset(offset),
       this.drizzle.db
-        .select({ count: categories.id })
+        .select({ count: sql<number>`count(*)` })
         .from(categories)
         .execute()
         .then(([result]) => Number(result.count)),
@@ -39,12 +41,12 @@ export class CategoriesRepository {
     return {
       data: items,
       meta: {
-        page: query.page,
-        limit: query.pageSize,
+        page,
+        limit: pageSize,
         total,
-        totalPages: Math.max(1, Math.ceil(total / query.pageSize)),
-        hasNextPage: query.page * query.pageSize < total,
-        hasPrevPage: query.page > 1,
+        totalPages: Math.max(1, Math.ceil(total / pageSize)),
+        hasNextPage: page * pageSize < total,
+        hasPrevPage: page > 1,
       },
     };
   }

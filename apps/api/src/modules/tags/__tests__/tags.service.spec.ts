@@ -15,6 +15,16 @@ const mockRepo = (): Record<keyof TagsRepository, ReturnType<typeof vi.fn>> => (
   delete: vi.fn(),
 });
 
+const now = new Date('2026-01-01T00:00:00.000Z');
+const tagRecord = (overrides: Record<string, unknown> = {}) => ({
+  id: '550e8400-e29b-41d4-a716-446655440002',
+  slug: 'react',
+  name: 'React',
+  createdAt: now,
+  updatedAt: now,
+  ...overrides,
+});
+
 describe('TagsService', () => {
   let service: TagsService;
   let repo: ReturnType<typeof mockRepo>;
@@ -28,20 +38,33 @@ describe('TagsService', () => {
   describe('list', () => {
     it('should delegate to repo.findAll', async () => {
       const query: TagQueryDto = { page: 1, pageSize: 10 };
-      const result = { data: [], meta: { page: 1, limit: 10, total: 0, totalPages: 1, hasNextPage: false, hasPrevPage: false } };
-      repo.findAll.mockResolvedValue(result);
+      repo.findAll.mockResolvedValue({
+        data: [tagRecord()],
+        meta: { page: 1, limit: 10, total: 1, totalPages: 1, hasNextPage: false, hasPrevPage: false },
+      });
 
-      expect(await service.list(query)).toBe(result);
+      await expect(service.list(query)).resolves.toStrictEqual({
+        data: [{
+          id: '550e8400-e29b-41d4-a716-446655440002',
+          slug: 'react',
+          name: 'React',
+          createdAt: now.toISOString(),
+          updatedAt: now.toISOString(),
+        }],
+        meta: { page: 1, limit: 10, total: 1, totalPages: 1, hasNextPage: false, hasPrevPage: false },
+      });
       expect(repo.findAll).toHaveBeenCalledWith(query);
     });
   });
 
   describe('get', () => {
     it('should return tag when found', async () => {
-      const tag = { id: '1', slug: 'react', name: 'React' };
-      repo.findBySlug.mockResolvedValue(tag);
+      repo.findBySlug.mockResolvedValue(tagRecord());
 
-      expect(await service.get('react')).toBe(tag);
+      await expect(service.get('react')).resolves.toMatchObject({
+        slug: 'react',
+        name: 'React',
+      });
     });
 
     it('should throw TagNotFound when not found', async () => {
@@ -60,15 +83,14 @@ describe('TagsService', () => {
     it('should create when slug is unique', async () => {
       repo.findBySlug.mockResolvedValue(null);
       const dto: CreateTagDto = { name: 'Vue', slug: 'vue' };
-      const created = { id: '2', ...dto };
-      repo.create.mockResolvedValue(created);
+      repo.create.mockResolvedValue(tagRecord({ slug: 'vue', name: 'Vue' }));
 
-      expect(await service.create(dto)).toBe(created);
+      await expect(service.create(dto)).resolves.toMatchObject({ slug: 'vue', name: 'Vue' });
       expect(repo.create).toHaveBeenCalledWith(dto);
     });
 
     it('should throw SlugConflict when slug exists', async () => {
-      repo.findBySlug.mockResolvedValue({ id: '1', slug: 'vue' });
+      repo.findBySlug.mockResolvedValue(tagRecord({ slug: 'vue', name: 'Vue' }));
       const dto: CreateTagDto = { name: 'Vue', slug: 'vue' };
 
       await expect(service.create(dto)).rejects.toMatchObject({
@@ -82,12 +104,14 @@ describe('TagsService', () => {
 
   describe('update', () => {
     it('should update when tag exists', async () => {
-      repo.findBySlug.mockResolvedValue({ id: '1', slug: 'react' });
+      repo.findBySlug.mockResolvedValue(tagRecord());
       const dto: UpdateTagDto = { name: 'React.js' };
-      const updated = { id: '1', slug: 'react', name: 'React.js' };
-      repo.update.mockResolvedValue(updated);
+      repo.update.mockResolvedValue(tagRecord({ name: 'React.js' }));
 
-      expect(await service.update('react', dto)).toBe(updated);
+      await expect(service.update('react', dto)).resolves.toMatchObject({
+        slug: 'react',
+        name: 'React.js',
+      });
       expect(repo.update).toHaveBeenCalledWith('react', dto);
     });
 
@@ -104,10 +128,10 @@ describe('TagsService', () => {
 
   describe('delete', () => {
     it('should delete when tag exists', async () => {
-      repo.findBySlug.mockResolvedValue({ id: '1', slug: 'react' });
-      repo.delete.mockResolvedValue(undefined);
+      repo.findBySlug.mockResolvedValue(tagRecord());
+      repo.delete.mockResolvedValue(tagRecord());
 
-      await service.delete('react');
+      await expect(service.delete('react')).resolves.toMatchObject({ slug: 'react' });
       expect(repo.delete).toHaveBeenCalledWith('react');
     });
 

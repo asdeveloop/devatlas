@@ -1,14 +1,14 @@
 import type { Tool, ToolDetail, ToolListItem } from '@devatlas/types';
-import { Body, Controller, Delete, Get, Param, Post, Put, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Inject, Param, Post, Put, Query } from '@nestjs/common';
 
 import type { CreateToolDto } from './dto/create-tool.dto';
 import type { ToolQueryDto } from './dto/tool-query.dto';
 import type { UpdateToolDto } from './dto/update-tool.dto';
-import type { ToolsService } from './tools.service';
+import { ToolsService } from './tools.service';
 
 @Controller('tools')
 export class ToolsController {
-  constructor(private readonly service: ToolsService) {}
+  constructor(@Inject(ToolsService) private readonly service: ToolsService) {}
 
   @Get()
   async list(@Query() query: ToolQueryDto): Promise<{
