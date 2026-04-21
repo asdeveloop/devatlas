@@ -66,6 +66,18 @@ export default tseslint.config(
   },
 
   {
+    files: ["packages/ui/**/*.{ts,tsx}"],
+    rules: {
+      "import/no-unresolved": [
+        "error",
+        {
+          ignore: ["^next/", "^framer-motion$", "^next-themes$"]
+        }
+      ]
+    }
+  },
+
+  {
     plugins: {
       boundaries: pluginBoundaries
     },

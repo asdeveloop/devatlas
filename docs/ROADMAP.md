@@ -1,6 +1,6 @@
 # DevAtlas Platform Roadmap (Production-Grade)
 
-Last Updated: 1405/01/29 (2026-04-18)
+Last Updated: 1405/09/01
 
 > This roadmap integrates the high-level strategic overview with a detailed 30-step execution plan, reflecting the actual repository state and prioritizing production readiness.
 
@@ -30,7 +30,7 @@ Last Updated: 1405/01/29 (2026-04-18)
 ### ✅ API Foundation
 - NestJS bootstrap with Swagger, validation, interceptors, exception filter
 - Active modules: guides, tools, categories, tags, health, database
-- Prisma schema (10 models, 7 enums) and 6 migrations checked in
+- Drizzle schema is the active source of truth in `apps/api/src/db/schema`
 - Error handling unification complete
 
 ### ✅ Frontend Foundation
@@ -45,6 +45,10 @@ Last Updated: 1405/01/29 (2026-04-18)
 - `@devatlas/content` — Content ingestion/indexing package
 - `@devatlas/api-client` — Shared API client
 - `@devatlas/utils` — Shared utilities
+
+### Current Constraints
+- `drizzle-kit push` still depends on a configured local `DATABASE_URL`
+- repo-wide `test`/`build` have not been re-run as part of this narrow migration follow-up
 
 ---
 
@@ -193,7 +197,7 @@ Last Updated: 1405/01/29 (2026-04-18)
    - ✅ Identify & reduce duplicate/unowned dependencies
    - ✅ Pin/downgrade incompatible dependencies for mirror
    - ✅ Regenerate & commit `pnpm-lock.yaml`
-   - ✅ Ensure `pnpm install`, `typecheck`, `test`, `build` pass
+   - 🚧 Ensure `pnpm install`, `typecheck`, `test`, `build` pass
 
 2. **Reduce Peer Dependency Warnings**
    - Owner: Platform / Frontend Infrastructure

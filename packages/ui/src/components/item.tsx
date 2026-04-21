@@ -1,11 +1,12 @@
-import * as React from "react"
+import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"
+import * as React from "react"
 // TODO: FIX RADIX IMPORT MANUALLY
 // // TODO: FIX RADIX IMPORT MANUALLY
 // import * as Primitive from "@radix-ui/react-primitive"
-import { Slot } from "@radix-ui/react-slot"
 
 import { cn } from "../lib/utils"
+
 import { Separator } from "./separator"
 // from "./separator"
 

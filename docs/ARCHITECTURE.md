@@ -98,6 +98,7 @@ The active schema lives under `apps/api/src/db/schema/` and currently includes:
 - `apps/api/src/modules/database/drizzle.service.ts` owns the Drizzle client
 - repositories import schema from `apps/api/src/db/schema`
 - controllers do not talk to Drizzle directly
+- Prisma is not active in the API runtime or shared workspace code paths
 
 ## Web Runtime
 
@@ -135,3 +136,8 @@ Typical flow:
 - `@devatlas/types` — shared enums and contracts used by API and web
 - `@devatlas/ui` — reusable UI primitives/components
 - `@devatlas/utils` — shared utility helpers
+
+## Current Repo Risks
+
+- `drizzle-kit push` still depends on a valid `DATABASE_URL` in the execution environment
+- repo-wide `test`/full health still depends on broader runtime validation beyond the API/types migration slice

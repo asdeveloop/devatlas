@@ -1,7 +1,7 @@
 "use client"
 
-import * as React from "react"
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react"
+import * as React from "react"
 import {
   type ChevronProps,
   DayPicker,
@@ -11,7 +11,9 @@ import {
 } from "react-day-picker"
 
 import { cn } from "../lib/utils"
-import { Button, buttonVariants } from "./button"
+
+import type { Button } from "./button"
+import { buttonVariants } from "./button"
 
 type CalendarProps = Omit<DayPickerProps, "components" | "classNames" | "formatters"> & {
   className?: string
@@ -22,8 +24,6 @@ type CalendarProps = Omit<DayPickerProps, "components" | "classNames" | "formatt
 }
 
 type CalendarClassNames = NonNullable<DayPickerProps["classNames"]>
-type CalendarComponents = NonNullable<DayPickerProps["components"]>
-
 const defaultClassNames = {} as CalendarClassNames
 
 function Calendar({

@@ -1,7 +1,7 @@
 # DevAtlas — 100 Sprint Tasks (Production Grade)
 
-> Source of truth: `schema.prisma`, `ROADMAP.md`, `ENGINEERING-STATE.md`, `ARCHITECTURE.md`, module tree
-> Generated: 1405/01/29
+> Source of truth: current repo code, `docs/ROADMAP.md`, `docs/ENGINEERING-STATE.md`, `docs/ARCHITECTURE.md`, package scripts, and executed local checks
+> Synced: 1405/09/01
 
 ---
 
@@ -9,78 +9,78 @@
 
 | # | Task | Module/File | Status |
 |---|------|-------------|--------|
-| 1 | Create `apps/api/src/db/schema/enums.ts` — all 7 pgEnums | db/schema | ⬜ |
-| 2 | Create `apps/api/src/db/schema/category.ts` + relations | db/schema | ⬜ |
-| 3 | Create `apps/api/src/db/schema/tag.ts` + relations | db/schema | ⬜ |
-| 4 | Create `apps/api/src/db/schema/guide.ts` + relations | db/schema | ⬜ |
-| 5 | Create `apps/api/src/db/schema/tool.ts` + relations | db/schema | ⬜ |
-| 6 | Create `apps/api/src/db/schema/guide-tag.ts` + indexes + cascade | db/schema | ⬜ |
-| 7 | Create `apps/api/src/db/schema/tool-tag.ts` + indexes + cascade | db/schema | ⬜ |
-| 8 | Create `apps/api/src/db/schema/content-relation.ts` polymorphic | db/schema | ⬜ |
-| 9 | Create `apps/api/src/db/schema/search-document.ts` | db/schema | ⬜ |
-| 10 | Create `apps/api/src/db/schema/ai-summary.ts` + `ai-answer.ts` + `search-query.ts` + `content-view.ts` | db/schema | ⬜ |
-| 11 | Create `apps/api/src/db/index.ts` — Pool + drizzle instance | db | ⬜ |
-| 12 | Create `apps/api/drizzle.config.ts` + `src/db/migrate.ts` | db | ⬜ |
+| 1 | Create `apps/api/src/db/schema/enums.ts` — all 7 pgEnums | db/schema | ✅ |
+| 2 | Create `apps/api/src/db/schema/category.ts` + relations | db/schema | ✅ |
+| 3 | Create `apps/api/src/db/schema/tag.ts` + relations | db/schema | ✅ |
+| 4 | Create `apps/api/src/db/schema/guide.ts` + relations | db/schema | ✅ |
+| 5 | Create `apps/api/src/db/schema/tool.ts` + relations | db/schema | ✅ |
+| 6 | Create `apps/api/src/db/schema/guide-tag.ts` + indexes + cascade | db/schema | ✅ |
+| 7 | Create `apps/api/src/db/schema/tool-tag.ts` + indexes + cascade | db/schema | ✅ |
+| 8 | Create `apps/api/src/db/schema/content-relation.ts` polymorphic | db/schema | ✅ |
+| 9 | Create `apps/api/src/db/schema/search-document.ts` | db/schema | ✅ |
+| 10 | Create `apps/api/src/db/schema/ai-summary.ts` + `ai-answer.ts` + `search-query.ts` + `content-view.ts` | db/schema | ✅ |
+| 11 | Create `apps/api/src/db/index.ts` — Pool + drizzle instance | db | ✅ |
+| 12 | Create `apps/api/drizzle.config.ts` + `src/db/migrate.ts` | db | ✅ |
 
 ## Phase 1 — Database Module Swap (Tasks 13–20)
 
 | # | Task | Module/File | Status |
 |---|------|-------------|--------|
-| 13 | Replace `prisma.service.ts` → `drizzle.service.ts` | database | ⬜ |
-| 14 | Update `database.module.ts` — export DrizzleService globally | database | ⬜ |
-| 15 | Remove `@prisma/client` and `prisma` from `package.json` | apps/api | ⬜ |
-| 16 | Add `drizzle-orm`, `pg`, `drizzle-kit`, `@types/pg` to deps | apps/api | ⬜ |
-| 17 | Run `drizzle-kit generate` — verify initial migration SQL | apps/api | ⬜ |
+| 13 | Replace `prisma.service.ts` → `drizzle.service.ts` | database | ✅ |
+| 14 | Update `database.module.ts` — export DrizzleService globally | database | ✅ |
+| 15 | Remove `@prisma/client` and `prisma` from `package.json` | apps/api | ✅ |
+| 16 | Add `drizzle-orm`, `pg`, `drizzle-kit`, `@types/pg` to deps | apps/api | ✅ |
+| 17 | Run `drizzle-kit generate` — verify initial migration SQL | apps/api | ✅ |
 | 18 | Run `drizzle-kit push` against local PG — validate tables | apps/api | ⬜ |
-| 19 | Delete `apps/api/prisma/` directory (schema + migrations) | apps/api | ⬜ |
-| 20 | Update `app.module.ts` — ensure DatabaseModule import uses Drizzle | apps/api | ⬜ |
+| 19 | Delete `apps/api/prisma/` directory (schema + migrations) | apps/api | ✅ |
+| 20 | Update `app.module.ts` — ensure DatabaseModule import uses Drizzle | apps/api | ✅ |
 
 ## Phase 2 — Repository Layer Rewrite (Tasks 21–35)
 
 | # | Task | Module/File | Status |
 |---|------|-------------|--------|
-| 21 | Rewrite `categories.repository.ts` — Drizzle queries | categories | ⬜ |
-| 22 | Rewrite `guides.repository.ts` — Drizzle queries + joins | guides | ⬜ |
-| 23 | Rewrite `tags.repository.ts` — Drizzle queries | tags | ⬜ |
-| 24 | Rewrite `tools.repository.ts` — Drizzle queries + joins | tools | ⬜ |
-| 25 | Update `categories.service.ts` — use new repo signatures | categories | ⬜ |
-| 26 | Update `guides.service.ts` — use new repo signatures | guides | ⬜ |
-| 27 | Update `tags.service.ts` — use new repo signatures | tags | ⬜ |
-| 28 | Update `tools.service.ts` — use new repo signatures | tools | ⬜ |
-| 29 | Update `guide.mapper.ts` — map Drizzle row types | guides | ⬜ |
-| 30 | Create `tool.mapper.ts` — map Drizzle row types | tools | ⬜ |
-| 31 | Create `category.mapper.ts` | categories | ⬜ |
-| 32 | Create `tag.mapper.ts` | tags | ⬜ |
-| 33 | Update `query-prisma.mapper.ts` → `query-drizzle.mapper.ts` | common | ⬜ |
-| 34 | Update all module imports — remove PrismaService refs | all modules | ⬜ |
-| 35 | Verify all controllers compile with new service signatures | all modules | ⬜ |
+| 21 | Rewrite `categories.repository.ts` — Drizzle queries | categories | ✅ |
+| 22 | Rewrite `guides.repository.ts` — Drizzle queries + joins | guides | ✅ |
+| 23 | Rewrite `tags.repository.ts` — Drizzle queries | tags | ✅ |
+| 24 | Rewrite `tools.repository.ts` — Drizzle queries + joins | tools | ✅ |
+| 25 | Update `categories.service.ts` — use new repo signatures | categories | ✅ |
+| 26 | Update `guides.service.ts` — use new repo signatures | guides | ✅ |
+| 27 | Update `tags.service.ts` — use new repo signatures | tags | ✅ |
+| 28 | Update `tools.service.ts` — use new repo signatures | tools | ✅ |
+| 29 | Update `guide.mapper.ts` — map Drizzle row types | guides | ✅ |
+| 30 | Create `tool.mapper.ts` — map Drizzle row types | tools | ✅ |
+| 31 | Create `category.mapper.ts` | categories | ✅ |
+| 32 | Create `tag.mapper.ts` | tags | ✅ |
+| 33 | Update `query-prisma.mapper.ts` → `query-drizzle.mapper.ts` | common | ✅ |
+| 34 | Update all module imports — remove PrismaService refs | all modules | ✅ |
+| 35 | Verify all controllers compile with new service signatures | all modules | ✅ |
 
 ## Phase 3 — DTO & Validation Alignment (Tasks 36–45)
 
 | # | Task | Module/File | Status |
 |---|------|-------------|--------|
-| 36 | Audit `create-guide.dto.ts` — match Drizzle insert type | guides/dto | ⬜ |
-| 37 | Audit `update-guide.dto.ts` — partial insert type | guides/dto | ⬜ |
-| 38 | Audit `create-tool.dto.ts` — match Drizzle insert type | tools/dto | ⬜ |
-| 39 | Audit `update-tool.dto.ts` — partial insert type | tools/dto | ⬜ |
-| 40 | Audit `create-category.dto.ts` — match schema | categories/dto | ⬜ |
-| 41 | Audit `create-tag.dto.ts` — match schema | tags/dto | ⬜ |
-| 42 | Audit `guide-query.dto.ts` — filter/sort fields match columns | guides/dto | ⬜ |
-| 43 | Audit `tool-query.dto.ts` — filter/sort fields match columns | tools/dto | ⬜ |
-| 44 | Audit `category-query.dto.ts` + `tag-query.dto.ts` | dto | ⬜ |
-| 45 | Audit `guide-list-response.dto.ts` + `guide-response.dto.ts` | guides/dto | ⬜ |
+| 36 | Audit `create-guide.dto.ts` — match Drizzle insert type | guides/dto | ✅ |
+| 37 | Audit `update-guide.dto.ts` — partial insert type | guides/dto | ✅ |
+| 38 | Audit `create-tool.dto.ts` — match Drizzle insert type | tools/dto | ✅ |
+| 39 | Audit `update-tool.dto.ts` — partial insert type | tools/dto | ✅ |
+| 40 | Audit `create-category.dto.ts` — match schema | categories/dto | ✅ |
+| 41 | Audit `create-tag.dto.ts` — match schema | tags/dto | ✅ |
+| 42 | Audit `guide-query.dto.ts` — filter/sort fields match columns | guides/dto | ✅ |
+| 43 | Audit `tool-query.dto.ts` — filter/sort fields match columns | tools/dto | ✅ |
+| 44 | Audit `category-query.dto.ts` + `tag-query.dto.ts` | dto | ✅ |
+| 45 | Audit `guide-list-response.dto.ts` + `guide-response.dto.ts` | guides/dto | ✅ |
 
 ## Phase 4 — Shared Types Package Sync (Tasks 46–52)
 
 | # | Task | Module/File | Status |
 |---|------|-------------|--------|
-| 46 | Update `packages/types` — export Drizzle inferred types | packages/types | ⬜ |
-| 47 | Remove Prisma-generated type imports from `packages/types` | packages/types | ⬜ |
-| 48 | Update `packages/api-client` — align request/response types | packages/api-client | ⬜ |
-| 49 | Update `packages/content` — remove Prisma deps if any | packages/content | ⬜ |
-| 50 | Verify `packages/ui` has no Prisma type leaks | packages/ui | ⬜ |
-| 51 | Run `pnpm typecheck` across entire monorepo — fix errors | root | ⬜ |
-| 52 | Run `pnpm lint` across entire monorepo — fix errors | root | ⬜ |
+| 46 | Update `packages/types` — export Drizzle inferred types | packages/types | ✅ |
+| 47 | Remove Prisma-generated type imports from `packages/types` | packages/types | ✅ |
+| 48 | Update `packages/api-client` — align request/response types | packages/api-client | ✅ |
+| 49 | Update `packages/content` — remove Prisma deps if any | packages/content | ✅ |
+| 50 | Verify `packages/ui` has no Prisma type leaks | packages/ui | ✅ |
+| 51 | Run `pnpm typecheck` across entire monorepo — fix errors | root | ✅ |
+| 52 | Run `pnpm lint` across entire monorepo — fix errors | root | ✅ |
 
 ## Phase 5 — Testing Infrastructure (Tasks 53–62)
 
@@ -91,10 +91,10 @@
 | 55 | Write unit tests: `guides.repository.ts` (CRUD + joins) | guides | ⬜ |
 | 56 | Write unit tests: `tags.repository.ts` (CRUD) | tags | ⬜ |
 | 57 | Write unit tests: `tools.repository.ts` (CRUD + joins) | tools | ⬜ |
-| 58 | Write unit tests: `categories.service.ts` | categories | ⬜ |
-| 59 | Write unit tests: `guides.service.ts` | guides | ⬜ |
-| 60 | Write unit tests: `tags.service.ts` | tags | ⬜ |
-| 61 | Write unit tests: `tools.service.ts` | tools | ⬜ |
+| 58 | Write unit tests: `categories.service.ts` | categories | ✅ |
+| 59 | Write unit tests: `guides.service.ts` | guides | ✅ |
+| 60 | Write unit tests: `tags.service.ts` | tags | ✅ |
+| 61 | Write unit tests: `tools.service.ts` | tools | ✅ |
 | 62 | Write integration test: health endpoint + DB connection | health | ⬜ |
 
 ## Phase 6 — API Contract Completion (Tasks 63–72)
@@ -116,8 +116,8 @@
 
 | # | Task | Module/File | Status |
 |---|------|-------------|--------|
-| 73 | Update `apps/web` guide list page — fetch from API | web/guides | ⬜ |
-| 74 | Update `apps/web` guide detail page — fetch by slug | web/guides/[slug] | ⬜ |
+| 73 | Update `apps/web` guide list page — fetch from API | web/guides | ✅ |
+| 74 | Update `apps/web` guide detail page — fetch by slug | web/guides/[slug] | ✅ |
 | 75 | Create tools listing page — `apps/web/tools` | web/tools | ⬜ |
 | 76 | Create tool detail page — `apps/web/tools/[slug]` | web/tools | ⬜ |
 | 77 | Create categories listing page | web/categories | ⬜ |
@@ -134,7 +134,7 @@
 | 83 | Create `search.module.ts` + `search.controller.ts` | modules/search | ⬜ |
 | 84 | Create `search.service.ts` — query `search_documents` table | modules/search | ⬜ |
 | 85 | Create `search.repository.ts` — Drizzle full-text queries | modules/search | ⬜ |
-| 86 | Create search indexing service — sync guides/tools → search_documents | modules/search | ⬜
+| 86 | Create search indexing service — sync guides/tools → search_documents | modules/search | ⬜ |
 | 87 | Implement `POST /search` endpoint — query + results | search | ⬜ |
 | 88 | Log search queries to `search_queries` table | search | ⬜ |
 
@@ -181,14 +181,21 @@ Tasks 83–100: Search + relations + AI prep
 
 ---
 
+## Validation Snapshot
+
+- ✅ `node scripts/agent-verify.mjs api lint typecheck test`
+- ✅ `node scripts/agent-verify.mjs web lint typecheck test build`
+- ✅ `pnpm lint` passes across the monorepo
+- ✅ Prisma references removed from `packages/content` and `packages/types`
+
 ## Success Criteria
 
 - ✅ Zero Prisma references in codebase
-- ✅ `pnpm typecheck && pnpm lint && pnpm test` passes
-- ✅ All API endpoints return correct data
-- ✅ Frontend pages render without errors
-- ✅ Drizzle migrations match existing DB state
-- ✅ Docs updated (ENGINEERING-STATE, ROADMAP, ARCHITECTURE)
+- ⚠️ `pnpm typecheck && pnpm lint && pnpm test` still needs root `test` verification
+- ⬜ All API endpoints return correct data
+- ✅ Frontend guide pages render without errors
+- ⬜ Drizzle migrations match existing DB state
+- ✅ Docs updated (`docs/ENGINEERING-STATE.md`, `docs/ROADMAP.md`, `docs/ARCHITECTURE.md`)
 
 ---
 
@@ -204,10 +211,9 @@ If migration fails:
 
 ## Notes
 
-- Prisma access blocked in Iran — Drizzle is the only viable path
-- All tasks derived from actual schema.prisma (289 lines, 10 models, 7 enums)
-- Module tree verified against devatlas.zip archive
-- No guesswork — every task maps to existing file or schema entity
+- Drizzle is active in `apps/api` and shared Prisma-era type remnants have been removed from the affected packages
+- Local verification confirms `apps/api`, `apps/web`, and root lint are healthy for this migration slice
+- Remaining DB validation depends on `DATABASE_URL` being set for `drizzle-kit push`
 
 ---
 

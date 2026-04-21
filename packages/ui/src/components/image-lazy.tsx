@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+
 import { cn } from '../lib/utils'
 
 interface LazyImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {

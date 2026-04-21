@@ -10,27 +10,35 @@ export type DatabaseEntity<TId extends string = string> = EntityTimestamps & {
 export type GuideRecord = DatabaseEntity & {
   slug: string;
   title: string;
-  description: string;
-  content: string;
+  description: string | null;
+  content: string | null;
   categoryId: string;
-  difficulty: "beginner" | "intermediate" | "advanced";
-  readingTime: number;
+  difficulty: 'beginner' | 'intermediate' | 'advanced' | null;
+  readingTime: number | null;
+  status: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
 };
 
-// === اصلاح‌شده ===
 export type ToolRecord = DatabaseEntity & {
   slug: string;
   name: string;
-  description: string;          // ← required
-  summary: string;
-  website?: string;              // ← نام Prisma
-  github?: string;               // ← جدید
-  popularityScore: number;       // ← جدید
+  description: string | null;
+  website: string | null;
+  github: string | null;
+  icon: string | null;
+  active: boolean;
+  tier: 'FREE' | 'FREEMIUM' | 'PRO' | 'ENTERPRISE';
+  price: 'FREE' | 'PAID' | 'MIXED';
+  popularity: number;
   categoryId: string;
 };
 
 export type CategoryRecord = DatabaseEntity & {
   slug: string;
   name: string;
-  description?: string;
+  icon: string | null;
+};
+
+export type TagRecord = DatabaseEntity & {
+  slug: string;
+  name: string;
 };

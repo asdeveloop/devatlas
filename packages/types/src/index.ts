@@ -1,9 +1,15 @@
 export type { ApiErrorResponse, ApiResult } from './api/error';
-export type { CreateCategoryBody, UpdateCategoryBody, CategoryListItem, CategoryDetail } from './api/category';
+export type {
+  CategoryDetail,
+  CategoryListItem,
+  CategoryListParams,
+  CreateCategoryBody,
+  UpdateCategoryBody,
+} from './api/category';
 export type { CreateGuideBody, UpdateGuideBody, GuideListItem, GuideDetail, GuideListParams } from './api/guide';
 export type { PaginationMeta, PaginatedResponse, PaginationParams } from './api/pagination';
 export type { ApiResponse, ApiPaginatedResponse } from './api/response';
-export type { CreateTagBody, UpdateTagBody, TagListItem, TagDetail } from './api/tag';
+export type { CreateTagBody, UpdateTagBody, TagListItem, TagDetail, TagListParams } from './api/tag';
 export type { CreateToolBody, UpdateToolBody, ToolListItem, ToolDetail, ToolListParams } from './api/tool';
 export {
   ContentStatus,

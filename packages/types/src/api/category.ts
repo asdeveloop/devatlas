@@ -1,15 +1,18 @@
 import type { Category } from '../content/category';
 
+import type { PaginationParams } from './pagination';
+
+export type CategoryListParams = PaginationParams;
+
 export interface CreateCategoryBody {
   slug: string;
   name: string;
-  description?: string;
+  icon?: string;
 }
 
 export interface UpdateCategoryBody {
-  slug?: string;
   name?: string;
-  description?: string | null;
+  icon?: string | null;
 }
 
 export type CategoryListItem = Category;

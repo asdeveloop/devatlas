@@ -12,12 +12,17 @@ export type ToolTag = {
   id: string;
   name: string;
   slug: string;
+  createdAt: Date;
+  updatedAt: Date;
 };
 
 type ToolCategory = {
   id: string;
   name: string;
   slug: string;
+  icon: string | null;
+  createdAt: Date;
+  updatedAt: Date;
 };
 
 export type ToolRecord = {
@@ -48,6 +53,8 @@ type ToolQueryRow = ToolRecord & {
     tagId: string;
     name: string;
     slug: string;
+    createdAt: Date;
+    updatedAt: Date;
   } | null;
   category: ToolCategory | null;
 };
@@ -152,11 +159,16 @@ export class ToolsRepository {
           tagId: toolTags.tagId,
           name: tags.name,
           slug: tags.slug,
+          createdAt: tags.createdAt,
+          updatedAt: tags.updatedAt,
         },
         category: {
           id: categories.id,
           name: categories.name,
           slug: categories.slug,
+          icon: categories.icon,
+          createdAt: categories.createdAt,
+          updatedAt: categories.updatedAt,
         },
       })
       .from(toolsSchema)
@@ -182,6 +194,8 @@ export class ToolsRepository {
             id: item.tags.tagId,
             name: item.tags.name,
             slug: item.tags.slug,
+            createdAt: item.tags.createdAt,
+            updatedAt: item.tags.updatedAt,
           });
         }
         continue;
@@ -194,6 +208,8 @@ export class ToolsRepository {
               id: item.tags.tagId,
               name: item.tags.name,
               slug: item.tags.slug,
+              createdAt: item.tags.createdAt,
+              updatedAt: item.tags.updatedAt,
             }]
           : [],
         category: item.category || null,

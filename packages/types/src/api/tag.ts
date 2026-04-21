@@ -1,12 +1,15 @@
 import type { Tag } from '../content/tag';
 
+import type { PaginationParams } from './pagination';
+
+export type TagListParams = PaginationParams;
+
 export interface CreateTagBody {
   slug: string;
   name: string;
 }
 
 export interface UpdateTagBody {
-  slug?: string;
   name?: string;
 }
 

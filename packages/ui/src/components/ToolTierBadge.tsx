@@ -1,7 +1,8 @@
 'use client';
 
-import { useMemo } from 'react';
 import { usePathname } from 'next/navigation';
+import { useMemo } from 'react';
+
 import { getTierByPath, type ToolTier } from '../lib/tools-registry';
 
 function tierUi(tier: ToolTier) {

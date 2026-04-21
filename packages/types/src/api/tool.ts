@@ -1,44 +1,42 @@
-import type { ToolStatus } from '../content/enums';
+import type { ToolPrice, ToolTier } from '../content/enums';
 import type { ToolSummary, ToolWithRelations } from '../content/tool';
 
 import type { PaginationParams } from './pagination';
 
-// ── Query Params ─────────────────────────────────────
-
 export interface ToolListParams extends PaginationParams {
   categorySlug?: string;
   tagSlug?: string;
-  status?: ToolStatus;
-  search?: string;
-  sortBy?: 'name' | 'popularityScore' | 'createdAt';
-  sortOrder?: 'asc' | 'desc';
+  tier?: ToolTier;
+  price?: ToolPrice;
 }
-
-// ── Request Bodies ───────────────────────────────────
 
 export interface CreateToolBody {
   name: string;
   slug: string;
-  description: string;
+  description?: string;
   website?: string;
   github?: string;
+  icon?: string;
+  active?: boolean;
+  tier: ToolTier;
+  price: ToolPrice;
   categoryId: string;
   tagIds?: string[];
-  status?: ToolStatus;
 }
 
 export interface UpdateToolBody {
   name?: string;
   slug?: string;
-  description?: string;
+  description?: string | null;
   website?: string | null;
   github?: string | null;
+  icon?: string | null;
+  active?: boolean;
+  tier?: ToolTier;
+  price?: ToolPrice;
   categoryId?: string;
   tagIds?: string[];
-  status?: ToolStatus;
 }
-
-// ── Response Payloads ────────────────────────────────
 
 export type ToolListItem = ToolSummary;
 export type ToolDetail = ToolWithRelations;

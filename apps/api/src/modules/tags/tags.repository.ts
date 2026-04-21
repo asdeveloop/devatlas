@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { eq } from 'drizzle-orm';
 
 import { tags } from '../../db/schema';
+export type TagRecord = typeof tags.$inferSelect;
 import type { DrizzleService } from '../database/drizzle.service';
 
 import type { CreateTagDto } from './dto/create-tag.dto';

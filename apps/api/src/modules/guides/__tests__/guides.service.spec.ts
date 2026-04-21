@@ -12,10 +12,11 @@ type GuideMapperInput = {
   id: string;
   title: string;
   content?: string;
+  slug?: string;
 };
 
 const { toSummaryMock, toDetailMock, toDomainMock } = vi.hoisted(() => ({
-  toSummaryMock: vi.fn((item: GuideMapperInput) => ({ id: item.id, title: item.title })),
+  toSummaryMock: vi.fn((item: GuideMapperInput) => ({ id: item.id, title: item.title, slug: item.slug ?? 'guide' })),
   toDetailMock: vi.fn((item: GuideMapperInput) => ({ id: item.id, title: item.title, content: item.content })),
   toDomainMock: vi.fn((item: GuideMapperInput) => item),
 }));
@@ -50,10 +51,10 @@ describe('GuidesService', () => {
   });
 
   describe('findAll', () => {
-    it('should delegate to repo.findAll', async () => {
+    it('should map repo items to guide summaries', async () => {
       const query: GuideQueryDto = { skip: 0, take: 10, status: ContentStatus.PUBLISHED };
       const result = {
-        data: [{ id: '1', title: 'Guide 1' }],
+        data: [{ id: '1', title: 'Guide 1', slug: 'guide-1' }],
         meta: {
           page: 1,
           limit: 10,
@@ -65,8 +66,12 @@ describe('GuidesService', () => {
       };
       repo.findAll.mockResolvedValue(result);
 
-      expect(await service.findAll(query)).toBe(result);
+      await expect(service.findAll(query)).resolves.toEqual({
+        data: [{ id: '1', title: 'Guide 1', slug: 'guide-1' }],
+        meta: result.meta,
+      });
       expect(repo.findAll).toHaveBeenCalledWith(query);
+      expect(toSummaryMock).toHaveBeenCalledWith(result.data[0]);
     });
   });
 

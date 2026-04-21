@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { and, eq } from 'drizzle-orm';
+import { and, asc, desc, eq, type SQL } from 'drizzle-orm';
 
 import { categories, guideTags, guides as guidesSchema, tags } from '../../db/schema';
 import type { DrizzleService } from '../database/drizzle.service';
 
 import type { CreateGuideDto } from './dto/create-guide.dto';
-import type { GuideQueryDto } from './dto/guide-query.dto';
+import type { GuideQueryDto, GuideSortField } from './dto/guide-query.dto';
 import type { UpdateGuideDto } from './dto/update-guide.dto';
 
 export type GuideTag = {
@@ -47,7 +47,6 @@ export type GuideWithRelations = GuideRecord & {
 type GuideQueryRow = GuideRecord & {
   tags: {
     id: string;
-    guideId: string;
     tagId: string;
     name: string;
     slug: string;
@@ -57,8 +56,8 @@ type GuideQueryRow = GuideRecord & {
   category: GuideCategory | null;
 };
 
-export type GuidesListResult = {
-  data: GuideRecord[];
+export type GuidesListResult<TGuide = GuideRecord> = {
+  data: TGuide[];
   meta: {
     page: number;
     limit: number;
@@ -73,8 +72,8 @@ export type GuidesListResult = {
 export class GuidesRepository {
   constructor(private readonly drizzle: DrizzleService) {}
 
-  async findAll(query: GuideQueryDto): Promise<GuidesListResult> {
-    const offset = (query.skip ?? 0);
+  async findAll(query: GuideQueryDto): Promise<GuidesListResult<GuideWithRelations>> {
+    const offset = query.skip ?? 0;
     const limit = query.take ?? 20;
 
     const whereConditions = [
@@ -87,7 +86,9 @@ export class GuidesRepository {
       ? and(...(whereConditions as Parameters<typeof and>))
       : undefined;
 
-    const [items, total] = await Promise.all([
+    const orderBy = this.buildOrderBy(query.sortBy, query.order);
+
+    const [rows, total] = await Promise.all([
       this.drizzle.db
         .select({
           id: guidesSchema.id,
@@ -101,9 +102,29 @@ export class GuidesRepository {
           categoryId: guidesSchema.categoryId,
           createdAt: guidesSchema.createdAt,
           updatedAt: guidesSchema.updatedAt,
+          tags: {
+            id: guideTags.id,
+            tagId: guideTags.tagId,
+            name: tags.name,
+            slug: tags.slug,
+            createdAt: tags.createdAt,
+            updatedAt: tags.updatedAt,
+          },
+          category: {
+            id: categories.id,
+            name: categories.name,
+            slug: categories.slug,
+            icon: categories.icon,
+            createdAt: categories.createdAt,
+            updatedAt: categories.updatedAt,
+          },
         })
         .from(guidesSchema)
+        .leftJoin(categories, eq(guidesSchema.categoryId, categories.id))
+        .leftJoin(guideTags, eq(guidesSchema.id, guideTags.guideId))
+        .leftJoin(tags, eq(guideTags.tagId, tags.id))
         .where(where)
+        .orderBy(...orderBy)
         .limit(limit)
         .offset(offset),
       this.drizzle.db
@@ -115,7 +136,7 @@ export class GuidesRepository {
     ]);
 
     return {
-      data: items,
+      data: this.groupGuides(rows as GuideQueryRow[]),
       meta: {
         page: Math.floor(offset / limit) + 1,
         limit,
@@ -143,7 +164,6 @@ export class GuidesRepository {
         updatedAt: guidesSchema.updatedAt,
         tags: {
           id: guideTags.id,
-          guideId: guideTags.guideId,
           tagId: guideTags.tagId,
           name: tags.name,
           slug: tags.slug,
@@ -154,7 +174,7 @@ export class GuidesRepository {
           id: categories.id,
           name: categories.name,
           slug: categories.slug,
-          description: categories.icon,
+          icon: categories.icon,
           createdAt: categories.createdAt,
           updatedAt: categories.updatedAt,
         },
@@ -164,48 +184,10 @@ export class GuidesRepository {
       .leftJoin(tags, eq(guideTags.tagId, tags.id))
       .leftJoin(categories, eq(guidesSchema.categoryId, categories.id))
       .where(eq(guidesSchema.slug, slug))
-      .execute()) as unknown as GuideQueryRow[];
+      .execute()) as GuideQueryRow[];
 
-    // Group by guide
-    type GroupedGuide = Omit<GuideQueryRow, 'tags' | 'category'> & {
-      tags: GuideTag[];
-      category: GuideCategory | null;
-    };
-
-    const grouped = new Map<string, GroupedGuide>();
-
-    for (const item of result) {
-      const existing = grouped.get(item.id);
-      if (existing) {
-        if (item.tags) {
-          existing.tags.push({
-            id: item.tags.tagId,
-            name: item.tags.name,
-            slug: item.tags.slug,
-            createdAt: item.tags.createdAt,
-            updatedAt: item.tags.updatedAt,
-          });
-        }
-        continue;
-      }
-
-      grouped.set(item.id, {
-        ...item,
-        tags: item.tags
-          ? [{
-              id: item.tags.tagId,
-              name: item.tags.name,
-              slug: item.tags.slug,
-              createdAt: item.tags.createdAt,
-              updatedAt: item.tags.updatedAt,
-            }]
-          : [],
-        category: item.category || null,
-      });
-    }
-
-    const firstGuide = grouped.values().next().value as GroupedGuide | undefined;
-    return firstGuide ?? null;
+    const [guide] = this.groupGuides(result);
+    return guide ?? null;
   }
 
   async findById(id: string): Promise<GuideRecord | null> {
@@ -220,7 +202,6 @@ export class GuidesRepository {
   async create(data: CreateGuideDto): Promise<GuideWithRelations | null> {
     const drizzle = this.drizzle.db;
 
-    // Insert guide
     const [guide] = await drizzle
       .insert(guidesSchema)
       .values({
@@ -236,7 +217,6 @@ export class GuidesRepository {
       .returning()
       .execute();
 
-    // Insert tags if provided
     if (data.tagIds?.length) {
       await drizzle
         .insert(guideTags)
@@ -244,19 +224,17 @@ export class GuidesRepository {
           data.tagIds.map((tagId) => ({
             guideId: guide.id,
             tagId,
-          }))
+          })),
         )
         .execute();
     }
 
-    // Fetch guide with tags and category
-    return await this.findBySlug(guide.slug);
+    return this.findBySlug(guide.slug);
   }
 
   async update(id: string, data: UpdateGuideDto): Promise<GuideWithRelations | null> {
     const drizzle = this.drizzle.db;
 
-    // Update guide
     const updateData: Record<string, unknown> = {};
     if (data.title !== undefined) updateData.title = data.title;
     if (data.slug !== undefined) updateData.slug = data.slug;
@@ -274,7 +252,6 @@ export class GuidesRepository {
       .returning()
       .execute();
 
-    // Handle tags replacement
     if (data.tagIds !== undefined) {
       await drizzle
         .delete(guideTags)
@@ -288,13 +265,13 @@ export class GuidesRepository {
             data.tagIds.map((tagId) => ({
               guideId: result.id,
               tagId,
-            }))
+            })),
           )
           .execute();
       }
     }
 
-    return await this.findBySlug(data.slug ?? result.slug);
+    return this.findBySlug(data.slug ?? result.slug);
   }
 
   async delete(id: string): Promise<GuideRecord | null> {
@@ -312,5 +289,62 @@ export class GuidesRepository {
       .from(guidesSchema)
       .execute();
     return Number(result[0]?.count ?? 0);
+  }
+
+  private buildOrderBy(sortBy?: GuideSortField, order: 'asc' | 'desc' = 'desc'): SQL[] {
+    const sortColumn = {
+      createdAt: guidesSchema.createdAt,
+      readingTime: guidesSchema.readingTime,
+      title: guidesSchema.title,
+    }[sortBy ?? 'createdAt'];
+    const direction = order === 'asc' ? asc : desc;
+
+    return [direction(sortColumn), desc(guidesSchema.createdAt)];
+  }
+
+  private groupGuides(rows: GuideQueryRow[]): GuideWithRelations[] {
+    const grouped = new Map<string, GuideWithRelations>();
+
+    for (const row of rows) {
+      const existing = grouped.get(row.id);
+      if (existing) {
+        if (row.tags && !existing.tags.some((tag) => tag.id === row.tags?.tagId)) {
+          existing.tags.push({
+            id: row.tags.tagId,
+            name: row.tags.name,
+            slug: row.tags.slug,
+            createdAt: row.tags.createdAt,
+            updatedAt: row.tags.updatedAt,
+          });
+        }
+        continue;
+      }
+
+      grouped.set(row.id, {
+        id: row.id,
+        slug: row.slug,
+        title: row.title,
+        description: row.description,
+        content: row.content,
+        readingTime: row.readingTime,
+        difficulty: row.difficulty,
+        status: row.status,
+        categoryId: row.categoryId,
+        createdAt: row.createdAt,
+        updatedAt: row.updatedAt,
+        tags: row.tags
+          ? [{
+              id: row.tags.tagId,
+              name: row.tags.name,
+              slug: row.tags.slug,
+              createdAt: row.tags.createdAt,
+              updatedAt: row.tags.updatedAt,
+            }]
+          : [],
+        category: row.category,
+      });
+    }
+
+    return [...grouped.values()];
   }
 }

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+
 import { useToast } from '../shared/ui/toast-context';
 import { scheduleDeferredTask } from '../shared/utils/runtime/scheduleDeferredTask';
 

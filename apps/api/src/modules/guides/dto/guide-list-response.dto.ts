@@ -1,8 +1,31 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-import { GuideResponseDto } from './guide-response.dto';
+import { GuideListItemDto } from './guide-response.dto';
+
+class GuideListMetaDto {
+  @ApiProperty()
+  page!: number;
+
+  @ApiProperty()
+  limit!: number;
+
+  @ApiProperty()
+  total!: number;
+
+  @ApiProperty()
+  totalPages!: number;
+
+  @ApiProperty()
+  hasNextPage!: boolean;
+
+  @ApiProperty()
+  hasPrevPage!: boolean;
+}
 
 export class GuideListResponseDto {
-  @ApiProperty({ type: [GuideResponseDto] })
-  items: GuideResponseDto[];
+  @ApiProperty({ type: [GuideListItemDto] })
+  data!: GuideListItemDto[];
+
+  @ApiProperty({ type: GuideListMetaDto })
+  meta!: GuideListMetaDto;
 }

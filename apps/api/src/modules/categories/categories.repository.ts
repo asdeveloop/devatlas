@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { eq } from 'drizzle-orm';
 
 import { categories } from '../../db/schema';
+export type CategoryRecord = typeof categories.$inferSelect;
 import type { DrizzleService } from '../database/drizzle.service';
 
 import type { CategoryQueryDto } from './dto/category-query.dto';

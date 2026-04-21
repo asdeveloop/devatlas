@@ -1,54 +1,25 @@
+import { Difficulty, type ContentStatus, type Guide, type GuideSummary, type GuideWithRelations as GuideDetail } from '@devatlas/types';
+
 import type { GuideRecord, GuideWithRelations } from '../guides.repository';
 
-type GuideSummaryRecord = GuideRecord & {
-  category: {
-    id: string;
-    slug: string;
-    name: string;
-  };
-  tags: Array<{
-    id: string;
-    slug: string;
-    name: string;
-  }>;
-};
-
-type GuideDetailRecord = GuideRecord & {
-  category: {
-    id: string;
-    slug: string;
-    name: string;
-    description: string | null;
-    createdAt: Date;
-    updatedAt: Date;
-  };
-  tags: Array<{
-    id: string;
-    slug: string;
-    name: string;
-    createdAt: Date;
-    updatedAt: Date;
-  }>;
-};
-
 export class GuideMapper {
-  static toDomain(entity: GuideRecord | GuideWithRelations): GuideRecord {
+  static toDomain(entity: GuideRecord | GuideWithRelations): Guide {
     return {
       id: entity.id,
       slug: entity.slug,
       title: entity.title,
       description: entity.description ?? '',
       content: entity.content ?? '',
-      readingTime: entity.readingTime ?? 1,
-      difficulty: entity.difficulty ?? null,
-      status: entity.status ?? 'DRAFT',
+      readingTime: entity.readingTime ?? 0,
+      difficulty: (entity.difficulty ?? Difficulty.BEGINNER) as Difficulty,
+      status: entity.status as ContentStatus,
       categoryId: entity.categoryId,
-      createdAt: entity.createdAt,
-      updatedAt: entity.updatedAt,
+      createdAt: entity.createdAt.toISOString(),
+      updatedAt: entity.updatedAt.toISOString(),
     };
   }
 
-  static toSummary(entity: GuideWithRelations): GuideSummaryRecord {
+  static toSummary(entity: GuideWithRelations): GuideSummary {
     if (!entity.category) {
       throw new Error('Guide category is required');
     }
@@ -60,11 +31,15 @@ export class GuideMapper {
         slug: entity.category.slug,
         name: entity.category.name,
       },
-      tags: entity.tags,
+      tags: entity.tags.map((tag) => ({
+        id: tag.id,
+        slug: tag.slug,
+        name: tag.name,
+      })),
     };
   }
 
-  static toDetail(entity: GuideWithRelations): GuideDetailRecord {
+  static toDetail(entity: GuideWithRelations): GuideDetail {
     if (!entity.category) {
       throw new Error('Guide category is required');
     }
@@ -76,10 +51,16 @@ export class GuideMapper {
         slug: entity.category.slug,
         name: entity.category.name,
         description: entity.category.icon,
-        createdAt: entity.category.createdAt,
-        updatedAt: entity.category.updatedAt,
+        createdAt: entity.category.createdAt.toISOString(),
+        updatedAt: entity.category.updatedAt.toISOString(),
       },
-      tags: entity.tags,
+      tags: entity.tags.map((tag) => ({
+        id: tag.id,
+        slug: tag.slug,
+        name: tag.name,
+        createdAt: tag.createdAt.toISOString(),
+        updatedAt: tag.updatedAt.toISOString(),
+      })),
     };
   }
 }

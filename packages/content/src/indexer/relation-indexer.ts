@@ -1,6 +1,5 @@
-import type { PrismaClient } from "@prisma/client";
-
-import type { RelationType } from "../types/index.js";
+import type { ContentPipelineDb } from '../pipeline/content-pipeline.js';
+import type { RelationType } from '../types/index.js';
 
 export interface RelationIndexInput {
   sourceType: string;
@@ -11,46 +10,35 @@ export interface RelationIndexInput {
 }
 
 export async function indexRelations(
-  prisma: PrismaClient,
+  db: ContentPipelineDb,
   input: RelationIndexInput,
 ): Promise<void> {
   const { sourceType, sourceSlug, targetType, targetSlugs, relationType } = input;
 
-  // Resolve source ID
-  const source = sourceType === "guide"
-    ? await prisma.guide.findUnique({ where: { slug: sourceSlug } })
-    : await prisma.tool.findUnique({ where: { slug: sourceSlug } });
+  const source = sourceType === 'guide'
+    ? await db.guides.findBySlug(sourceSlug)
+    : await db.tools.findBySlug(sourceSlug);
 
   if (!source) return;
 
   for (const targetSlug of targetSlugs) {
-    const target = targetType === "guide"
-      ? await prisma.guide.findUnique({ where: { slug: targetSlug } })
-      : await prisma.tool.findUnique({ where: { slug: targetSlug } });
+    const target = targetType === 'guide'
+      ? await db.guides.findBySlug(targetSlug)
+      : await db.tools.findBySlug(targetSlug);
 
     if (!target) continue;
 
-    // Avoid duplicates
-    const exists = await prisma.contentRelation.findFirst({
-      where: {
-        sourceType,
-        sourceId: source.id,
-        targetType,
-        targetId: target.id,
-        relationType,
-      },
-    });
+    const relation = {
+      sourceType,
+      sourceId: source.id,
+      targetType,
+      targetId: target.id,
+      relationType,
+    };
 
+    const exists = await db.relations.exists(relation);
     if (!exists) {
-      await prisma.contentRelation.create({
-        data: {
-          sourceType,
-          sourceId: source.id,
-          targetType,
-          targetId: target.id,
-          relationType,
-        },
-      });
+      await db.relations.create(relation);
     }
   }
 }

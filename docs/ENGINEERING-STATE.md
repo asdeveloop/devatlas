@@ -4,10 +4,10 @@
 
 ## Active Now
 
-- Drizzle is already the active ORM in `apps/api`.
+- Drizzle is the active ORM in `apps/api`.
 - Nest modules for `guides`, `tools`, `categories`, `tags`, `health`, and `database` are wired in `apps/api/src/app.module.ts`.
 - Global API wrappers for success, error handling, logging, and trace ids are active in bootstrap.
-- Web routes are currently live for home and guides; tools currently have data-access code but not a routed page.
+- Web routes are live for `/`, `/guides`, and `/guides/[slug]`; tools still stop at feature/API helper level.
 - Root scripts include local verification helpers: `agent:context`, `agent:verify`, `doctor`, and `health`.
 
 ## Current Packages
@@ -36,6 +36,12 @@ pnpm doctor
 pnpm health
 ```
 
+Latest executed checks:
+
+- `node scripts/agent-verify.mjs api lint typecheck test` ✅
+- `node scripts/agent-verify.mjs web lint typecheck test build` ✅
+- `pnpm lint` ✅ across the monorepo
+
 ## Known Shape Of Runtime
 
 ### API
@@ -44,11 +50,17 @@ pnpm health
 - health check hits the DB with `SELECT 1`
 - guides use `PATCH`/`DELETE` by `:id`
 - tools/categories/tags use slug-based update/delete routes
+- guide list/detail DTOs now match the current category/tag-enriched response shape
 
 ### Web
 - app routes exist for `/`, `/guides`, `/guides/[slug]`
 - guide feature owns the routed pages plus API adapters
 - tool feature currently exposes API helpers only
+
+### Known Gaps
+
+- `apps/api` migration push still requires `DATABASE_URL` to be set before local table validation can run
+- repo-wide `test`/`build` still need a broader validation pass when the next cross-package batch is ready
 
 ## Documentation Sync Notes
 

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+
 import { getAdsConsent } from '../shared/consent/adsConsent';
 
 const RUM_ENDPOINT = '/api/rum';
