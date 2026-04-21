@@ -47,7 +47,7 @@ Last Updated: 1405/09/01
 - `@devatlas/utils` — Shared utilities
 
 ### Current Constraints
-- `drizzle-kit push` still depends on a configured local `DATABASE_URL`
+- local PostgreSQL schema must stay aligned with the generated Drizzle migration artifacts
 - repo-wide `test`/`build` have not been re-run as part of this narrow migration follow-up
 
 ---

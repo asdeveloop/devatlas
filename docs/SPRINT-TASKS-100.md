@@ -31,7 +31,7 @@
 | 15 | Remove `@prisma/client` and `prisma` from `package.json` | apps/api | ✅ |
 | 16 | Add `drizzle-orm`, `pg`, `drizzle-kit`, `@types/pg` to deps | apps/api | ✅ |
 | 17 | Run `drizzle-kit generate` — verify initial migration SQL | apps/api | ✅ |
-| 18 | Run `drizzle-kit push` against local PG — validate tables | apps/api | ⬜ |
+| 18 | Run `drizzle-kit push` against local PG — validate tables | apps/api | ✅ |
 | 19 | Delete `apps/api/prisma/` directory (schema + migrations) | apps/api | ✅ |
 | 20 | Update `app.module.ts` — ensure DatabaseModule import uses Drizzle | apps/api | ✅ |
 
@@ -194,7 +194,7 @@ Tasks 83–100: Search + relations + AI prep
 - ⚠️ `pnpm typecheck && pnpm lint && pnpm test` still needs root `test` verification
 - ⬜ All API endpoints return correct data
 - ✅ Frontend guide pages render without errors
-- ⬜ Drizzle migrations match existing DB state
+- ✅ Drizzle migrations match existing DB state (validated on local PostgreSQL `devatlas`)
 - ✅ Docs updated (`docs/ENGINEERING-STATE.md`, `docs/ROADMAP.md`, `docs/ARCHITECTURE.md`)
 
 ---
@@ -213,7 +213,7 @@ If migration fails:
 
 - Drizzle is active in `apps/api` and shared Prisma-era type remnants have been removed from the affected packages
 - Local verification confirms `apps/api`, `apps/web`, and root lint are healthy for this migration slice
-- Remaining DB validation depends on `DATABASE_URL` being set for `drizzle-kit push`
+- Local PostgreSQL `devatlas` was validated with the generated Drizzle SQL and matching tables/enums/indexes
 
 ---
 

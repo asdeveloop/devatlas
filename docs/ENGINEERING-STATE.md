@@ -59,7 +59,7 @@ Latest executed checks:
 
 ### Known Gaps
 
-- `apps/api` migration push still requires `DATABASE_URL` to be set before local table validation can run
+- local PostgreSQL validation completed against the `devatlas` database using the generated Drizzle migration SQL
 - repo-wide `test`/`build` still need a broader validation pass when the next cross-package batch is ready
 
 ## Documentation Sync Notes

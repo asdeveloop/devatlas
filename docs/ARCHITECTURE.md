@@ -139,5 +139,5 @@ Typical flow:
 
 ## Current Repo Risks
 
-- `drizzle-kit push` still depends on a valid `DATABASE_URL` in the execution environment
+- local DB validation depends on keeping the generated Drizzle SQL and PostgreSQL schema in sync
 - repo-wide `test`/full health still depends on broader runtime validation beyond the API/types migration slice
