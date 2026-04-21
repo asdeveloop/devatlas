@@ -108,7 +108,7 @@
 | 66 | Verify `PATCH /guides/:id` — partial update | guides | ✅ |
 | 67 | Verify `GET /tools` — pagination, filtering, sorting | tools | ✅ |
 | 68 | Verify `GET /tools/:slug` — full detail + tags + category | tools | ✅ |
-| 69 | Verify `POST /tools` + `PATCH /tools/:id` | tools | ⚠️ |
+| 69 | Verify `POST /tools` + `PUT /tools/:slug` | tools | ✅ |
 | 70 | Verify `GET /categories` + `POST /categories` | categories | ✅ |
 | 71 | Verify `GET /tags` + `POST /tags` | tags | ✅ |
 | 72 | Verify Swagger `/docs` reflects all endpoints correctly | app | ✅ |
@@ -215,7 +215,7 @@ If migration fails:
 - Drizzle is active in `apps/api` and shared Prisma-era type remnants have been removed from the affected packages
 - Local verification confirms `apps/api`, `apps/web`, and root lint are healthy for this migration slice
 - Local PostgreSQL `devatlas` was validated with the generated Drizzle SQL and matching tables/enums/indexes
-- `apps/api/src/modules/__tests__/api-contract.spec.ts` now covers guides/tools/categories/tags plus Swagger path/method exposure; tools are currently verified against the implemented `PUT /tools/:slug` contract, while sprint task 69 still names `PATCH /tools/:id`
+- `apps/api/src/modules/__tests__/api-contract.spec.ts` covers guides/tools/categories/tags plus Swagger path/method exposure, including the implemented `POST /tools` and `PUT /tools/:slug` contract used by the API client
 
 ---
 
