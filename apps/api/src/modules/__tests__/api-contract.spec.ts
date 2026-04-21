@@ -2,7 +2,7 @@ import { ContentStatus, Difficulty, ToolPrice, ToolTier } from '@devatlas/types'
 import { sql } from 'drizzle-orm';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
-import { categories, guides, tags, tools } from '../../db/schema';
+import { categories, guides, searchQueries, tags, tools } from '../../db/schema';
 import { createTestApp } from '../../testing/test-app';
 import { createTestDatabase } from '../../testing/test-db';
 
@@ -211,6 +211,68 @@ describe('API contract', () => {
       name: 'Task Runner Pro',
       status: 'ARCHIVED',
       tags: [{ slug: 'automation' }],
+    });
+  });
+
+  it('verifies POST /search and query logging', async () => {
+    const [category] = await testDb.db.insert(categories).values({ name: 'Frontend', slug: 'frontend' }).returning();
+    const [tag] = await testDb.db.insert(tags).values({ name: 'React', slug: 'react' }).returning();
+    const [guide] = await testDb.db.insert(guides).values({
+      title: 'React Search Patterns',
+      slug: 'react-search-patterns',
+      description: 'Search UX guide',
+      content: 'Build a fast search experience with React components.',
+      readingTime: 6,
+      difficulty: Difficulty.BEGINNER,
+      status: ContentStatus.PUBLISHED,
+      categoryId: category.id,
+    }).returning();
+    await testDb.db.execute(sql`insert into guide_tags (guide_id, tag_id) values (${guide.id}, ${tag.id})`);
+
+    const [tool] = await testDb.db.insert(tools).values({
+      name: 'React Search Kit',
+      slug: 'react-search-kit',
+      description: 'Tooling for search indexing',
+      website: 'https://example.com/react-search-kit',
+      tier: ToolTier.FREE,
+      price: ToolPrice.FREE,
+      active: true,
+      categoryId: category.id,
+    }).returning();
+    await testDb.db.execute(sql`insert into tool_tags (tool_id, tag_id) values (${tool.id}, ${tag.id})`);
+
+    const searchRes = await fetch(`${baseUrl}/api/v1/search`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ query: 'React search', limit: 5 }),
+    });
+    const searchJson = await searchRes.json();
+
+    expect(searchRes.status).toBe(201);
+    expect(searchJson.data).toMatchObject({
+      query: 'React search',
+      total: 2,
+      results: [
+        expect.objectContaining({
+          contentType: 'guide',
+          title: 'React Search Patterns',
+          category: 'frontend',
+          tags: ['react'],
+        }),
+        expect.objectContaining({
+          contentType: 'tool',
+          title: 'React Search Kit',
+          category: 'frontend',
+          tags: ['react'],
+        }),
+      ],
+    });
+
+    const loggedQueries = await testDb.db.select().from(searchQueries);
+    expect(loggedQueries).toHaveLength(1);
+    expect(loggedQueries[0]).toMatchObject({
+      query: 'React search',
+      resultsCount: 2,
     });
   });
 

@@ -1,50 +1,41 @@
-import type { GuideListParams } from '@devatlas/types';
+import type { ToolListParams } from '@devatlas/types';
 import type { Metadata } from 'next';
 
 import { PageShell } from '../../components/layout/page-shell';
-import { getGuides } from '../../features/guides/api/get-guides';
-import { GuidesList } from '../../features/guides/components/guides-list';
-import { ListFilters } from '../../features/guides/components/list-filters';
-import { Pagination } from '../../features/guides/components/pagination';
-import { SiteHeader } from '../../features/navigation';
 import { getCategories } from '../categories/api/get-categories';
+import { ListFilters } from '../guides/components/list-filters';
+import { Pagination } from '../guides/components/pagination';
+import { SiteHeader } from '../navigation';
 import { getTags } from '../tags/api/get-tags';
+
+import { getTools } from './api/get-tools';
+import { ToolsList } from './components/tools-list';
 
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: 'Guides - DevAtlas',
-  description: 'Browse developer guides and tutorials',
+  title: 'Tools - DevAtlas',
+  description: 'Browse the DevAtlas developer tools catalog.',
 };
 
-type GuidesPageProps = {
+type ToolsPageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
 
-export default async function GuidesPage({ searchParams }: GuidesPageProps) {
+export default async function ToolsPage({ searchParams }: ToolsPageProps) {
   const params = await searchParams;
 
-  const queryParams: GuideListParams = {
+  const queryParams: ToolListParams = {
     page: params['page'] ? Number(params['page']) : 1,
     limit: params['limit'] ? Number(params['limit']) : 12,
     categorySlug: typeof params['categorySlug'] === 'string' ? params['categorySlug'] : undefined,
-    difficulty:
-      typeof params['difficulty'] === 'string'
-        ? (params['difficulty'] as GuideListParams['difficulty'])
-        : undefined,
-    search: typeof params['search'] === 'string' ? params['search'] : undefined,
-    sortBy:
-      typeof params['sortBy'] === 'string'
-        ? (params['sortBy'] as GuideListParams['sortBy'])
-        : 'createdAt',
-    sortOrder:
-      typeof params['sortOrder'] === 'string'
-        ? (params['sortOrder'] as GuideListParams['sortOrder'])
-        : 'desc',
+    tagSlug: typeof params['tagSlug'] === 'string' ? params['tagSlug'] : undefined,
+    tier: typeof params['tier'] === 'string' ? (params['tier'] as ToolListParams['tier']) : undefined,
+    price: typeof params['price'] === 'string' ? (params['price'] as ToolListParams['price']) : undefined,
   };
 
   const [response, categories, tags] = await Promise.all([
-    getGuides(queryParams),
+    getTools(queryParams),
     getCategories({ page: 1, limit: 50 }),
     getTags({ page: 1, limit: 50 }),
   ]);
@@ -54,11 +45,13 @@ export default async function GuidesPage({ searchParams }: GuidesPageProps) {
       <SiteHeader />
       <section className="mx-auto max-w-6xl px-4 py-10">
         <div className="mb-8 space-y-2">
-          <h1 className="text-3xl font-bold">Guides</h1>
-          <p className="text-neutral-600 dark:text-neutral-400">In-depth tutorials and walkthroughs for developers.</p>
+          <h1 className="text-3xl font-bold">Tools</h1>
+          <p className="text-neutral-600 dark:text-neutral-400">
+            Explore vetted developer tooling with category context and quick metadata.
+          </p>
         </div>
         <ListFilters
-          basePath="/guides"
+          basePath="/tools"
           currentParams={queryParams}
           groups={[
             {
@@ -79,8 +72,8 @@ export default async function GuidesPage({ searchParams }: GuidesPageProps) {
             },
           ]}
         />
-        <GuidesList guides={response.data} />
-        <Pagination meta={response.meta} basePath="/guides" currentParams={queryParams} />
+        <ToolsList tools={response.data} />
+        <Pagination meta={response.meta} basePath="/tools" currentParams={queryParams} />
       </section>
     </PageShell>
   );

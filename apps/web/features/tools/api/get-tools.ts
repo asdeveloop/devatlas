@@ -1,6 +1,12 @@
 import { HttpClient, ToolsClient } from '@devatlas/api-client';
+import type { PaginationMeta, ToolListItem, ToolListParams } from '@devatlas/types';
 
 import { webEnv } from '../../../lib/env';
+
+export interface ToolListResponse {
+  data: ToolListItem[];
+  meta: PaginationMeta;
+}
 
 const toolsClient = new ToolsClient(
   new HttpClient({
@@ -11,7 +17,7 @@ const toolsClient = new ToolsClient(
   }),
 );
 
-export async function getTools(params?: Record<string, string | number | undefined>) {
+export async function getTools(params?: ToolListParams): Promise<ToolListResponse> {
   const response = await toolsClient.list(params);
   return {
     data: response.data,

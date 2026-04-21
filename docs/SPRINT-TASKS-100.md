@@ -119,25 +119,25 @@
 |---|------|-------------|--------|
 | 73 | Update `apps/web` guide list page — fetch from API | web/guides | ✅ |
 | 74 | Update `apps/web` guide detail page — fetch by slug | web/guides/[slug] | ✅ |
-| 75 | Create tools listing page — `apps/web/tools` | web/tools | ⬜ |
-| 76 | Create tool detail page — `apps/web/tools/[slug]` | web/tools | ⬜ |
-| 77 | Create categories listing page | web/categories | ⬜ |
-| 78 | Implement tag filtering on guide/tool lists | web | ⬜ |
-| 79 | Implement category filtering on guide/tool lists | web | ⬜ |
-| 80 | Wire `packages/api-client` into all web pages | web | ⬜ |
-| 81 | Add loading states + error boundaries | web | ⬜ |
-| 82 | Add SEO meta tags for guide/tool detail pages | web | ⬜ |
+| 75 | Create tools listing page — `apps/web/tools` | web/tools | ✅ |
+| 76 | Create tool detail page — `apps/web/tools/[slug]` | web/tools | ✅ |
+| 77 | Create categories listing page | web/categories | ✅ |
+| 78 | Implement tag filtering on guide/tool lists | web | ✅ |
+| 79 | Implement category filtering on guide/tool lists | web | ✅ |
+| 80 | Wire `packages/api-client` into all web pages | web | ✅ |
+| 81 | Add loading states + error boundaries | web | ✅ |
+| 82 | Add SEO meta tags for guide/tool detail pages | web | ✅ |
 
 ## Phase 8 — Search Module (Tasks 83–88)
 
 | # | Task | Module/File | Status |
 |---|------|-------------|--------|
-| 83 | Create `search.module.ts` + `search.controller.ts` | modules/search | ⬜ |
-| 84 | Create `search.service.ts` — query `search_documents` table | modules/search | ⬜ |
-| 85 | Create `search.repository.ts` — Drizzle full-text queries | modules/search | ⬜ |
-| 86 | Create search indexing service — sync guides/tools → search_documents | modules/search | ⬜ |
-| 87 | Implement `POST /search` endpoint — query + results | search | ⬜ |
-| 88 | Log search queries to `search_queries` table | search | ⬜ |
+| 83 | Create `search.module.ts` + `search.controller.ts` | modules/search | ✅ |
+| 84 | Create `search.service.ts` — query `search_documents` table | modules/search | ✅ |
+| 85 | Create `search.repository.ts` — Drizzle full-text queries | modules/search | ✅ |
+| 86 | Create search indexing service — sync guides/tools → search_documents | modules/search | ✅ |
+| 87 | Implement `POST /search` endpoint — query + results | search | ✅ |
+| 88 | Log search queries to `search_queries` table | search | ✅ |
 
 ## Phase 9 — Content Relations & Knowledge Graph (Tasks 89–93)
 

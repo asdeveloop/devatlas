@@ -3,5 +3,6 @@ export * from './error';
 export * from './guide';
 export * from './pagination';
 export * from './response';
+export * from './search';
 export * from './tag';
 export * from './tool';

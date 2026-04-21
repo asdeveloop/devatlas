@@ -256,6 +256,38 @@ List payload:
 
 ### `GET /api/v1/tools/:slug`
 ### `POST /api/v1/tools`
+
+## Search
+
+### `POST /api/v1/search`
+
+Request payload:
+
+```ts
+{
+  query: string;
+  limit?: number; // default: 10
+}
+```
+
+Response payload:
+
+```ts
+{
+  query: string;
+  results: Array<{
+    id: string;
+    contentType: 'guide' | 'tool';
+    title: string;
+    description: string;
+    category: string;
+    url: string;
+    tags: string[];
+    score: number;
+  }>;
+  total: number;
+}
+```
 ### `PUT /api/v1/tools/:slug`
 ### `DELETE /api/v1/tools/:slug`
 

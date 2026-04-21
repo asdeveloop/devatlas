@@ -1,17 +1,17 @@
-import type { GuideListParams, PaginationMeta } from '@devatlas/types';
+import type { PaginationMeta } from '@devatlas/types';
 import Link from 'next/link';
 
-interface PaginationProps {
+interface PaginationProps<TParams extends object> {
   meta: PaginationMeta;
   basePath: string;
-  currentParams: GuideListParams;
+  currentParams: TParams;
 }
 
-function buildPageUrl(basePath: string, params: GuideListParams, page: number): string {
+function buildPageUrl<TParams extends object>(basePath: string, params: TParams, page: number): string {
   const searchParams = new URLSearchParams();
   const nextParams = { ...params, page };
 
-  Object.entries(nextParams).forEach(([key, value]) => {
+  Object.entries(nextParams as Record<string, string | number | undefined>).forEach(([key, value]) => {
     if (value !== undefined && value !== null) {
       searchParams.set(key, String(value));
     }
@@ -20,7 +20,7 @@ function buildPageUrl(basePath: string, params: GuideListParams, page: number): 
   return `${basePath}?${searchParams.toString()}`;
 }
 
-export function Pagination({ meta, basePath, currentParams }: PaginationProps) {
+export function Pagination<TParams extends object>({ meta, basePath, currentParams }: PaginationProps<TParams>) {
   if (meta.totalPages <= 1) {
     return null;
   }

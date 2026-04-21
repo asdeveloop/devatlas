@@ -7,6 +7,7 @@ import { CategoriesModule } from './modules/categories/categories.module';
 import { DatabaseModule } from './modules/database/database.module';
 import { GuidesModule } from './modules/guides/guides.module';
 import { HealthModule } from './modules/health/health.module';
+import { SearchModule } from './modules/search/search.module';
 import { TagsModule } from './modules/tags/tags.module';
 import { ToolsModule } from './modules/tools/tools.module';
 
@@ -24,6 +25,7 @@ import { ToolsModule } from './modules/tools/tools.module';
     ToolsModule,
     CategoriesModule,
     TagsModule,
+    SearchModule,
     HealthModule,
   ],
 })

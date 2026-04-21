@@ -22,6 +22,16 @@ export async function generateMetadata({
     return {
       title: `${guide.title} — DevAtlas`,
       description: guide.description,
+      openGraph: {
+        title: guide.title,
+        description: guide.description,
+        type: 'article',
+      },
+      twitter: {
+        card: 'summary',
+        title: guide.title,
+        description: guide.description,
+      },
     };
   } catch {
     return {

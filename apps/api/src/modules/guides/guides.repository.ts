@@ -80,6 +80,12 @@ export class GuidesRepository {
       query.difficulty ? eq(guidesSchema.difficulty, query.difficulty) : undefined,
       query.status ? eq(guidesSchema.status, query.status) : undefined,
       query.categoryId ? eq(guidesSchema.categoryId, query.categoryId) : undefined,
+      query.categorySlug
+        ? sql`${guidesSchema.categoryId} IN (SELECT id FROM ${categories} WHERE slug = ${query.categorySlug})`
+        : undefined,
+      query.tagSlug
+        ? sql`${guidesSchema.id} IN (SELECT guide_id FROM ${guideTags} WHERE tag_id IN (SELECT id FROM ${tags} WHERE slug = ${query.tagSlug}))`
+        : undefined,
     ].filter(Boolean);
 
     const where = whereConditions.length > 0

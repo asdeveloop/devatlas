@@ -7,7 +7,7 @@ import { getTools } from '../features/tools/api/get-tools';
 export const dynamic = 'force-dynamic';
 
 export default async function HomePage(): Promise<React.JSX.Element> {
-  const [guides, tools] = await Promise.all([getGuides({ limit: 6 }), getTools({ page: 1, pageSize: 6 })]);
+  const [guides, tools] = await Promise.all([getGuides({ limit: 6 }), getTools({ page: 1, limit: 6 })]);
 
   return (
     <PageShell>

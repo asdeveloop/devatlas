@@ -51,7 +51,9 @@ export class GuidesClient {
       take: params.limit,
       difficulty: params.difficulty,
       status: params.status,
-      categoryId: params.categorySlug,
+      categorySlug: params.categorySlug,
+      tagSlug: params.tagSlug,
+      search: params.search,
       sortBy: params.sortBy,
       order: params.sortOrder,
     });

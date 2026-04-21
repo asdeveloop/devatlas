@@ -24,6 +24,16 @@ export class GuideQueryDto extends BaseQueryDto {
   @IsString()
   categoryId?: string;
 
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  categorySlug?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  tagSlug?: string;
+
   @ApiPropertyOptional({ enum: guideSortFields, default: 'createdAt' })
   @IsOptional()
   @IsIn(guideSortFields)
