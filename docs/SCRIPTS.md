@@ -16,7 +16,7 @@
 | `typecheck`     | `turbo run typecheck`            | Type-check all packages                  |
 | `clean`         | `turbo run clean`                | Remove build artifacts                   |
 | `format`        | `prettier --write .`             | Format entire codebase                   |
-| `format:check`  | `prettier --check .`            | Check formatting without writing         |
+| `format:check`  | `prettier --check .`             | Check formatting without writing         |
 | `postinstall`   | `—`                              | No ORM engine prep needed with Drizzle   |
 
 ### Notes
@@ -32,83 +32,24 @@
 
 | Script       | Command                                    | Description                    |
 | ------------ | ------------------------------------------ | ------------------------------ |
-| `build`      | `nest build`                               | Production build               |
+| `build`      | `tsc --project tsconfig.build.json --outDir dist --incremental false` | Production build |
 | `dev`        | `nest start --watch`                       | Dev server with hot reload     |
 | `start`      | `node dist/main.js`                        | Start production server        |
-| `lint`       | `eslint . --max-warnings=0`               | Lint — zero warnings allowed   |
-| `test`       | `vitest run`                               | Run all tests (single run)     |
+| `lint`       | `eslint src --ext .ts --max-warnings=0`   | Lint — zero warnings allowed   |
+| `test`       | `vitest run --passWithNoTests --config vitest.config.ts` | Run all tests (single run) |
 | `test:watch` | `vitest`                                   | Run tests in watch mode        |
 | `test:cov`   | `vitest run --coverage`                    | Run tests with coverage        |
 | `typecheck`  | `tsc --noEmit`                             | Type-check without emitting    |
 
 ### Database Scripts (Drizzle)
 
-| Script             | Command                                              | Description                                |
-| ------------------ | ---------------------------------------------------- | ------------------------------------------ |
-| `db:generate`      | `drizzle-kit generate`                               | Generate migration SQL from schema changes |
-| `db:migrate`       | `drizzle-kit migrate`                                | Apply pending migrations                   |
-| `db:push`          | `drizzle-kit push`                                   | Push schema directly (dev only)            |
-| `db:studio`        | `drizzle-kit studio`                                 | Open Drizzle Studio (DB browser)           |
-| `db:check`         | `drizzle-kit check`                                  | Validate schema consistency                |
-| `db:drop`          | `drizzle-kit drop`                                   | Drop a migration file                      |
-| `db:seed`          | `tsx src/database/seed.ts`                            | Seed database with initial data            |
-| `db:reset`         | `pnpm db:drop && pnpm db:push && pnpm db:seed`      | Full reset (dev only)                      |
+اسکریپت های Drizzle هنوز به صورت کامل در `apps/api/package.json` expose نشده اند و باید از فایل های واقعی زیر استفاده شوند:
 
-### Script Details
+- config: `apps/api/src/db/drizzle.config.ts`
+- migration runner: `apps/api/src/db/migrate.ts`
+- schema: `apps/api/src/db/schema/*`
 
-#### `db:generate`
-
-Schema تغییر کرده → migration SQL تولید می‌شه:
-
-```bash
-cd apps/api
-pnpm db:generate
-# Output: drizzle/XXXX_migration_name.sql
-
-- فایل‌های migration در `apps/api/drizzle/` ذخیره می‌شن.
-- هر migration یک فایل SQL خالص هست — قابل review در PR.
-
-#### `db:migrate`
-
-Migration های pending رو روی دیتابیس اعمال می‌کنه:
-
-bash
-cd apps/api
-pnpm db:migrate
-
-- در production فقط از این دستور استفاده کنید.
-- **هرگز** از `db:push` در production استفاده نکنید.
-
-#### `db:push`
-
-Schema رو مستقیم به دیتابیس push می‌کنه بدون تولید migration:
-
-bash
-cd apps/api
-pnpm db:push
-
-- فقط برای development سریع.
-- تغییرات destructive بدون هشدار اعمال می‌شن.
-
-#### `db:studio`
-
-Drizzle Studio — یک DB browser بصری:
-
-bash
-cd apps/api
-pnpm db:studio
-# Opens at https://local.drizzle.studio
-
-#### `db:seed`
-
-دیتابیس رو با داده‌های اولیه پر می‌کنه:
-
-bash
-cd apps/api
-pnpm db:seed
-
-- Seed file: `apps/api/src/database/seed.ts`
-- Idempotent باشه — اجرای مکرر مشکلی ایجاد نکنه.
+تا قبل از اضافه شدن اسکریپت های رسمی، هر تغییر دیتابیس باید همراه با runbook مستند و اعتبارسنجی محلی انجام شود.
 
 ---
 
@@ -116,22 +57,22 @@ pnpm db:seed
 
 | Script       | Command                          | Description                    |
 | ------------ | -------------------------------- | ------------------------------ |
-| `build`      | `next build`                     | Production build               |
+| `build`      | `node ../../scripts/link-next-eslint.mjs && next build` | Production build |
 | `dev`        | `next dev`                       | Dev server                     |
 | `start`      | `next start`                     | Start production server        |
 | `lint`       | `eslint . --max-warnings=0`     | Lint — zero warnings allowed   |
-| `test`       | `vitest run`                     | Run all tests                  |
+| `test`       | `vitest run --passWithNoTests --config vitest.config.ts` | Run all tests |
 | `typecheck`  | `tsc --noEmit`                   | Type-check without emitting    |
 
 ---
 
-## packages/shared-types
+## packages/types
 
 | Script      | Command          | Description                 |
 | ----------- | ---------------- | --------------------------- |
-| `build`     | `tsc`            | Compile type declarations   |
-| `typecheck` | `tsc --noEmit`   | Type-check                  |
-| `lint`      | `eslint .`       | Lint                        |
+| `build`     | `tsup src/index.ts --dts --format esm,cjs --clean` | Compile runtime + type declarations |
+| `typecheck` | `tsc -p tsconfig.json --noEmit` | Type-check |
+| `lint`      | `eslint src --ext .ts --max-warnings=0` | Lint |
 
 ---
 
@@ -149,22 +90,23 @@ pnpm db:seed
 
 ## Drizzle Configuration
 
-فایل `drizzle.config.ts` در root پکیج `apps/api`:
+فایل `drizzle.config.ts` در پکیج `apps/api`:
 
-ts
-// filepath: apps/api/drizzle.config.ts
+```ts
+// filepath: apps/api/src/db/drizzle.config.ts
 import { defineConfig } from 'drizzle-kit';
 
 export default defineConfig({
-  schema: './src/database/schema/index.ts',
+  schema: './src/db/schema/index.ts',
   out: './drizzle',
   dialect: 'postgresql',
   dbCredentials: {
-    url: process.env.DATABASE_URL!,
+    url: process.env['DATABASE_URL'],
   },
   verbose: true,
   strict: true,
 });
+```
 
 ---
 
@@ -172,15 +114,16 @@ export default defineConfig({
 
 CI این مراحل رو به ترتیب اجرا می‌کنه:
 
-bash
+```bash
 pnpm install --frozen-lockfile
 pnpm typecheck
 pnpm lint
 pnpm test
 pnpm build
+```
 
-- `db:migrate` در CI فقط برای integration test stage اجرا می‌شه.
-- `db:push` هرگز در CI اجرا نمی‌شه.
+- CI فعلی فقط از `pnpm typecheck`, `pnpm lint`, `pnpm test`, `pnpm build` استفاده می‌کند.
+- هر مرحله migration یا DB setup باید فقط وقتی به workflow اضافه شود که اسکریپت واقعی repo برای آن وجود داشته باشد.
 
 ---
 
@@ -190,8 +133,8 @@ pnpm build
 2. `test` از `vitest run` استفاده می‌کنه — نه watch mode.
 3. `lint` با `--max-warnings=0` — هیچ warning ای قابل قبول نیست.
 4. اسکریپت مرده یا موقت ممنوع — حذفش کن یا issue بزن.
-5. اسکریپت‌های `db:*` فقط در `apps/api` تعریف می‌شن.
-6. `db:push` و `db:reset` فقط در dev — هرگز در production یا CI.
+5. اسکریپت‌های `db:*` فقط وقتی باید مستند شوند که واقعا در `apps/api/package.json` وجود داشته باشند.
+6. هیچ دستور منسوخ Prisma یا Drizzle-placeholder نباید در CI یا docs باقی بماند.
 
 ---
 
@@ -209,5 +152,4 @@ pnpm build
 ### اجرا:
 ```bash
 pnpm doctor
-
----
+```

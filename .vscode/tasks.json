@@ -1,0 +1,64 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Backlog: Pending TODOs",
+      "type": "shell",
+      "command": "rg -n \"TODO|DOING|BLOCKED|VERIFY\" docs/TODO.md",
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "Doctor: System Check",
+      "type": "shell",
+      "command": "pnpm doctor",
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "Health: Full Workspace",
+      "type": "shell",
+      "command": "pnpm health",
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "Health: Full (Verbose)",
+      "type": "shell",
+      "command": "pnpm health:verbose",
+      "problemMatcher": []
+    },
+    {
+      "label": "Context: Repo",
+      "type": "shell",
+      "command": "pnpm agent:context repo",
+      "problemMatcher": []
+    },
+    {
+      "label": "Verify API",
+      "type": "shell",
+      "command": "pnpm agent:verify api",
+      "problemMatcher": []
+    },
+    {
+      "label": "Verify Web",
+      "type": "shell",
+      "command": "pnpm agent:verify web",
+      "problemMatcher": []
+    },
+    {
+      "label": "Dev: API",
+      "type": "shell",
+      "command": "pnpm dev:api",
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "Dev: Web",
+      "type": "shell",
+      "command": "pnpm dev:web",
+      "isBackground": true,
+      "problemMatcher": []
+    }
+  ]
+}

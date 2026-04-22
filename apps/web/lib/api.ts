@@ -1,16 +1,4 @@
-import { GuidesClient, HttpClient, ToolsClient } from '@devatlas/api-client';
-
-import { webEnv } from './env';
-
-const http = new HttpClient({
-  baseUrl: webEnv.apiBaseUrl,
-  defaultHeaders: {
-    'Content-Type': 'application/json',
-  },
-});
-
-const guidesClient = new GuidesClient(http);
-const toolsClient = new ToolsClient(http);
+import { guidesClient, toolsClient } from './api-client';
 
 export async function fetchGuides(query?: Record<string, string | number | undefined>) {
   const response = await guidesClient.list(query);

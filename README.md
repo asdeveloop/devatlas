@@ -80,6 +80,7 @@ devatlas/
 
 ```bash
 pnpm install
+cp .env.example .env
 ```
 
 ### Run locally
@@ -93,6 +94,12 @@ Or per app:
 ```bash
 pnpm dev:api
 pnpm dev:web
+```
+
+### Docker Compose
+
+```bash
+docker compose -f infra/docker/docker-compose.yml up --build
 ```
 
 ## Common Commands
@@ -113,6 +120,7 @@ pnpm health
 ## Notes
 
 - `apps/api` uses Drizzle schemas under `apps/api/src/db/schema`.
+- local env template lives in `.env.example` and uses `NEXT_PUBLIC_API_BASE_URL` for the web app.
 - Global API responses are normalized through `TransformInterceptor` and `HttpExceptionFilter`.
 - The repo contains helper scripts under `scripts/`, including `agent:context`, `agent:verify`, `doctor`, and `health`.
 - Shared package imports should always use workspace package names, not internal `src/` paths.

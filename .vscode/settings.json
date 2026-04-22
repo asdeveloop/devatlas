@@ -1,0 +1,104 @@
+{
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  "editor.tabSize": 2,
+  "editor.detectIndentation": false,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.rulers": [100],
+
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "typescript.preferences.importModuleSpecifier": "non-relative",
+  "typescript.preferences.importModuleSpecifierEnding": "minimal",
+  "typescript.updateImportsOnFileMove.enabled": "always",
+
+  "eslint.useFlatConfig": true,
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact"
+  ],
+  "eslint.workingDirectories": [
+    { "mode": "auto" }
+  ],
+
+  "files.exclude": {
+    "**/.turbo": true,
+    "**/dist": true,
+    "**/.next": true,
+    "**/coverage": true
+  },
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/dist": true,
+    "**/.next": true,
+    "**/coverage": true
+  },
+  "files.watcherExclude": {
+    "**/.turbo/**": true,
+    "**/.next/**": true,
+    "**/dist/**": true,
+    "**/coverage/**": true
+  },
+
+  "terminal.integrated.defaultProfile.linux": "zsh",
+  "terminal.integrated.scrollback": 10000,
+
+  "markdown.validate.enabled": true,
+  "markdown.extension.toc.updateOnSave": false,
+  "markdownlint.config": {
+    "MD013": false,
+    "MD033": false
+  },
+
+  "todo-tree.general.tags": [
+    "TODO",
+    "DOING",
+    "BLOCKED",
+    "VERIFY"
+  ],
+  "todo-tree.regex.regex": "(^\\s*[-*]\\s*`?($TAGS)`?\\b|//\\s*($TAGS)\\b|#\\s*($TAGS)\\b|<!--\\s*($TAGS)\\b)",
+  "todo-tree.tree.showCountsInTree": true,
+  "todo-tree.highlights.defaultHighlight": {
+    "type": "tag"
+  },
+  "todo-tree.highlights.customHighlight": {
+    "TODO": {
+      "icon": "checklist",
+      "foreground": "#0f172a",
+      "background": "#facc15"
+    },
+    "DOING": {
+      "icon": "sync",
+      "foreground": "#ffffff",
+      "background": "#2563eb"
+    },
+    "BLOCKED": {
+      "icon": "issue-opened",
+      "foreground": "#ffffff",
+      "background": "#dc2626"
+    },
+    "VERIFY": {
+      "icon": "beaker",
+      "foreground": "#ffffff",
+      "background": "#059669"
+    }
+  },
+  "todo-tree.filtering.includeGlobs": [
+    "docs/TODO.md",
+    "apps/**/*.{ts,tsx,js,jsx}",
+    "packages/**/*.{ts,tsx,js,jsx,md}",
+    ".github/**/*.{yml,yaml}",
+    "infra/**/*.{yml,yaml}"
+  ],
+
+  "errorLens.enabledDiagnosticLevels": [
+    "error",
+    "warning"
+  ],
+
+  "turbo.runOnSave": false
+}

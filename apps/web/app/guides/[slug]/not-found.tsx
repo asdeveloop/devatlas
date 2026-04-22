@@ -1,12 +1,10 @@
-import Link from "next/link";
+import Link from 'next/link';
 
-import { PageShell } from "../../../components/layout/page-shell";
-import { SiteHeader } from "../../../features/navigation";
+import { AppPageShell } from '../../../components/layout/app-page-shell';
 
 export default function GuideNotFound() {
   return (
-    <PageShell>
-      <SiteHeader />
+    <AppPageShell>
       <section className="flex min-h-[60vh] flex-col items-center justify-center gap-4 px-4 text-center">
         <h1 className="text-4xl font-bold">404</h1>
         <p className="text-lg text-neutral-600 dark:text-neutral-400">
@@ -19,6 +17,6 @@ export default function GuideNotFound() {
           Browse all guides
         </Link>
       </section>
-    </PageShell>
+    </AppPageShell>
   );
 }

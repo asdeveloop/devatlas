@@ -26,6 +26,8 @@ Last Updated: 1405/09/01
 - CI workflow in `.github/workflows/ci.yml`
 - Local install/build/test/typecheck workflow
 - npm mirror configuration in `.npmrc`
+- tracked VS Code workspace config for shared tasks/extensions/settings
+- local Docker deploy artifacts in `infra/docker/`
 
 ### ✅ API Foundation
 - NestJS bootstrap with Swagger, validation, interceptors, exception filter
@@ -51,6 +53,7 @@ Last Updated: 1405/09/01
 ### Current Constraints
 - local PostgreSQL schema must stay aligned with the generated Drizzle migration artifacts
 - repo-wide `test`/`build` have not been re-run as part of this narrow migration follow-up
+- staging/prod CD and automated DB rollout are still not wired
 
 ---
 
@@ -96,7 +99,7 @@ Last Updated: 1405/09/01
 11. ✅ Finalize guide flow in frontend (UX/data flow for `/guides` and `/guides/[slug]`)
 12. ✅ Turn Tools into full frontend feature (listing pages, live API integration)
 13. ✅ Unify API client usage in Web (eliminate parallel fetch patterns)
-14. 🔵 Clean up navigation / route architecture (reduce `app/` vs. `features/` scattering)
+14. 🔵 Clean up navigation / route architecture (route entrypoints now centralized in `app/`; remaining cleanup is incremental dedupe around list/detail route wiring)
 
 **Exit Criteria:** Guides and Tools flows complete; single canonical API client layer
 
@@ -179,7 +182,7 @@ Last Updated: 1405/09/01
 ### Section D — DevOps, QA, Infra (Steps 24–30)
 
 24. `[~ Partial]` CI Pipeline (Lint, Test, Build)
-25. `[ ] Pending` CD Pipeline (Staging + Prod)
+25. `[~ Partial]` CD / Docker Delivery Baseline (Dockerfiles and compose exist; staging/prod pipeline still pending)
 26. `[~ Partial]` Database Migration Strategy (Zero-downtime, seeding, rollout)
 27. `[ ] Pending` Load Testing (k6 / Artillery)
 28. `[ ] Pending` Production Observability Setup

@@ -1,11 +1,13 @@
 import Link from 'next/link';
 
-interface FilterOption {
+import { buildSearchUrl } from '../../../lib/search-params';
+
+export interface FilterOption {
   label: string;
   value: string;
 }
 
-interface FilterGroup {
+export interface FilterGroup {
   key: string;
   label: string;
   options: FilterOption[];
@@ -23,7 +25,6 @@ function buildFilterHref(
   key: string,
   value?: string,
 ) {
-  const params = new URLSearchParams();
   const nextParams: Record<string, string | number | undefined> = {
     ...(currentParams as Record<string, string | number | undefined>),
     page: 1,
@@ -35,14 +36,7 @@ function buildFilterHref(
     delete nextParams[key];
   }
 
-  Object.entries(nextParams).forEach(([paramKey, paramValue]) => {
-    if (paramValue !== undefined) {
-      params.set(paramKey, String(paramValue));
-    }
-  });
-
-  const query = params.toString();
-  return query ? `${basePath}?${query}` : basePath;
+  return buildSearchUrl(basePath, nextParams);
 }
 
 export function ListFilters({ basePath, groups, currentParams }: ListFiltersProps) {

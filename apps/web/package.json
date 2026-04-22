@@ -6,6 +6,7 @@
     "build": "node ../../scripts/link-next-eslint.mjs && next build",
     "dev": "next dev",
     "lint": "eslint . --max-warnings=0",
+    "start": "next start",
     "test": "vitest run --passWithNoTests --config vitest.config.ts",
     "typecheck": "tsc --noEmit"
   },

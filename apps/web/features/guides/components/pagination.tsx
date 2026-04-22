@@ -1,6 +1,8 @@
 import type { PaginationMeta } from '@devatlas/types';
 import Link from 'next/link';
 
+import { buildSearchUrl } from '../../../lib/search-params';
+
 interface PaginationProps<TParams extends object> {
   meta: PaginationMeta;
   basePath: string;
@@ -8,16 +10,8 @@ interface PaginationProps<TParams extends object> {
 }
 
 function buildPageUrl<TParams extends object>(basePath: string, params: TParams, page: number): string {
-  const searchParams = new URLSearchParams();
   const nextParams = { ...params, page };
-
-  Object.entries(nextParams as Record<string, string | number | undefined>).forEach(([key, value]) => {
-    if (value !== undefined && value !== null) {
-      searchParams.set(key, String(value));
-    }
-  });
-
-  return `${basePath}?${searchParams.toString()}`;
+  return buildSearchUrl(basePath, nextParams as Record<string, string | number | undefined>);
 }
 
 export function Pagination<TParams extends object>({ meta, basePath, currentParams }: PaginationProps<TParams>) {

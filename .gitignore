@@ -50,7 +50,10 @@ storybook-static/
 # --- OS & IDEs ---
 .DS_Store
 Thumbs.db
-.vscode/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/tasks.json
 .idea/
 *.pem
 
