@@ -7,6 +7,7 @@
 - Drizzle is the active ORM in `apps/api`.
 - Nest modules for `ai`, `guides`, `tools`, `categories`, `tags`, `search`, `content-relations`, `health`, and `database` are wired in `apps/api/src/app.module.ts`.
 - Global API wrappers for success, error handling, logging, and trace ids are active in bootstrap.
+- API health endpoints now expose `/api/v1/health`, `/api/v1/health/live`, and `/api/v1/health/ready` with in-memory request metrics on the full health report.
 - Web routes are live for `/`, `/guides`, `/guides/[slug]`, `/tools`, and `/tools/[slug]`.
 - Root scripts include local verification helpers: `agent:context`, `agent:verify`, `doctor`, and `health`.
 
@@ -49,6 +50,9 @@ Latest executed checks:
 - prefix: `/api/v1`
 - swagger: `/docs`
 - health check hits the DB with `SELECT 1`
+- liveness probe is available at `/api/v1/health/live`
+- readiness probe is available at `/api/v1/health/ready`
+- full health payload includes in-memory request metrics (totals, status classes, duration buckets, per-route summaries)
 - guides use `PATCH`/`DELETE` by `:id`
 - tools/categories/tags use slug-based update/delete routes
 - guide list/detail DTOs now match the current category/tag-enriched response shape
@@ -61,6 +65,7 @@ Latest executed checks:
 ### Known Gaps
 
 - local PostgreSQL validation completed against the `devatlas` database using the generated Drizzle migration SQL
+- observability baseline is partial: trace ids, structured request logging, request metrics, and health/live/ready probes are present; external exporters/alerts are still pending
 - repo-wide `test`/`build` still need a broader validation pass when the next cross-package batch is ready
 
 ## Documentation Sync Notes

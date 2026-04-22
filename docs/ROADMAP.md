@@ -84,7 +84,7 @@ Last Updated: 1405/09/01
 7. ✅ Finalize Guides contract (params, response shape, behavior)
 8. ✅ Finalize Tools contract (naming, semantics, filtering)
 9. ✅ Finalize Categories & Tags contracts (validation, CRUD/query)
-10. 🔵 Review error/trace/logging readiness (traceId coverage present; metrics gaps remain)
+10. 🔵 Review error/trace/logging readiness (traceId coverage present; basic health metrics/probes shipped; exporter gaps remain)
 
 **Exit Criteria:** All API endpoints match contract; error/trace/logging production-ready
 
@@ -125,7 +125,7 @@ Last Updated: 1405/09/01
 24. ⬜ Load testing (k6/Artillery, latency/error rate baselines)
 25. ⬜ Final production checklist (release prerequisites, versioning)
 
-**Exit Criteria:** Production Docker Compose runs; health endpoint reports status; no critical security findings
+**Exit Criteria:** Production Docker Compose runs; health/live/ready endpoints report status; no critical security findings
 
 ---
 
@@ -269,9 +269,10 @@ Last Updated: 1405/09/01
     - Estimate: 1 day
     - Dependencies: Task 13 (error handling unification)
     - 🚧 Standardize log lines
-    - 🚧 Ensure `traceId` coverage
+    - ✅ Ensure `traceId` coverage
+    - 🚧 Add basic in-memory request metrics + health/live/ready probes
     - ⬜ Identify metrics/exporter gaps
-    - ⬜ Define minimal staging observability backlog
+    - 🚧 Define minimal staging observability backlog: exporter, retention, alert thresholds
 
 ---
 
