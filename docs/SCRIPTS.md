@@ -49,6 +49,8 @@
 | `db:migrate`  | `drizzle-kit migrate --config src/db/drizzle.config.ts`  | Apply pending migrations to the target database |
 | `db:check`    | `drizzle-kit check --config src/db/drizzle.config.ts`    | Validate migration history against the schema output |
 | `db:export`   | `drizzle-kit export --config src/db/drizzle.config.ts`   | Export the full schema diff as SQL from the current state |
+| `content:ingest` | `ts-node --project tsconfig.json src/scripts/ingest-content.ts` | Parse MDX content from `CONTENT_DIR` and upsert categories/tags/guides/tools plus relations and search documents |
+| `search:reindex` | `ts-node --project tsconfig.json src/scripts/reindex-search.ts` | Rebuild `search_documents` explicitly instead of doing index work on read traffic |
 
 اجرای production-like دیتابیس در این repo باید این ترتیب را دنبال کند:
 
@@ -56,6 +58,8 @@
 2. migration SQL را بازبینی و commit کنید
 3. `pnpm --filter @devatlas/api db:check`
 4. `pnpm --filter @devatlas/api db:migrate`
+5. `pnpm --filter @devatlas/api content:ingest` after setting `CONTENT_DIR`
+6. `pnpm --filter @devatlas/api search:reindex` only when you need to rebuild `search_documents` from DB state without re-importing content
 
 Rollback در فاز فعلی خودکار نشده؛ rollback باید با migration جبرانی جدید انجام شود، نه ویرایش دستی migrationهای commit شده.
 

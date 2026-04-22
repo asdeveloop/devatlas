@@ -11,5 +11,6 @@ import { SearchService } from './search.service';
   imports: [DatabaseModule],
   controllers: [SearchController],
   providers: [SearchService, SearchRepository, SearchIndexingService],
+  exports: [SearchService, SearchIndexingService],
 })
 export class SearchModule {}

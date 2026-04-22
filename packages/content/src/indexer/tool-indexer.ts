@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 
-import type { Tool, ParsedContent, ToolFrontmatter } from '../types';
+import type { Tool, ParsedContent, ToolFrontmatter } from '../types/index.js';
 
 export function indexTool(
   parsed: ParsedContent<ToolFrontmatter>,

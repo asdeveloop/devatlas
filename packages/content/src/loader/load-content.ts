@@ -1,8 +1,8 @@
 import { readdir, readFile } from 'node:fs/promises';
 import { extname, join } from 'node:path';
 
-import { parseMdx } from '../parser';
-import type { ParsedContent } from '../types';
+import { parseMdx } from '../parser/index.js';
+import type { ParsedContent } from '../types/index.js';
 
 async function walkDir(dir: string): Promise<string[]> {
   const entries = await readdir(dir, { withFileTypes: true });

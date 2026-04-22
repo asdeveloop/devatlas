@@ -1,8 +1,8 @@
 import matter from 'gray-matter';
 
-import { guideFrontmatterSchema } from '../schemas/guide.schema';
-import { toolFrontmatterSchema } from '../schemas/tool.schema';
-import type { ParsedContent, GuideFrontmatter, ToolFrontmatter, ContentKind } from '../types';
+import { guideFrontmatterSchema } from '../schemas/guide.schema.js';
+import { toolFrontmatterSchema } from '../schemas/tool.schema.js';
+import type { ParsedContent, GuideFrontmatter, ToolFrontmatter, ContentKind } from '../types/index.js';
 
 export class ContentParseError extends Error {
   constructor(

@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 
-import type { SearchDocument, Guide, Tool, ContentType } from '../types';
+import type { SearchDocument, Guide, Tool, ContentType } from '../types/index.js';
 
 export function buildSearchDocument(
   entity: Guide | Tool,

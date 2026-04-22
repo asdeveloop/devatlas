@@ -2,19 +2,13 @@ import type { SearchResultItem } from '@devatlas/types';
 import { Inject, Injectable } from '@nestjs/common';
 
 import type { SearchRequestDto } from './dto/search-request.dto';
-import { SearchIndexingService } from './search-indexing.service';
 import { SearchRepository } from './search.repository';
 
 @Injectable()
 export class SearchService {
-  constructor(
-    @Inject(SearchRepository) private readonly repo: SearchRepository,
-    @Inject(SearchIndexingService) private readonly indexingService: SearchIndexingService,
-  ) {}
+  constructor(@Inject(SearchRepository) private readonly repo: SearchRepository) {}
 
   async search(dto: SearchRequestDto): Promise<{ query: string; results: SearchResultItem[]; total: number }> {
-    await this.indexingService.syncSearchDocuments();
-
     const query = dto.query.trim();
     const result = await this.repo.search(query, dto.limit);
     const results = result.map((item) => ({

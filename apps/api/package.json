@@ -4,17 +4,20 @@
   "private": true,
   "scripts": {
     "build": "tsc --project tsconfig.build.json --outDir dist --incremental false",
+    "content:ingest": "ts-node --project tsconfig.json src/scripts/ingest-content.ts",
     "db:check": "drizzle-kit check --config src/db/drizzle.config.ts",
     "db:export": "drizzle-kit export --config src/db/drizzle.config.ts",
     "db:generate": "drizzle-kit generate --config src/db/drizzle.config.ts",
     "db:migrate": "drizzle-kit migrate --config src/db/drizzle.config.ts",
     "dev": "nest start --watch",
     "lint": "eslint src --ext .ts --max-warnings=0",
+    "search:reindex": "ts-node --project tsconfig.json src/scripts/reindex-search.ts",
     "start": "node dist/main.js",
     "test": "vitest run --passWithNoTests --config vitest.config.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@devatlas/content": "workspace:*",
     "@devatlas/types": "workspace:*",
     "@nestjs/common": "11.1.18",
     "@nestjs/config": "4.0.4",

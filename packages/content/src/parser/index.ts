@@ -1,1 +1,1 @@
-export { parseMdx, ContentParseError } from './parse-mdx';
+export { parseMdx, ContentParseError } from './parse-mdx.js';

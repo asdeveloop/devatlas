@@ -1,2 +1,2 @@
-export { guideFrontmatterSchema, type ValidatedGuideFrontmatter } from './guide.schema';
-export { toolFrontmatterSchema, type ValidatedToolFrontmatter } from './tool.schema';
+export { guideFrontmatterSchema, type ValidatedGuideFrontmatter } from './guide.schema.js';
+export { toolFrontmatterSchema, type ValidatedToolFrontmatter } from './tool.schema.js';

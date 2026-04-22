@@ -6,7 +6,7 @@ import { SearchRepository } from './search.repository';
 export class SearchIndexingService {
   constructor(@Inject(SearchRepository) private readonly repo: SearchRepository) {}
 
-  async syncSearchDocuments(): Promise<void> {
+  async rebuildSearchDocuments(): Promise<void> {
     await this.repo.replaceIndexWithGuides();
     await this.repo.replaceIndexWithTools();
   }

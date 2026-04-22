@@ -1,2 +1,2 @@
-export * from './database';
-export * from './frontmatter';
+export * from './database.js';
+export * from './frontmatter.js';

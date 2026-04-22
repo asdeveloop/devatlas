@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 
-import type { Guide, ParsedContent, GuideFrontmatter } from '../types';
+import type { Guide, ParsedContent, GuideFrontmatter } from '../types/index.js';
 
 export function indexGuide(
   parsed: ParsedContent<GuideFrontmatter>,

@@ -1,6 +1,6 @@
-export * from './types';
-export * from './schemas';
-export * from './parser';
-export * from './loader';
-export * from './indexer';
-export { buildContentIndex, type ContentIndex } from './pipeline/build-content-index';
+export * from './types/index.js';
+export * from './schemas/index.js';
+export * from './parser/index.js';
+export * from './loader/index.js';
+export * from './indexer/index.js';
+export { buildContentIndex, type ContentIndex } from './pipeline/build-content-index.js';

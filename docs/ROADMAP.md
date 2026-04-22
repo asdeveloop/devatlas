@@ -24,6 +24,8 @@
 - لایه امنیت baseline برای abuse protection, env contract, rate limit و secret handling کامل نشده
 - observability خارجی، alerting و runbook incident هنوز نداریم
 - CI/CD تا staging/prod به شکل عملیاتی و قابل تکرار کامل نشده
+- بازسازی ایندکس Search باید explicit و عملیاتی بماند؛ کار سنگین index نباید روی read-path هر درخواست اجرا شود
+- ingest محتوا باید از MDX به DB/Search/Relations با یک command عملیاتی قابل تکرار انجام شود، نه با import دستی داده
 
 ### چیزهایی که فعلا هدف نیست
 - فیچرهای جدید محتوایی خارج از `guides/tools/search`

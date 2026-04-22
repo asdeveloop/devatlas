@@ -1,12 +1,12 @@
 import { randomUUID } from 'node:crypto';
 
-import { indexGuide, indexTool, buildSearchDocument, buildRelations } from '../indexer';
-import { loadContent } from '../loader';
+import { indexGuide, indexTool, buildSearchDocument, buildRelations } from '../indexer/index.js';
+import { loadContent } from '../loader/index.js';
 import type {
   Guide, Tool, Category, Tag, GuideTag, ToolTag,
   ContentRelation, SearchDocument, GuideFrontmatter,
   ToolFrontmatter, ParsedContent, ContentType,
-} from '../types';
+} from '../types/index.js';
 
 export interface ContentIndex {
   guides: Guide[];
