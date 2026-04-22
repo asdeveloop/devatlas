@@ -26,6 +26,14 @@ export class ErrorFactory {
     );
   }
 
+  static InvalidAiContentType() {
+    return new DomainError(
+      ErrorCodes.INVALID_AI_CONTENT_TYPE,
+      'AI content type must be guide or tool',
+      400,
+    );
+  }
+
   static CategoryNotFound() {
     return new DomainError(
       ErrorCodes.CATEGORY_NOT_FOUND,

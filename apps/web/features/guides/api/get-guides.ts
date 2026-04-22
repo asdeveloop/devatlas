@@ -20,7 +20,7 @@ const guidesClient = new GuidesClient(
 export async function getGuides(params?: GuideListParams): Promise<GuideListResponse> {
   const response = await guidesClient.list(params);
   return {
-    data: response.data,
+    data: response.data as GuideListItem[],
     meta: response.meta,
   };
 }

@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 
 import configuration from './config/configuration';
 import { envSchema } from './config/env.validation';
+import { AiModule } from './modules/ai/ai.module';
 import { CategoriesModule } from './modules/categories/categories.module';
 import { ContentRelationsModule } from './modules/content-relations/content-relations.module';
 import { DatabaseModule } from './modules/database/database.module';
@@ -22,6 +23,7 @@ import { ToolsModule } from './modules/tools/tools.module';
       validate: (env) => envSchema.parse(env),
     }),
     DatabaseModule,
+    AiModule,
     ContentRelationsModule,
     GuidesModule,
     ToolsModule,

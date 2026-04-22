@@ -1,5 +1,5 @@
 import { HttpClient, ToolsClient } from '@devatlas/api-client';
-import type { RelatedContentItem } from '@devatlas/types';
+import type { RelatedContentItem, RelationType } from '@devatlas/types';
 
 import { webEnv } from '../../../lib/env';
 
@@ -14,5 +14,8 @@ const toolsClient = new ToolsClient(
 
 export async function getRelatedTools(id: string): Promise<RelatedContentItem[]> {
   const response = await toolsClient.getRelated(id);
-  return response.data;
+  return response.data.map((item) => ({
+    ...item,
+    relationType: item.relationType as RelationType,
+  }));
 }

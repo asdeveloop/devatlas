@@ -153,13 +153,13 @@
 
 | # | Task | Module/File | Status |
 |---|------|-------------|--------|
-| 94 | Create `ai.module.ts` + `ai.service.ts` skeleton | modules/ai | ⬜ |
-| 95 | Create `ai-summary.repository.ts` — CRUD for ai_summaries | modules/ai | ⬜ |
-| 96 | Create `ai-answer.repository.ts` — CRUD for ai_answers | modules/ai | ⬜ |
-| 97 | Implement summary generation job — store in ai_summaries | modules/ai | ⬜ |
-| 98 | Implement Q&A endpoint — `POST /ai/ask` | modules/ai | ⬜ |
-| 99 | Add AI summary display to guide/tool detail pages | web | ⬜ |
-| 100 | Document AI provider strategy in ARCHITECTURE.md | docs | ⬜ |
+| 94 | Create `ai.module.ts` + `ai.service.ts` skeleton | modules/ai | ✅ |
+| 95 | Create `ai-summary.repository.ts` — CRUD for ai_summaries | modules/ai | ✅ |
+| 96 | Create `ai-answer.repository.ts` — CRUD for ai_answers | modules/ai | ✅ |
+| 97 | Implement summary generation job — store in ai_summaries | modules/ai | ✅ |
+| 98 | Implement Q&A endpoint — `POST /ai/ask` | modules/ai | ✅ |
+| 99 | Add AI summary display to guide/tool detail pages | web | ✅ |
+| 100 | Document AI provider strategy in ARCHITECTURE.md | docs | ✅ |
 
 ---
 

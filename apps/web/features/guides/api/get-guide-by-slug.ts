@@ -14,5 +14,5 @@ const guidesClient = new GuidesClient(
 
 export async function getGuideBySlug(slug: string): Promise<GuideDetail> {
   const response = await guidesClient.getBySlug(slug);
-  return response.data;
+  return response.data as GuideDetail;
 }

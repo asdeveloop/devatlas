@@ -1,5 +1,5 @@
 import { HttpClient, ToolsClient } from '@devatlas/api-client';
-import type { PaginationMeta, ToolListItem, ToolListParams } from '@devatlas/types';
+import type { PaginationMeta, ToolListItem, ToolListParams, ToolStatus } from '@devatlas/types';
 
 import { webEnv } from '../../../lib/env';
 
@@ -20,7 +20,10 @@ const toolsClient = new ToolsClient(
 export async function getTools(params?: ToolListParams): Promise<ToolListResponse> {
   const response = await toolsClient.list(params);
   return {
-    data: response.data,
+    data: response.data.map((item) => ({
+      ...item,
+      status: item.status as ToolStatus,
+    })),
     meta: response.meta,
   };
 }

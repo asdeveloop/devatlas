@@ -27,12 +27,14 @@ devatlas/
 ## Tech Stack
 
 ### Web
+
 - Next.js 16.2.3
 - React 19.2.4
 - Tailwind CSS 3.4.17
 - Vitest 3
 
 ### API
+
 - NestJS 11.1.x
 - Drizzle ORM 0.45.x
 - PostgreSQL 15+
@@ -40,6 +42,7 @@ devatlas/
 - Swagger
 
 ### Tooling
+
 - pnpm 10.33.0
 - Turborepo 2.9.x
 - TypeScript 5.9.x
@@ -49,21 +52,26 @@ devatlas/
 ## Active Runtime Surface
 
 ### API
+
 - Base prefix: `/api`
 - Versioning: URI versioning with default `v1`
 - Swagger: `/docs`
-- Modules: `health`, `guides`, `tools`, `categories`, `tags`, `database`
+- Modules: `health`, `guides`, `tools`, `categories`, `tags`, `search`, `content-relations`, `ai`, `database`
 
 ### Web
+
 - Routes:
   - `/`
   - `/guides`
   - `/guides/[slug]`
-- Data access currently exists for guides and tools, but only guides are exposed as routed pages right now.
+  - `/tools`
+  - `/tools/[slug]`
+- Guide and tool detail pages render related-content suggestions and persisted AI summaries from the API layer.
 
 ## Quick Start
 
 ### Prerequisites
+
 - Node.js 20+
 - pnpm 10+
 - PostgreSQL 15+

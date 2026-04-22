@@ -58,10 +58,13 @@ docs/
 `apps/api/src/app.module.ts` imports:
 
 - `DatabaseModule`
+- `AiModule`
 - `GuidesModule`
 - `ToolsModule`
 - `CategoriesModule`
 - `TagsModule`
+- `SearchModule`
+- `ContentRelationsModule`
 - `HealthModule`
 
 ### API Module Shape
@@ -73,6 +76,25 @@ Each active domain follows the Nest module split below:
 - repository: Drizzle queries
 - dto: request and response shapes
 - tests: service-level tests close to the module
+
+### AI Layer Preparation
+
+The current AI slice is intentionally provider-agnostic:
+
+- `apps/api/src/modules/ai/ai.module.ts` owns AI HTTP endpoints and orchestration
+- `ai-summary.repository.ts` stores/retrieves generated summaries from `ai_summaries`
+- `ai-answer.repository.ts` persists Q&A responses into `ai_answers`
+- summary generation is deterministic and local for now, so the persistence and API contracts are stable before a remote provider is added
+- `POST /api/v1/ai/ask` uses search retrieval plus stored summaries as the answer context
+
+#### Provider Strategy
+
+DevAtlas keeps the AI provider behind the service layer so the next step can swap in OpenAI, Anthropic, local models, or another provider without changing controllers, repositories, or web consumers.
+
+- retrieval stays local in the existing search/index tables
+- prompt/response generation belongs in `AiService` behind a narrow method boundary
+- provider credentials and model selection should enter through config, not repository code
+- `ai_summaries` and `ai_answers` remain the durable cache/audit layer regardless of provider choice
 
 ### Response and Error Model
 
@@ -109,8 +131,10 @@ Current App Router entries under `apps/web/app`:
 - `/` → `apps/web/app/page.tsx`
 - `/guides` → `apps/web/app/guides/page.tsx`
 - `/guides/[slug]` → `apps/web/app/guides/[slug]/page.tsx`
+- `/tools` → `apps/web/app/tools/page.tsx`
+- `/tools/[slug]` → `apps/web/app/tools/[slug]/page.tsx`
 
-There is no routed `/tools` page yet, although tool fetching utilities already exist under `apps/web/features/tools/api/`.
+Guide and tool detail pages now pull AI summaries through the shared API client and render them as a separate summary block above the main detail content.
 
 ### Feature Organization
 

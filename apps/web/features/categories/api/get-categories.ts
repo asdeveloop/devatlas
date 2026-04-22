@@ -20,7 +20,7 @@ const categoriesClient = new CategoriesClient(
 export async function getCategories(params?: CategoryListParams): Promise<CategoryListResponse> {
   const response = await categoriesClient.list(params);
   return {
-    data: response.data,
+    data: response.data as CategoryListItem[],
     meta: response.meta,
   };
 }

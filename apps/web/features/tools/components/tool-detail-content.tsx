@@ -1,13 +1,15 @@
-import type { RelatedContentItem, ToolDetail } from '@devatlas/types';
+import type { AiSummary, RelatedContentItem, ToolDetail } from '@devatlas/types';
 
+import { AiSummaryCard } from '../../ai/components/ai-summary-card';
 import { RelatedContentSection } from '../../content-relations/components/related-content-section';
 
 interface ToolDetailContentProps {
   tool: ToolDetail;
+  summary?: AiSummary | null;
   related?: RelatedContentItem[];
 }
 
-export function ToolDetailContent({ tool, related = [] }: ToolDetailContentProps) {
+export function ToolDetailContent({ tool, summary, related = [] }: ToolDetailContentProps) {
   return (
     <article className="mx-auto max-w-3xl px-4 py-10">
       <header className="mb-8 space-y-4">
@@ -23,6 +25,8 @@ export function ToolDetailContent({ tool, related = [] }: ToolDetailContentProps
           <span>Score {tool.popularityScore}</span>
         </div>
       </header>
+
+      {summary ? <AiSummaryCard summary={summary} /> : null}
 
       <section className="grid gap-4 rounded-xl border border-neutral-200 p-5 dark:border-neutral-800 sm:grid-cols-2">
         <div>

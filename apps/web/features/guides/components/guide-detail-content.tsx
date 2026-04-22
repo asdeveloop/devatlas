@@ -1,5 +1,6 @@
-import { Difficulty, type GuideDetail, type RelatedContentItem } from '@devatlas/types';
+import { Difficulty, type AiSummary, type GuideDetail, type RelatedContentItem } from '@devatlas/types';
 
+import { AiSummaryCard } from '../../ai/components/ai-summary-card';
 import { RelatedContentSection } from '../../content-relations/components/related-content-section';
 
 const difficultyLabels: Record<Difficulty, string> = {
@@ -10,10 +11,11 @@ const difficultyLabels: Record<Difficulty, string> = {
 
 interface GuideDetailContentProps {
   guide: GuideDetail;
+  summary?: AiSummary | null;
   related?: RelatedContentItem[];
 }
 
-export function GuideDetailContent({ guide, related = [] }: GuideDetailContentProps) {
+export function GuideDetailContent({ guide, summary, related = [] }: GuideDetailContentProps) {
   return (
     <article className="mx-auto max-w-3xl px-4 py-10">
       <header className="mb-8 space-y-3">
@@ -25,6 +27,8 @@ export function GuideDetailContent({ guide, related = [] }: GuideDetailContentPr
           <span>{guide.readingTime} min read</span>
         </div>
       </header>
+
+      {summary ? <AiSummaryCard summary={summary} /> : null}
 
       <div className="prose prose-neutral max-w-none dark:prose-invert">
         <div dangerouslySetInnerHTML={{ __html: guide.content }} />

@@ -13,6 +13,7 @@ describe('ErrorCodes', () => {
       CATEGORY_NOT_FOUND: 'CATEGORY_NOT_FOUND',
       TAG_NOT_FOUND: 'TAG_NOT_FOUND',
       TOOL_NOT_FOUND: 'TOOL_NOT_FOUND',
+      INVALID_AI_CONTENT_TYPE: 'INVALID_AI_CONTENT_TYPE',
       INVALID_CATEGORY: 'INVALID_CATEGORY',
       INVALID_RELATION: 'INVALID_RELATION',
       UNKNOWN: 'UNKNOWN_ERROR',
@@ -84,5 +85,13 @@ describe('ErrorFactory', () => {
     const err = ErrorFactory.Unknown({});
     expect(err.message).toBe('Unknown error');
     expect(err.status).toBe(500);
+  });
+
+  it('InvalidAiContentType → 400, INVALID_AI_CONTENT_TYPE', () => {
+    const err = ErrorFactory.InvalidAiContentType();
+    expect(err).toBeInstanceOf(DomainError);
+    expect(err.code).toBe('INVALID_AI_CONTENT_TYPE');
+    expect(err.message).toBe('AI content type must be guide or tool');
+    expect(err.status).toBe(400);
   });
 });

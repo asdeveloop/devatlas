@@ -1,19 +1,22 @@
 import { ContentStatus, Difficulty, EntityType, RelationType, ToolPrice, ToolTier } from '@devatlas/types';
+import type { INestApplication } from '@nestjs/common';
+import type { OpenAPIObject } from '@nestjs/swagger';
 import { sql } from 'drizzle-orm';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
-import { categories, contentRelations, guides, searchQueries, tags, tools } from '../../db/schema';
-import { createTestApp } from '../../testing/test-app';
-import { createTestDatabase } from '../../testing/test-db';
+import { aiAnswers, aiSummaries, categories, contentRelations, guides, searchQueries, tags, tools } from '../../db/schema';
+import { createTestDatabase, hasTestDatabaseConfig } from '../../testing/test-db';
 
-const testDb = createTestDatabase();
+const describeIfDatabase = hasTestDatabaseConfig ? describe : describe.skip;
+const testDb = hasTestDatabaseConfig ? createTestDatabase() : null;
 
-describe('API contract', () => {
+describeIfDatabase('API contract', () => {
   let baseUrl: string;
-  let app: Awaited<ReturnType<typeof createTestApp>>['app'];
-  let swaggerDocument: Awaited<ReturnType<typeof createTestApp>>['swaggerDocument'];
+  let app: INestApplication;
+  let swaggerDocument: OpenAPIObject;
 
   beforeAll(async () => {
+    const { createTestApp } = await import('../../testing/test-app');
     const testApp = await createTestApp();
     app = testApp.app;
     baseUrl = testApp.baseUrl;
@@ -21,18 +24,18 @@ describe('API contract', () => {
   });
 
   beforeEach(async () => {
-    await testDb.reset();
+    await testDb!.reset();
   });
 
   afterAll(async () => {
     await app.close();
-    await testDb.close();
+    await testDb!.close();
   });
 
   it('verifies GET /guides and GET /guides/:slug', async () => {
-    const [category] = await testDb.db.insert(categories).values({ name: 'Frontend', slug: 'frontend' }).returning();
-    const [tag] = await testDb.db.insert(tags).values({ name: 'React', slug: 'react' }).returning();
-    await testDb.db.insert(guides).values({
+    const [category] = await testDb!.db.insert(categories).values({ name: 'Frontend', slug: 'frontend' }).returning();
+    const [tag] = await testDb!.db.insert(tags).values({ name: 'React', slug: 'react' }).returning();
+    await testDb!.db.insert(guides).values({
       title: 'Archived Vue Notes',
       slug: 'archived-vue-notes',
       description: 'Ignore me',
@@ -42,7 +45,7 @@ describe('API contract', () => {
       status: ContentStatus.ARCHIVED,
       categoryId: category.id,
     });
-    const [guide] = await testDb.db.insert(guides).values({
+    const [guide] = await testDb!.db.insert(guides).values({
       title: 'React Patterns',
       slug: 'react-patterns',
       description: 'Useful patterns',
@@ -52,7 +55,7 @@ describe('API contract', () => {
       status: ContentStatus.PUBLISHED,
       categoryId: category.id,
     }).returning();
-    await testDb.db.execute(sql`insert into guide_tags (guide_id, tag_id) values (${guide.id}, ${tag.id})`);
+    await testDb!.db.execute(sql`insert into guide_tags (guide_id, tag_id) values (${guide.id}, ${tag.id})`);
 
     const listRes = await fetch(`${baseUrl}/api/v1/guides?status=PUBLISHED&take=10&skip=0&sortBy=title&order=asc`);
     const listJson = await listRes.json();
@@ -78,9 +81,9 @@ describe('API contract', () => {
   });
 
   it('verifies POST and PATCH guide flows', async () => {
-    const [category] = await testDb.db.insert(categories).values({ name: 'Backend', slug: 'backend' }).returning();
-    const [tagA] = await testDb.db.insert(tags).values({ name: 'NestJS', slug: 'nestjs' }).returning();
-    const [tagB] = await testDb.db.insert(tags).values({ name: 'API', slug: 'api' }).returning();
+    const [category] = await testDb!.db.insert(categories).values({ name: 'Backend', slug: 'backend' }).returning();
+    const [tagA] = await testDb!.db.insert(tags).values({ name: 'NestJS', slug: 'nestjs' }).returning();
+    const [tagB] = await testDb!.db.insert(tags).values({ name: 'API', slug: 'api' }).returning();
 
     const createRes = await fetch(`${baseUrl}/api/v1/guides`, {
       method: 'POST',
@@ -123,9 +126,9 @@ describe('API contract', () => {
   });
 
   it('verifies GET /tools and GET /tools/:slug', async () => {
-    const [category] = await testDb.db.insert(categories).values({ name: 'AI', slug: 'ai' }).returning();
-    const [tag] = await testDb.db.insert(tags).values({ name: 'LLM', slug: 'llm' }).returning();
-    await testDb.db.insert(tools).values({
+    const [category] = await testDb!.db.insert(categories).values({ name: 'AI', slug: 'ai' }).returning();
+    const [tag] = await testDb!.db.insert(tags).values({ name: 'LLM', slug: 'llm' }).returning();
+    await testDb!.db.insert(tools).values({
       name: 'Starter Tool',
       slug: 'starter-tool',
       description: 'Lower popularity',
@@ -135,7 +138,7 @@ describe('API contract', () => {
       categoryId: category.id,
       popularity: 7,
     });
-    const [tool] = await testDb.db.insert(tools).values({
+    const [tool] = await testDb!.db.insert(tools).values({
       name: 'DevAtlas AI',
       slug: 'devatlas-ai',
       description: 'Assistant',
@@ -146,7 +149,7 @@ describe('API contract', () => {
       categoryId: category.id,
       popularity: 42,
     }).returning();
-    await testDb.db.execute(sql`insert into tool_tags (tool_id, tag_id) values (${tool.id}, ${tag.id})`);
+    await testDb!.db.execute(sql`insert into tool_tags (tool_id, tag_id) values (${tool.id}, ${tag.id})`);
 
     const listRes = await fetch(`${baseUrl}/api/v1/tools?page=1&pageSize=10&categorySlug=ai&tagSlug=llm`);
     const listJson = await listRes.json();
@@ -171,9 +174,9 @@ describe('API contract', () => {
   });
 
   it('verifies POST and PUT tool flows', async () => {
-    const [category] = await testDb.db.insert(categories).values({ name: 'Productivity', slug: 'productivity' }).returning();
-    const [tagA] = await testDb.db.insert(tags).values({ name: 'CLI', slug: 'cli' }).returning();
-    const [tagB] = await testDb.db.insert(tags).values({ name: 'Automation', slug: 'automation' }).returning();
+    const [category] = await testDb!.db.insert(categories).values({ name: 'Productivity', slug: 'productivity' }).returning();
+    const [tagA] = await testDb!.db.insert(tags).values({ name: 'CLI', slug: 'cli' }).returning();
+    const [tagB] = await testDb!.db.insert(tags).values({ name: 'Automation', slug: 'automation' }).returning();
 
     const createRes = await fetch(`${baseUrl}/api/v1/tools`, {
       method: 'POST',
@@ -215,9 +218,9 @@ describe('API contract', () => {
   });
 
   it('verifies POST /search and query logging', async () => {
-    const [category] = await testDb.db.insert(categories).values({ name: 'Frontend', slug: 'frontend' }).returning();
-    const [tag] = await testDb.db.insert(tags).values({ name: 'React', slug: 'react' }).returning();
-    const [guide] = await testDb.db.insert(guides).values({
+    const [category] = await testDb!.db.insert(categories).values({ name: 'Frontend', slug: 'frontend' }).returning();
+    const [tag] = await testDb!.db.insert(tags).values({ name: 'React', slug: 'react' }).returning();
+    const [guide] = await testDb!.db.insert(guides).values({
       title: 'React Search Patterns',
       slug: 'react-search-patterns',
       description: 'Search UX guide',
@@ -227,9 +230,9 @@ describe('API contract', () => {
       status: ContentStatus.PUBLISHED,
       categoryId: category.id,
     }).returning();
-    await testDb.db.execute(sql`insert into guide_tags (guide_id, tag_id) values (${guide.id}, ${tag.id})`);
+    await testDb!.db.execute(sql`insert into guide_tags (guide_id, tag_id) values (${guide.id}, ${tag.id})`);
 
-    const [tool] = await testDb.db.insert(tools).values({
+    const [tool] = await testDb!.db.insert(tools).values({
       name: 'React Search Kit',
       slug: 'react-search-kit',
       description: 'Tooling for search indexing',
@@ -239,7 +242,7 @@ describe('API contract', () => {
       active: true,
       categoryId: category.id,
     }).returning();
-    await testDb.db.execute(sql`insert into tool_tags (tool_id, tag_id) values (${tool.id}, ${tag.id})`);
+    await testDb!.db.execute(sql`insert into tool_tags (tool_id, tag_id) values (${tool.id}, ${tag.id})`);
 
     const searchRes = await fetch(`${baseUrl}/api/v1/search`, {
       method: 'POST',
@@ -268,7 +271,7 @@ describe('API contract', () => {
       ],
     });
 
-    const loggedQueries = await testDb.db.select().from(searchQueries);
+    const loggedQueries = await testDb!.db.select().from(searchQueries);
     expect(loggedQueries).toHaveLength(1);
     expect(loggedQueries[0]).toMatchObject({
       query: 'React search',
@@ -276,10 +279,59 @@ describe('API contract', () => {
     });
   });
 
+  it('verifies AI summaries and Q&A flows', async () => {
+    const [category] = await testDb!.db.insert(categories).values({ name: 'AI', slug: 'ai' }).returning();
+    const [tag] = await testDb!.db.insert(tags).values({ name: 'Agents', slug: 'agents' }).returning();
+    const [guide] = await testDb!.db.insert(guides).values({
+      title: 'Build AI Agents',
+      slug: 'build-ai-agents',
+      description: 'How to compose reliable agent flows.',
+      content: 'Use retrieval, deterministic orchestration, and clear tool boundaries.',
+      readingTime: 9,
+      difficulty: Difficulty.INTERMEDIATE,
+      status: ContentStatus.PUBLISHED,
+      categoryId: category.id,
+    }).returning();
+    await testDb!.db.execute(sql`insert into guide_tags (guide_id, tag_id) values (${guide.id}, ${tag.id})`);
+
+    const summaryRes = await fetch(`${baseUrl}/api/v1/ai/summaries/guide/build-ai-agents`);
+    const summaryJson = await summaryRes.json();
+    expect(summaryRes.status).toBe(200);
+    expect(summaryJson.data).toMatchObject({
+      contentType: 'guide',
+      slug: 'build-ai-agents',
+      title: 'Build AI Agents',
+    });
+    expect(summaryJson.data.summary).toContain('Build AI Agents');
+
+    const [storedSummary] = await testDb!.db.select().from(aiSummaries).execute();
+    expect(storedSummary?.contentId).toBe(guide.id);
+
+    const askRes = await fetch(`${baseUrl}/api/v1/ai/ask`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ question: 'How should I build AI agents?', limit: 2 }),
+    });
+    const askJson = await askRes.json();
+    expect(askRes.status).toBe(201);
+    expect(askJson.data).toMatchObject({
+      question: 'How should I build AI agents?',
+      sources: [
+        expect.objectContaining({
+          contentType: 'guide',
+          slug: 'build-ai-agents',
+        }),
+      ],
+    });
+
+    const [storedAnswer] = await testDb!.db.select().from(aiAnswers).execute();
+    expect(storedAnswer?.question).toBe('How should I build AI agents?');
+  });
+
   it('verifies content relation creation and related lookups', async () => {
-    const [category] = await testDb.db.insert(categories).values({ name: 'Frontend', slug: 'frontend' }).returning();
-    const [tag] = await testDb.db.insert(tags).values({ name: 'React', slug: 'react' }).returning();
-    const [sourceGuide] = await testDb.db.insert(guides).values({
+    const [category] = await testDb!.db.insert(categories).values({ name: 'Frontend', slug: 'frontend' }).returning();
+    const [tag] = await testDb!.db.insert(tags).values({ name: 'React', slug: 'react' }).returning();
+    const [sourceGuide] = await testDb!.db.insert(guides).values({
       title: 'React Foundations',
       slug: 'react-foundations',
       description: 'Core guide',
@@ -289,7 +341,7 @@ describe('API contract', () => {
       status: ContentStatus.PUBLISHED,
       categoryId: category.id,
     }).returning();
-    const [relatedGuide] = await testDb.db.insert(guides).values({
+    const [relatedGuide] = await testDb!.db.insert(guides).values({
       title: 'Advanced Hooks',
       slug: 'advanced-hooks',
       description: 'Deep dive',
@@ -299,9 +351,9 @@ describe('API contract', () => {
       status: ContentStatus.PUBLISHED,
       categoryId: category.id,
     }).returning();
-    await testDb.db.execute(sql`insert into guide_tags (guide_id, tag_id) values (${relatedGuide.id}, ${tag.id})`);
+    await testDb!.db.execute(sql`insert into guide_tags (guide_id, tag_id) values (${relatedGuide.id}, ${tag.id})`);
 
-    const [tool] = await testDb.db.insert(tools).values({
+    const [tool] = await testDb!.db.insert(tools).values({
       name: 'Hook Inspector',
       slug: 'hook-inspector',
       description: 'Inspect React hooks',
@@ -336,7 +388,7 @@ describe('API contract', () => {
       weight: 0.9,
     });
 
-    await testDb.db.insert(contentRelations).values({
+    await testDb!.db.insert(contentRelations).values({
       sourceType: EntityType.GUIDE,
       sourceId: sourceGuide.id,
       targetType: EntityType.TOOL,
@@ -365,7 +417,7 @@ describe('API contract', () => {
       }),
     ]);
 
-    const [sourceTool] = await testDb.db.insert(tools).values({
+    const [sourceTool] = await testDb!.db.insert(tools).values({
       name: 'React Starter',
       slug: 'react-starter',
       description: 'Starter tool',
@@ -376,7 +428,7 @@ describe('API contract', () => {
       categoryId: category.id,
       popularity: 3,
     }).returning();
-    await testDb.db.insert(contentRelations).values({
+    await testDb!.db.insert(contentRelations).values({
       sourceType: EntityType.TOOL,
       sourceId: sourceTool.id,
       targetType: EntityType.GUIDE,

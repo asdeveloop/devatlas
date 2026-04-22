@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { PageShell } from "../../../components/layout/page-shell";
+import { getAiSummary } from "../../../features/ai/api/get-ai-summary";
 import { getGuideBySlug } from "../../../features/guides/api/get-guide-by-slug";
 import { getRelatedGuides } from "../../../features/guides/api/get-related-guides";
 import { GuideDetailContent } from "../../../features/guides/components/guide-detail-content";
@@ -46,9 +47,13 @@ export default async function GuidePage({ params }: GuidePageProps) {
 
   let guide;
   let related = [];
+  let summary = null;
   try {
     guide = await getGuideBySlug(slug);
-    related = await getRelatedGuides(guide.id);
+    [related, summary] = await Promise.all([
+      getRelatedGuides(guide.id),
+      getAiSummary('guide', slug).catch(() => null),
+    ]);
   } catch (error: unknown) {
     const message =
       error instanceof Error ? error.message : "Unknown error";
@@ -63,7 +68,7 @@ export default async function GuidePage({ params }: GuidePageProps) {
   return (
     <PageShell>
       <SiteHeader />
-      <GuideDetailContent guide={guide} related={related} />
+      <GuideDetailContent guide={guide} summary={summary} related={related} />
     </PageShell>
   );
 }

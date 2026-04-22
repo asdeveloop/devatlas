@@ -20,7 +20,7 @@ const tagsClient = new TagsClient(
 export async function getTags(params?: TagListParams): Promise<TagListResponse> {
   const response = await tagsClient.list(params);
   return {
-    data: response.data,
+    data: response.data as TagListItem[],
     meta: response.meta,
   };
 }

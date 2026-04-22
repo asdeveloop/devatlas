@@ -327,6 +327,57 @@ Response payload:
   total: number;
 }
 ```
+
+## AI
+
+### `GET /api/v1/ai/summaries/:contentType/:slug`
+
+Returns the persisted AI summary for a published guide or active tool. If a summary does not exist yet, the API generates it and stores it in `ai_summaries` before responding.
+
+Response payload:
+
+```ts
+{
+  id: string;
+  contentType: 'guide' | 'tool';
+  contentId: string;
+  slug: string;
+  title: string;
+  summary: string;
+  model: string;
+  createdAt: string;
+}
+```
+
+### `POST /api/v1/ai/ask`
+
+Request payload:
+
+```ts
+{
+  question: string;
+  limit?: number; // default: 3, max: 5
+}
+```
+
+Response payload:
+
+```ts
+{
+  id: string;
+  question: string;
+  answer: string;
+  sources: Array<{
+    contentType: 'guide' | 'tool';
+    title: string;
+    slug: string;
+    url: string;
+    summary: string;
+  }>;
+  createdAt: string;
+}
+```
+
 ### `PUT /api/v1/tools/:slug`
 ### `DELETE /api/v1/tools/:slug`
 

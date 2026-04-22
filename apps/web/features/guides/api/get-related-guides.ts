@@ -14,5 +14,5 @@ const guidesClient = new GuidesClient(
 
 export async function getRelatedGuides(id: string): Promise<RelatedContentItem[]> {
   const response = await guidesClient.getRelated(id);
-  return response.data;
+  return response.data as RelatedContentItem[];
 }

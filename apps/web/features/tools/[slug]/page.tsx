@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 
 import { PageShell } from '../../../components/layout/page-shell';
+import { getAiSummary } from '../../ai/api/get-ai-summary';
 import { SiteHeader } from '../../navigation';
 import { getRelatedTools } from '../api/get-related-tools';
 import { getToolBySlug } from '../api/get-tool-by-slug';
@@ -44,9 +45,13 @@ export default async function ToolPage({ params }: ToolPageProps) {
 
   let tool;
   let related = [];
+  let summary = null;
   try {
     tool = await getToolBySlug(slug);
-    related = await getRelatedTools(tool.id);
+    [related, summary] = await Promise.all([
+      getRelatedTools(tool.id),
+      getAiSummary('tool', slug).catch(() => null),
+    ]);
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Unknown error';
 
@@ -60,7 +65,7 @@ export default async function ToolPage({ params }: ToolPageProps) {
   return (
     <PageShell>
       <SiteHeader />
-      <ToolDetailContent tool={tool} related={related} />
+      <ToolDetailContent tool={tool} summary={summary} related={related} />
     </PageShell>
   );
 }
