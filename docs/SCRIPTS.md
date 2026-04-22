@@ -63,6 +63,23 @@
 
 Rollback در فاز فعلی خودکار نشده؛ rollback باید با migration جبرانی جدید انجام شود، نه ویرایش دستی migrationهای commit شده.
 
+### Runtime Security Baseline
+
+- `CORS_ORIGIN` می تواند یک origin یا چند origin جداشده با `,` باشد
+- `RATE_LIMIT_WINDOW_MS` پنجره rate limit را برای endpointهای عمومی مشخص می کند
+- `RATE_LIMIT_SEARCH_MAX` سقف درخواست `POST /api/v1/search` را در هر پنجره مشخص می کند
+- `RATE_LIMIT_AI_MAX` سقف درخواست endpointهای `ai` را در هر پنجره مشخص می کند
+- API به صورت baseline این headerها را ست می کند: `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Cross-Origin-Opener-Policy`, `Permissions-Policy`
+
+نمونه env production-like:
+
+```bash
+CORS_ORIGIN=https://devatlas.app,https://staging.devatlas.app
+RATE_LIMIT_WINDOW_MS=60000
+RATE_LIMIT_SEARCH_MAX=30
+RATE_LIMIT_AI_MAX=10
+```
+
 ---
 
 ## apps/web

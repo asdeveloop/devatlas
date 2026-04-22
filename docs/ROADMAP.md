@@ -136,6 +136,10 @@
 - rate limit برای endpointهای `search` و `ai`
 - sanitize/validate برای query inputs و payloadها
 - بازبینی CORS و response headers
+- وضعیت فعلی:
+  - روی `POST /api/v1/search` و endpointهای `ai` rate limit قابل تنظیم از env فعال شده
+  - ورودی های عمومی `search` و `ai` با حد طول/بازه سخت تر validate می شوند
+  - baseline response headers امنیتی و CORS چند-origin از env اعمال می شود
 - معیار پذیرش:
   - endpointهای عمومی در برابر abuse ابتدایی محافظت شوند
   - ورودی نامعتبر به response کنترل شده و قابل رصد ختم شود

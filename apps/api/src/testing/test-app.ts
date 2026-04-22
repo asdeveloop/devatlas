@@ -11,6 +11,7 @@ import { AppModule } from '../app.module';
 import { HttpExceptionFilter } from '../common/filters/http-exception.filter';
 import { RequestLoggerInterceptor } from '../common/interceptors/request-logger.interceptor';
 import { TransformInterceptor } from '../common/interceptors/transform.interceptor';
+import { applySecurityHeaders } from '../common/security/security-headers';
 
 export async function createTestApp(): Promise<{
   app: INestApplication;
@@ -29,6 +30,7 @@ export async function createTestApp(): Promise<{
     origin: '*',
     credentials: false,
   });
+  app.use(applySecurityHeaders);
 
   app.useGlobalPipes(
     new ValidationPipe({

@@ -279,6 +279,26 @@ describeIfDatabase('API contract', () => {
     });
   });
 
+  it('returns hardened headers and controlled validation errors for public inputs', async () => {
+    const invalidSearchRes = await fetch(`${baseUrl}/api/v1/search`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ query: '', limit: 100 }),
+    });
+    const invalidSearchJson = await invalidSearchRes.json();
+
+    expect(invalidSearchRes.status).toBe(400);
+    expect(invalidSearchRes.headers.get('x-content-type-options')).toBe('nosniff');
+    expect(invalidSearchRes.headers.get('x-frame-options')).toBe('DENY');
+    expect(invalidSearchJson).toMatchObject({
+      success: false,
+      error: {
+        status: 400,
+      },
+    });
+    expect(Array.isArray(invalidSearchJson.error.message)).toBe(true);
+  });
+
   it('verifies AI summaries and Q&A flows', async () => {
     const [category] = await testDb!.db.insert(categories).values({ name: 'AI', slug: 'ai' }).returning();
     const [tag] = await testDb!.db.insert(tags).values({ name: 'Agents', slug: 'agents' }).returning();
