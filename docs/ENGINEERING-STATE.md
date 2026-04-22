@@ -5,9 +5,9 @@
 ## Active Now
 
 - Drizzle is the active ORM in `apps/api`.
-- Nest modules for `guides`, `tools`, `categories`, `tags`, `health`, and `database` are wired in `apps/api/src/app.module.ts`.
+- Nest modules for `ai`, `guides`, `tools`, `categories`, `tags`, `search`, `content-relations`, `health`, and `database` are wired in `apps/api/src/app.module.ts`.
 - Global API wrappers for success, error handling, logging, and trace ids are active in bootstrap.
-- Web routes are live for `/`, `/guides`, and `/guides/[slug]`; tools still stop at feature/API helper level.
+- Web routes are live for `/`, `/guides`, `/guides/[slug]`, `/tools`, and `/tools/[slug]`.
 - Root scripts include local verification helpers: `agent:context`, `agent:verify`, `doctor`, and `health`.
 
 ## Current Packages
@@ -41,6 +41,7 @@ Latest executed checks:
 - `node scripts/agent-verify.mjs api lint typecheck test` ✅
 - `node scripts/agent-verify.mjs web lint typecheck test build` ✅
 - `pnpm lint` ✅ across the monorepo
+- `pnpm --filter @devatlas/api test -- src/modules/__tests__/api-contract.spec.ts` ✅
 
 ## Known Shape Of Runtime
 
@@ -53,9 +54,9 @@ Latest executed checks:
 - guide list/detail DTOs now match the current category/tag-enriched response shape
 
 ### Web
-- app routes exist for `/`, `/guides`, `/guides/[slug]`
+- app routes exist for `/`, `/guides`, `/guides/[slug]`, `/tools`, `/tools/[slug]`
 - guide feature owns the routed pages plus API adapters
-- tool feature currently exposes API helpers only
+- tool feature owns the tools listing/detail integration
 
 ### Known Gaps
 
@@ -68,5 +69,4 @@ These docs were updated to remove stale references to:
 
 - Prisma as the active ORM
 - outdated package names like `@devatlas/shared-types`
-- nonexistent routed `/tools` page claims
 - older script examples that do not match the current `package.json` files

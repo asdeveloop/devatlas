@@ -12,9 +12,9 @@ Last Updated: 1405/09/01
 |-------|------|--------|
 | Phase 0 | Architecture & Setup | ✅ complete |
 | Phase 1 | Platform Foundation | ✅ complete |
-| Phase 2 | Core Content Platform | 🚧 in progress |
-| Phase 3 | Search & Knowledge Layer | 🔵 partially scaffolded |
-| Phase 4 | Intelligence Layer | ⬜ planned |
+| Phase 2 | Core Content Platform | ✅ complete |
+| Phase 3 | Search & Knowledge Layer | 🚧 in progress |
+| Phase 4 | Intelligence Layer | 🚧 in progress |
 | Phase 5 | Operations & Scale | ⬜ planned |
 
 ---
@@ -29,7 +29,7 @@ Last Updated: 1405/09/01
 
 ### ✅ API Foundation
 - NestJS bootstrap with Swagger, validation, interceptors, exception filter
-- Active modules: guides, tools, categories, tags, health, database
+- Active modules: ai, guides, tools, categories, tags, search, content-relations, health, database
 - Drizzle schema is the active source of truth in `apps/api/src/db/schema`
 - Error handling unification complete
 
@@ -37,6 +37,8 @@ Last Updated: 1405/09/01
 - Landing page
 - Guides listing route
 - Guide detail route
+- Tools listing route
+- Tool detail route
 - Feature-based organization in `apps/web/features`
 
 ### ✅ Shared Package Foundation
@@ -79,10 +81,10 @@ Last Updated: 1405/09/01
 ### P2 — API Production Hardening 🚧
 **Goal:** Full contract alignment with `docs/API Contract.md`
 
-7. 🚧 Finalize Guides contract (params, response shape, behavior)
-8. 🚧 Finalize Tools contract (naming, semantics, filtering)
-9. 🚧 Finalize Categories & Tags contracts (validation, CRUD/query)
-10. 🚧 Review error/trace/logging readiness (traceId coverage, metrics gaps)
+7. ✅ Finalize Guides contract (params, response shape, behavior)
+8. ✅ Finalize Tools contract (naming, semantics, filtering)
+9. ✅ Finalize Categories & Tags contracts (validation, CRUD/query)
+10. 🔵 Review error/trace/logging readiness (traceId coverage present; metrics gaps remain)
 
 **Exit Criteria:** All API endpoints match contract; error/trace/logging production-ready
 
@@ -91,9 +93,9 @@ Last Updated: 1405/09/01
 ### P3 — Web Product Completion 🔵
 **Goal:** End-to-end guide/tool flows, unified API client
 
-11. 🔵 Finalize guide flow in frontend (UX/data flow for `/guides` and `/guides/[slug]`)
-12. 🔵 Turn Tools into full frontend feature (listing pages, live API integration)
-13. 🔵 Unify API client usage in Web (eliminate parallel fetch patterns)
+11. ✅ Finalize guide flow in frontend (UX/data flow for `/guides` and `/guides/[slug]`)
+12. ✅ Turn Tools into full frontend feature (listing pages, live API integration)
+13. ✅ Unify API client usage in Web (eliminate parallel fetch patterns)
 14. 🔵 Clean up navigation / route architecture (reduce `app/` vs. `features/` scattering)
 
 **Exit Criteria:** Guides and Tools flows complete; single canonical API client layer
@@ -103,10 +105,10 @@ Last Updated: 1405/09/01
 ### P4 — Search & Content Integration ⬜
 **Goal:** Functional search API and content pipeline
 
-15. ⬜ Define search scope (guide-only vs. cross-content)
-16. ⬜ Implement search API/module (backend surface, query contract)
+15. ✅ Define search scope (cross-content search across guides and tools)
+16. ✅ Implement search API/module (backend surface, query contract)
 17. ⬜ Connect `packages/content` to real data flow (ingestion/indexing/DB)
-18. ⬜ Align `SearchDocument` / relation models with execution
+18. ✅ Align `SearchDocument` / relation models with execution
 
 **Exit Criteria:** Search API returns relevant results; content pipeline operational
 
