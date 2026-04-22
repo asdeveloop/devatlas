@@ -496,6 +496,12 @@ describeIfDatabase('API contract', () => {
     expect(successJson.data.metrics).toMatchObject({
       totalRequests: expect.any(Number),
       totalErrors: 0,
+      statusClasses: expect.arrayContaining([
+        expect.objectContaining({ label: '2xx' }),
+      ]),
+      durationBuckets: expect.arrayContaining([
+        expect.objectContaining({ label: '<100ms' }),
+      ]),
     });
     expect(successJson.data.metrics.routes).toContainEqual(
       expect.objectContaining({

@@ -57,6 +57,14 @@ interface HealthPayload {
     totalRequests: number;
     totalErrors: number;
     averageDurationMs: number;
+    statusClasses: Array<{
+      label: '2xx' | '3xx' | '4xx' | '5xx';
+      count: number;
+    }>;
+    durationBuckets: Array<{
+      label: '<100ms' | '100-299ms' | '300ms+';
+      count: number;
+    }>;
     routes: Array<{
       key: string;
       method: string;

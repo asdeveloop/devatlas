@@ -20,6 +20,12 @@ describeIfDb('HealthController integration', () => {
       statusCode: 200,
       durationMs: 12,
     });
+    requestMetrics.record({
+      method: 'GET',
+      route: '/api/v1/guides/:slug',
+      statusCode: 404,
+      durationMs: 320,
+    });
     controller = new HealthController(
       { db: testDb.db } as unknown as DrizzleService,
       requestMetrics,
@@ -39,9 +45,13 @@ describeIfDb('HealthController integration', () => {
     expect(result.service).toBe('devatlas-api');
     expect(result.timestamp).toMatch(/T/);
     expect(result.metrics).toMatchObject({
-      totalRequests: 1,
-      totalErrors: 0,
+      totalRequests: 2,
+      totalErrors: 1,
     });
+    expect(result.metrics.statusClasses).toContainEqual({ label: '2xx', count: 1 });
+    expect(result.metrics.statusClasses).toContainEqual({ label: '4xx', count: 1 });
+    expect(result.metrics.durationBuckets).toContainEqual({ label: '<100ms', count: 1 });
+    expect(result.metrics.durationBuckets).toContainEqual({ label: '300ms+', count: 1 });
     expect(result.metrics.routes).toContainEqual(
       expect.objectContaining({
         key: 'GET /api/v1/health',
