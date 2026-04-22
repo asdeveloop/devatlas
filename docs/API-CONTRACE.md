@@ -41,6 +41,33 @@ interface ApiFailure {
 
 ## Health
 
+### `GET /api/v1/health/live`
+
+Returns process liveness for load balancers and container probes.
+
+```ts
+interface HealthLivePayload {
+  status: 'ok';
+  service: string;
+  environment: string;
+  timestamp: string;
+}
+```
+
+### `GET /api/v1/health/ready`
+
+Returns dependency readiness, currently based on database availability.
+
+```ts
+interface HealthReadyPayload {
+  status: 'ready' | 'not_ready';
+  service: string;
+  environment: string;
+  database: 'connected' | 'disconnected';
+  timestamp: string;
+}
+```
+
 ### `GET /api/v1/health`
 
 Returns a direct object that is still wrapped by the global success envelope.

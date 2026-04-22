@@ -482,6 +482,29 @@ describeIfDatabase('API contract', () => {
     expect(tagListJson.meta).toMatchObject({ page: 1, limit: 10, total: 1 });
   });
 
+  it('verifies health liveness and readiness endpoints', async () => {
+    const liveRes = await fetch(`${baseUrl}/api/v1/health/live`);
+    const liveJson = await liveRes.json();
+
+    expect(liveRes.status).toBe(200);
+    expect(liveJson.success).toBe(true);
+    expect(liveJson.data).toMatchObject({
+      status: 'ok',
+      service: 'devatlas-api',
+    });
+
+    const readyRes = await fetch(`${baseUrl}/api/v1/health/ready`);
+    const readyJson = await readyRes.json();
+
+    expect(readyRes.status).toBe(200);
+    expect(readyJson.success).toBe(true);
+    expect(readyJson.data).toMatchObject({
+      status: 'ready',
+      database: 'connected',
+      service: 'devatlas-api',
+    });
+  });
+
   it('verifies traceId propagation for success and error responses', async () => {
     const inboundTraceId = 'trace-contract-success';
     const successRes = await fetch(`${baseUrl}/api/v1/health`, {
@@ -564,6 +587,12 @@ describeIfDatabase('API contract', () => {
       post: expect.any(Object),
     });
     expect(swaggerDocument.paths['/api/v1/health']).toMatchObject({
+      get: expect.any(Object),
+    });
+    expect(swaggerDocument.paths['/api/v1/health/live']).toMatchObject({
+      get: expect.any(Object),
+    });
+    expect(swaggerDocument.paths['/api/v1/health/ready']).toMatchObject({
       get: expect.any(Object),
     });
   });

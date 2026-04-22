@@ -3,13 +3,13 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { RequestMetricsService } from '../../../common/interceptors/request-metrics.service';
 import { createTestDatabase, hasTestDatabaseConfig } from '../../../testing/test-db';
 import type { DrizzleService } from '../../database/drizzle.service';
-import { HealthController } from '../health.controller';
+import { HealthService } from '../health.service';
 
 const describeIfDb = hasTestDatabaseConfig ? describe.sequential : describe.skip;
 
-describeIfDb('HealthController integration', () => {
+describeIfDb('HealthService integration', () => {
   let testDb: ReturnType<typeof createTestDatabase>;
-  let controller: HealthController;
+  let service: HealthService;
 
   beforeAll(async () => {
     testDb = createTestDatabase();
@@ -26,7 +26,7 @@ describeIfDb('HealthController integration', () => {
       statusCode: 404,
       durationMs: 320,
     });
-    controller = new HealthController(
+    service = new HealthService(
       { db: testDb.db } as unknown as DrizzleService,
       requestMetrics,
     );
@@ -38,7 +38,7 @@ describeIfDb('HealthController integration', () => {
   });
 
   it('reports a healthy database connection', async () => {
-    const result = await controller.check();
+    const result = await service.getHealthReport();
 
     expect(result.status).toBe('ok');
     expect(result.database).toBe('connected');
@@ -58,5 +58,20 @@ describeIfDb('HealthController integration', () => {
         count: 1,
       }),
     );
+  });
+
+  it('reports live and ready states', async () => {
+    const live = service.getLiveness();
+    const ready = await service.getReadiness();
+
+    expect(live).toMatchObject({
+      status: 'ok',
+      service: 'devatlas-api',
+    });
+    expect(ready).toMatchObject({
+      status: 'ready',
+      database: 'connected',
+      service: 'devatlas-api',
+    });
   });
 });
