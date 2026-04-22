@@ -1,5 +1,6 @@
 import { Controller, Get } from '@nestjs/common';
 
+import { RequestMetricsService } from '../../common/interceptors/request-metrics.service';
 import type { DrizzleService } from '../database/drizzle.service';
 
 interface HealthResponse {
@@ -9,11 +10,27 @@ interface HealthResponse {
   environment: string;
   database: 'connected' | 'disconnected';
   timestamp: string;
+  metrics: {
+    totalRequests: number;
+    totalErrors: number;
+    averageDurationMs: number;
+    routes: Array<{
+      key: string;
+      method: string;
+      route: string;
+      count: number;
+      errors: number;
+      averageDurationMs: number;
+    }>;
+  };
 }
 
 @Controller('health')
 export class HealthController {
-  constructor(private readonly drizzle: DrizzleService) {}
+  constructor(
+    private readonly drizzle: DrizzleService,
+    private readonly requestMetrics: RequestMetricsService,
+  ) {}
 
   @Get()
   async check(): Promise<HealthResponse> {
@@ -33,6 +50,7 @@ export class HealthController {
       uptime: process.uptime(),
       database: dbStatus,
       timestamp: new Date().toISOString(),
+      metrics: this.requestMetrics.snapshot(),
     };
   }
 }

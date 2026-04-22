@@ -10,9 +10,13 @@ import { tap } from 'rxjs/operators';
 
 import { ensureTraceId } from '../http/trace-id';
 
+import { RequestMetricsService } from './request-metrics.service';
+
 @Injectable()
 export class RequestLoggerInterceptor implements NestInterceptor {
   private readonly logger = new Logger('HTTP');
+
+  constructor(private readonly requestMetrics: RequestMetricsService) {}
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
     const ctx = context.switchToHttp();
@@ -21,18 +25,33 @@ export class RequestLoggerInterceptor implements NestInterceptor {
     const response = ctx.getResponse<Response>();
     const traceId = ensureTraceId(request, response);
 
-    const { method, originalUrl } = request;
+    const { method, originalUrl, route } = request;
+    const routePath = route?.path ?? originalUrl;
     const start = Date.now();
 
     return next.handle().pipe(
-      tap(() => {
-        const duration = Date.now() - start;
-        const statusCode = response.statusCode;
-
-        this.logger.log(
-          `${method} ${originalUrl} ${statusCode} +${duration}ms traceId=${traceId}`,
-        );
+      tap({
+        next: () => this.recordRequest(method, routePath, response.statusCode, Date.now() - start, traceId, originalUrl),
+        error: () => this.recordRequest(method, routePath, response.statusCode, Date.now() - start, traceId, originalUrl),
       }),
     );
+  }
+
+  private recordRequest(
+    method: string,
+    route: string,
+    statusCode: number,
+    durationMs: number,
+    traceId: string,
+    originalUrl: string,
+  ): void {
+    this.requestMetrics.record({
+      method,
+      route,
+      statusCode,
+      durationMs,
+    });
+
+    this.logger.log(`${method} ${originalUrl} ${statusCode} +${durationMs}ms traceId=${traceId}`);
   }
 }

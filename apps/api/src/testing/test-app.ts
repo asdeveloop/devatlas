@@ -48,7 +48,7 @@ export async function createTestApp(): Promise<{
   const swaggerDocument = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('docs', app, swaggerDocument);
 
-  app.useGlobalInterceptors(new RequestLoggerInterceptor(), new TransformInterceptor());
+  app.useGlobalInterceptors(app.get(RequestLoggerInterceptor), new TransformInterceptor());
   app.useGlobalFilters(new HttpExceptionFilter());
 
   await app.listen(0);

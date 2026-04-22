@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 
 import configuration from './config/configuration';
 import { envSchema } from './config/env.validation';
+import { ObservabilityModule } from './common/interceptors/observability.module';
 import { AiModule } from './modules/ai/ai.module';
 import { CategoriesModule } from './modules/categories/categories.module';
 import { ContentRelationsModule } from './modules/content-relations/content-relations.module';
@@ -22,6 +23,7 @@ import { ToolsModule } from './modules/tools/tools.module';
       expandVariables: true,
       validate: (env) => envSchema.parse(env),
     }),
+    ObservabilityModule,
     DatabaseModule,
     AiModule,
     ContentRelationsModule,

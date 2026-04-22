@@ -1,5 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
+import { RequestMetricsService } from '../../../common/interceptors/request-metrics.service';
 import { createTestDatabase, hasTestDatabaseConfig } from '../../../testing/test-db';
 import type { DrizzleService } from '../../database/drizzle.service';
 import { HealthController } from '../health.controller';
@@ -12,7 +13,17 @@ describeIfDb('HealthController integration', () => {
 
   beforeAll(async () => {
     testDb = createTestDatabase();
-    controller = new HealthController({ db: testDb.db } as unknown as DrizzleService);
+    const requestMetrics = new RequestMetricsService();
+    requestMetrics.record({
+      method: 'GET',
+      route: '/api/v1/health',
+      statusCode: 200,
+      durationMs: 12,
+    });
+    controller = new HealthController(
+      { db: testDb.db } as unknown as DrizzleService,
+      requestMetrics,
+    );
     await testDb.reset();
   });
 
@@ -27,5 +38,15 @@ describeIfDb('HealthController integration', () => {
     expect(result.database).toBe('connected');
     expect(result.service).toBe('devatlas-api');
     expect(result.timestamp).toMatch(/T/);
+    expect(result.metrics).toMatchObject({
+      totalRequests: 1,
+      totalErrors: 0,
+    });
+    expect(result.metrics.routes).toContainEqual(
+      expect.objectContaining({
+        key: 'GET /api/v1/health',
+        count: 1,
+      }),
+    );
   });
 });

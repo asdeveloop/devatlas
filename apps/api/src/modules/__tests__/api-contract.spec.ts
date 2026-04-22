@@ -493,6 +493,16 @@ describeIfDatabase('API contract', () => {
     expect(successRes.headers.get('x-trace-id')).toBe(inboundTraceId);
     expect(successJson.traceId).toBe(inboundTraceId);
     expect(successJson.success).toBe(true);
+    expect(successJson.data.metrics).toMatchObject({
+      totalRequests: expect.any(Number),
+      totalErrors: 0,
+    });
+    expect(successJson.data.metrics.routes).toContainEqual(
+      expect.objectContaining({
+        key: 'GET /health',
+        method: 'GET',
+      }),
+    );
 
     const errorRes = await fetch(`${baseUrl}/api/v1/guides/missing-guide`, {
       headers: { 'x-trace-id': 'trace-contract-error' },

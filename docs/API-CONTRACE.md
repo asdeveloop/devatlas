@@ -53,6 +53,19 @@ interface HealthPayload {
   environment: string;
   database: 'connected' | 'disconnected';
   timestamp: string;
+  metrics: {
+    totalRequests: number;
+    totalErrors: number;
+    averageDurationMs: number;
+    routes: Array<{
+      key: string;
+      method: string;
+      route: string;
+      count: number;
+      errors: number;
+      averageDurationMs: number;
+    }>;
+  };
 }
 ```
 
