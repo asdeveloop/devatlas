@@ -482,6 +482,33 @@ describeIfDatabase('API contract', () => {
     expect(tagListJson.meta).toMatchObject({ page: 1, limit: 10, total: 1 });
   });
 
+  it('verifies traceId propagation for success and error responses', async () => {
+    const inboundTraceId = 'trace-contract-success';
+    const successRes = await fetch(`${baseUrl}/api/v1/health`, {
+      headers: { 'x-trace-id': inboundTraceId },
+    });
+    const successJson = await successRes.json();
+
+    expect(successRes.status).toBe(200);
+    expect(successRes.headers.get('x-trace-id')).toBe(inboundTraceId);
+    expect(successJson.traceId).toBe(inboundTraceId);
+    expect(successJson.success).toBe(true);
+
+    const errorRes = await fetch(`${baseUrl}/api/v1/guides/missing-guide`, {
+      headers: { 'x-trace-id': 'trace-contract-error' },
+    });
+    const errorJson = await errorRes.json();
+
+    expect(errorRes.status).toBe(404);
+    expect(errorRes.headers.get('x-trace-id')).toBe('trace-contract-error');
+    expect(errorJson.success).toBe(false);
+    expect(errorJson.traceId).toBe('trace-contract-error');
+    expect(errorJson.error).toMatchObject({
+      code: 'NOT_FOUND',
+      status: 404,
+    });
+  });
+
   it('verifies swagger paths include the active endpoints', () => {
     expect(swaggerDocument.paths['/api/v1/guides']).toMatchObject({
       get: expect.any(Object),
