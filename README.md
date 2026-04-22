@@ -117,6 +117,8 @@ pnpm doctor
 pnpm health
 ```
 
+- `pnpm verify:api` now includes `db:check` before lint/typecheck/test so schema drift is caught earlier.
+
 ## Notes
 
 - `apps/api` uses Drizzle schemas under `apps/api/src/db/schema`.
@@ -127,8 +129,8 @@ pnpm health
 
 ## Docs
 
+- `docs/ROADMAP.md`
 - `docs/ARCHITECTURE.md`
 - `docs/API-CONTRACE.md`
 - `docs/STANDARDS.md`
-- `docs/ENGINEERING-STATE.md`
 - `docs/SCRIPTS.md`

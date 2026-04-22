@@ -1,367 +1,296 @@
-# DevAtlas Platform Roadmap (Production-Grade)
+# DevAtlas Production Roadmap
 
-Last Updated: 1405/09/01
+آخرین بازبینی: 2025-02-14
+وضعیت مبنا: بر اساس ساختار واقعی ریپو، اسکریپت های `package.json`، مسیرهای فعال `apps/api` و `apps/web`، و آرتیفکت های موجود در `infra/docker`
 
-> This roadmap integrates the high-level strategic overview with a detailed 30-step execution plan, reflecting the actual repository state and prioritizing production readiness.
-
----
-
-## Phase Overview
-
-| Phase | Name | Status |
-|-------|------|--------|
-| Phase 0 | Architecture & Setup | ✅ complete |
-| Phase 1 | Platform Foundation | ✅ complete |
-| Phase 2 | Core Content Platform | ✅ complete |
-| Phase 3 | Search & Knowledge Layer | 🚧 in progress |
-| Phase 4 | Intelligence Layer | 🚧 in progress |
-| Phase 5 | Operations & Scale | ⬜ planned |
+این فایل تنها منبع تصمیم گیری برای اجرای پروژه تا رسیدن به استقرار production است. هدف این roadmap اضافه کردن «مستندات بیشتر» نیست؛ هدف، تبدیل وضعیت فعلی ریپو به یک محصول قابل استقرار، قابل پشتیبانی و قابل توسعه است.
 
 ---
 
-## Current Implementation Status
+## 1) خط مبنا
 
-### ✅ Repository & Delivery Foundation
-- pnpm workspace + Turborepo
-- CI workflow in `.github/workflows/ci.yml`
-- Local install/build/test/typecheck workflow
-- npm mirror configuration in `.npmrc`
-- tracked VS Code workspace config for shared tasks/extensions/settings
-- local Docker deploy artifacts in `infra/docker/`
+### آنچه الان واقعا داریم
+- monorepo با `pnpm` و `turbo`
+- API مبتنی بر NestJS با ماژول های `guides`, `tools`, `categories`, `tags`, `search`, `content-relations`, `ai`, `health`, `database`
+- Web مبتنی بر Next.js با routeهای `/`, `/guides`, `/guides/[slug]`, `/tools`, `/tools/[slug]`, `/categories`
+- shared packages شامل `@devatlas/api-client`, `@devatlas/content`, `@devatlas/types`, `@devatlas/ui`, `@devatlas/utils`, `@devatlas/config`
+- Docker artifacts در `infra/docker/` برای API و Web
+- اسکریپت های تایید محلی: `pnpm verify:api`, `pnpm verify:web`, `pnpm doctor`, `pnpm health`
 
-### ✅ API Foundation
-- NestJS bootstrap with Swagger, validation, interceptors, exception filter
-- Active modules: ai, guides, tools, categories, tags, search, content-relations, health, database
-- Drizzle schema is the active source of truth in `apps/api/src/db/schema`
-- Error handling unification complete
+### شکاف های واقعی تا production
+- مسیر ingestion واقعی برای `@devatlas/content` هنوز به چرخه عملیاتی API/Search وصل نشده
+- تجربه Search در Web هنوز route عملیاتی و کامل ندارد
+- قرارداد env و runbook دیتابیس برای migration / rollback هنوز production-grade نیست
+- لایه امنیت baseline برای abuse protection, env contract, rate limit و secret handling کامل نشده
+- observability خارجی، alerting و runbook incident هنوز نداریم
+- CI/CD تا staging/prod به شکل عملیاتی و قابل تکرار کامل نشده
 
-### ✅ Frontend Foundation
-- Landing page
-- Guides listing route
-- Guide detail route
-- Tools listing route
-- Tool detail route
-- Feature-based organization in `apps/web/features`
-
-### ✅ Shared Package Foundation
-- `@devatlas/ui` — Reusable UI components
-- `@devatlas/types` — Shared Zod schemas and TS types
-- `@devatlas/content` — Content ingestion/indexing package
-- `@devatlas/api-client` — Shared API client
-- `@devatlas/utils` — Shared utilities
-
-### Current Constraints
-- local PostgreSQL schema must stay aligned with the generated Drizzle migration artifacts
-- repo-wide `test`/`build` have not been re-run as part of this narrow migration follow-up
-- staging/prod CD and automated DB rollout are still not wired
+### چیزهایی که فعلا هدف نیست
+- فیچرهای جدید محتوایی خارج از `guides/tools/search`
+- توسعه AI فراتر از seam فعلی
+- refactorهای سلیقه ای یا جابه جایی معماری بدون اثر مستقیم روی production-readiness
 
 ---
 
-## Prioritized Execution Backlog (P0–P5)
+## 2) اصول اجرا
 
-### P0 — Stabilization Baseline ✅
-**Goal:** Reproducible builds, clean dependency graph, canonical scripts
-
-1. ✅ Stabilize dependency graph / remove version drift
-2. ✅ Reduce peer dependency warnings
-3. ✅ Review root scripts and canonical command set
-
-**Exit Criteria:** `pnpm install && pnpm typecheck && pnpm test && pnpm build` passes cleanly
+- هر فاز باید خروجی deployable داشته باشد، نه صرفا code complete.
+- هر task باید مالک، معیار پذیرش، و دستور verify مشخص داشته باشد.
+- تا وقتی ingest/search/security/deploy واقعی نشده، roadmap «پیشرفت ظاهری» محسوب نمی شود.
+- هر تغییر shared باید نزدیک ترین consumer را هم validate کند.
+- اگر یک مورد در roadmap معیار قابل اندازه گیری ندارد، هنوز آماده اجرا نیست.
 
 ---
 
-### P1 — CI / QA Hardening ✅
-**Goal:** Production-grade quality gates and test coverage
+## 3) ترتیب واقعی اجرا
 
-4. ✅ Align CI with workspace state
-5. ✅ Define formal quality gate
-6. ✅ Add targeted tests for API core modules (39 unit tests written)
+## Phase 1 — Platform Baseline Stabilization
 
-**Exit Criteria:** CI enforces lint/test/typecheck/build; core modules have test coverage
+هدف: baseline پروژه را طوری تثبیت کنیم که توسعه روزمره و release بعدی روی زمین سفت انجام شود.
 
----
+### 1.1 دیتابیس و lifecycle عملیاتی Drizzle
+- تکمیل اسکریپت های رسمی DB در `apps/api/package.json`
+- تثبیت workflowهای `generate`, `migrate`, `check`, `seed` و rollback
+- حذف یا تعیین تکلیف artifactهای باقیمانده غیرلازم مثل مسیرهای legacy دیتابیس
+- معیار پذیرش:
+  - تیم بتواند local و staging را فقط با اسکریپت های رسمی repo بالا بیاورد
+  - migration جدید بدون دستورهای دستی پراکنده قابل اجرا و rollback باشد
+- verify:
+  - `pnpm --filter @devatlas/api typecheck`
+  - `pnpm --filter @devatlas/api test`
 
-### P2 — API Production Hardening 🚧
-**Goal:** Full contract alignment with `docs/API Contract.md`
+### 1.2 قرارداد env و bootstrap واقعی
+- تکمیل `.env.example` برای API و Web
+- تعریف contract حداقلی env: `DATABASE_URL`, `NEXT_PUBLIC_API_BASE_URL`, app URLs, logging/telemetry vars
+- fail-fast برای env ناقص در startup
+- معیار پذیرش:
+  - اجرای local بدون حدس زدن env ممکن باشد
+  - staging/prod env matrix شفاف و versioned باشد
+- verify:
+  - `pnpm doctor`
+  - startup محلی API و Web با env template تکمیل شده
 
-7. ✅ Finalize Guides contract (params, response shape, behavior)
-8. ✅ Finalize Tools contract (naming, semantics, filtering)
-9. ✅ Finalize Categories & Tags contracts (validation, CRUD/query)
-10. 🔵 Review error/trace/logging readiness (traceId coverage present; basic health metrics/probes shipped; exporter gaps remain)
+### 1.3 تثبیت CI روی وضعیت واقعی repo
+- بازبینی workflowها برای استفاده از اسکریپت های واقعی package-scoped و root
+- اضافه کردن مسیر verify سریع برای PR و مسیر verify کامل برای release
+- جلوگیری از drift بین CI و اسکریپت های local
+- معیار پذیرش:
+  - CI دقیقا همان چیزهایی را اجرا کند که تیم محلی اجرا می کند
+  - build شکسته یا test شکسته قبل از merge متوقف شود
+- verify:
+  - `pnpm verify:api`
+  - `pnpm verify:web`
 
-**Exit Criteria:** All API endpoints match contract; error/trace/logging production-ready
-
----
-
-### P3 — Web Product Completion 🔵
-**Goal:** End-to-end guide/tool flows, unified API client
-
-11. ✅ Finalize guide flow in frontend (UX/data flow for `/guides` and `/guides/[slug]`)
-12. ✅ Turn Tools into full frontend feature (listing pages, live API integration)
-13. ✅ Unify API client usage in Web (eliminate parallel fetch patterns)
-14. 🔵 Clean up navigation / route architecture (route entrypoints now centralized in `app/`; remaining cleanup is incremental dedupe around list/detail route wiring)
-
-**Exit Criteria:** Guides and Tools flows complete; single canonical API client layer
-
----
-
-### P4 — Search & Content Integration ⬜
-**Goal:** Functional search API and content pipeline
-
-15. ✅ Define search scope (cross-content search across guides and tools)
-16. ✅ Implement search API/module (backend surface, query contract)
-17. ⬜ Connect `packages/content` to real data flow (ingestion/indexing/DB)
-18. ✅ Align `SearchDocument` / relation models with execution
-
-**Exit Criteria:** Search API returns relevant results; content pipeline operational
+خروجی این فاز: یک baseline قابل اتکا برای توسعه و release بدون وابستگی به دانش ضمنی
 
 ---
 
-### P5 — Security, Infra, Release Readiness ⬜
-**Goal:** Production deployment, observability, security hardening
+## Phase 2 — Product Core Completion
 
-19. ⬜ Security review (validation gaps, sanitization, abuse surfaces)
-20. ⬜ Caching strategy (Redis/internal cache for high-traffic endpoints)
-21. ⬜ Migration / seed / rollout procedure (zero-downtime, rollback)
-22. ⬜ CD pipeline for staging (repeatable build artifact, release path)
-23. ⬜ Production observability stack (Grafana/Loki/OpenTelemetry)
-24. ⬜ Load testing (k6/Artillery, latency/error rate baselines)
-25. ⬜ Final production checklist (release prerequisites, versioning)
+هدف: سه مسیر اصلی محصول را عملیاتی کنیم: content ingestion، search، و surface وب برای استفاده واقعی.
 
-**Exit Criteria:** Production Docker Compose runs; health/live/ready endpoints report status; no critical security findings
+### 2.1 اتصال `@devatlas/content` به چرخه داده واقعی
+- تعریف یک entrypoint واقعی برای ingestion: CLI job یا admin-only workflow
+- ذخیره خروجی ingest در جداول search/content relations/API
+- پشتیبانی از reindex incremental و full rebuild
+- معیار پذیرش:
+  - داده جدید بدون دستکاری دستی در DB وارد سیستم شود
+  - پس از ingest، داده در API و search قابل مشاهده باشد
+- verify:
+  - تست integration برای ingest → index → search
+  - `pnpm --filter @devatlas/api test`
 
----
+### 2.2 تکمیل Search end-to-end
+- اضافه کردن route عملیاتی Search در Web
+- استفاده از seam واحد `apps/web/lib/api-client.ts`
+- پیاده سازی loading, empty, error, query-state و URL persistence
+- معیار پذیرش:
+  - کاربر از Web جستجو کند و نتیجه guide/tool ببیند
+  - رفتار search بین API و Web drift نداشته باشد
+- verify:
+  - `pnpm test:web`
+  - `pnpm build:web`
 
-## Detailed 30-Step Execution Plan
+### 2.3 تثبیت contracts بین API و Web
+- بازبینی routeها و DTOهای consumer-facing برای `guides`, `tools`, `categories`, `search`
+- حذف fetchهای پراکنده باقیمانده و enforce کردن API client واحد
+- افزودن validation نزدیک مرز client/server
+- معیار پذیرش:
+  - contract change بدون شکستن consumer شناسایی شود
+  - web surface فقط از مسیر canonical داده مصرف کند
+- verify:
+  - `pnpm typecheck:web`
+  - `pnpm test:api`
 
-**Status Legend:**
-- `[✓ Done]` Implemented and visible in repo
-- `[~ Partial]` Partially implemented, not production-ready
-- `[ ] Pending]` Not meaningfully implemented yet
-
----
-
-### Section A — Foundations & Design (Steps 1–5)
-
-1. `[✓ Done]` Comprehensive Monorepo & Architecture Docs Analysis
-2. `[✓ Done]` Comprehensive Types Package Analysis
-3. `[✓ Done]` Comprehensive Backend Analysis (`apps/api`)
-4. `[✓ Done]` Final API Contract Design for Whole Platform
-5. `[✓ Done]` Define Coding Standards & Architecture Constraints
-
----
-
-### Section B — Core Development (Steps 6–18)
-
-6. `[~ Partial]` Phase 1 — Types Package Refactor
-7. `[~ Partial]` Phase 2 — Backend Contracts Alignment
-8. `[~ Partial]` Phase 3 — Guides API Finalization
-9. `[~ Partial]` Phase 4 — Tools API Module
-10. `[~ Partial]` Phase 5 — Categories API Module
-11. `[~ Partial]` Phase 6 — Tags API Module
-12. `[~ Partial]` Phase 7 — Content Indexer Integration
-13. `[✓ Done]` Phase 8 — API Error Handling Unification
-14. `[~ Partial]` Phase 9 — Observability Layer
-15. `[ ] Pending` Phase 10 — Authentication Layer (Optional for now)
-16. `[ ] Pending` Phase 11 — Authorization Layer
-17. `[ ] Pending` Phase 12 — Input Sanitization & Security Audit
-18. `[ ] Pending` Phase 13 — Internal Caching Layer
+خروجی این فاز: محصولی که محتوای واقعی ingest می کند، search دارد، و مسیرهای اصلی Web/API آن operational هستند
 
 ---
 
-### Section C — Frontend Integration (Steps 19–23)
+## Phase 3 — Security and Reliability Baseline
 
-19. `[~ Partial]` Web App: API Client Unification
-20. `[~ Partial]` Web App: Guides Integration Stability
-21. `[~ Partial]` Web App: Tools Integration
-22. `[~ Partial]` Web App: Navigation Architecture Cleanup
-23. `[~ Partial]` Web App: Search UX Implementation
+هدف: قبل از هر استقرار واقعی، سطح حداقلی امنیت و پایداری را enforce کنیم.
 
----
+### 3.1 hardening ورودی ها و abuse protection
+- rate limit برای endpointهای `search` و `ai`
+- sanitize/validate برای query inputs و payloadها
+- بازبینی CORS و response headers
+- معیار پذیرش:
+  - endpointهای عمومی در برابر abuse ابتدایی محافظت شوند
+  - ورودی نامعتبر به response کنترل شده و قابل رصد ختم شود
+- verify:
+  - تست validation/error-path برای API
+  - `pnpm verify:api`
 
-### Section D — DevOps, QA, Infra (Steps 24–30)
+### 3.2 observability قابل استفاده
+- استانداردسازی log fields و correlation ids
+- افزودن metric برای latency, DB, search, error rate
+- تعریف seam برای exporter/monitoring backend
+- معیار پذیرش:
+  - بتوان latency و failure را روی API/Web تشخیص داد
+  - health فقط heartbeat نباشد و به عملیات کمک کند
+- verify:
+  - `pnpm health`
+  - smoke test endpointهای health/search
 
-24. `[~ Partial]` CI Pipeline (Lint, Test, Build)
-25. `[~ Partial]` CD / Docker Delivery Baseline (Dockerfiles and compose exist; staging/prod pipeline still pending)
-26. `[~ Partial]` Database Migration Strategy (Zero-downtime, seeding, rollout)
-27. `[ ] Pending` Load Testing (k6 / Artillery)
-28. `[ ] Pending` Production Observability Setup
-29. `[~ Partial]` Documentation Portal
-30. `[ ] Pending` Final Production Checklist & Launch
+### 3.3 runbook عملیاتی
+- مستندسازی release order, migration order, rollback, smoke checks
+- مشخص کردن owner و گام های incident response اولیه
+- معیار پذیرش:
+  - release بدون تکیه بر حافظه فردی قابل اجرا باشد
+  - rollback در کمتر از چند گام روشن باشد
+- verify:
+  - dry-run روی staging checklist
 
----
-
-## Sprint-Ready Checklist (Top 10 Actionable Tasks)
-
-### ✅ Completed
-
-1. **Stabilize Dependency Graph & Remove Version Drift**
-   - Owner: Platform / Workspace
-   - Estimate: 1–2 days
-   - ✅ List & compare dependencies (root, web, api, ui)
-   - ✅ Identify & reduce duplicate/unowned dependencies
-   - ✅ Pin/downgrade incompatible dependencies for mirror
-   - ✅ Regenerate & commit `pnpm-lock.yaml`
-   - 🚧 Ensure `pnpm install`, `typecheck`, `test`, `build` pass
-
-2. **Reduce Peer Dependency Warnings**
-   - Owner: Platform / Frontend Infrastructure
-   - Estimate: 0.5–1.5 days
-   - ✅ Record all `pnpm install` warnings
-   - ✅ Categorize warnings (`blocking` vs. `acceptable-for-now`)
-   - ✅ Decide `upgrade`/`replace`/`pin`/`defer` for `packages/ui` warnings
-   - ✅ Remove or document critical warnings
-
-3. **Review Root Scripts & Canonical Command Set**
-   - Owner: Platform
-   - Estimate: 0.5 days
-   - ✅ Audit all root `package.json` scripts
-   - ✅ Remove stale/unimplemented scripts
-   - ✅ Document canonical dev/CI commands in `SCRIPTS.md`
-
-4. **Align CI with Workspace State**
-   - Owner: Platform / DevOps
-   - Estimate: 0.5–1 day
-   - ✅ Ensure `.github/workflows/ci.yml` matches repo reality
-   - ✅ Validate install/typecheck/test/build/health flows
-   - ✅ Remove stale pipeline commands
-
-5. **Define Formal Quality Gate**
-   - Owner: Platform / QA
-   - Estimate: 0.5 days
-   - ✅ Specify minimum merge/release criteria
-   - ✅ Determine blocking failures
-
-6. **Add Targeted Tests for API Core Modules**
-   - Owner: Backend
-   - Estimate: 2–3 days
-   - ✅ Focus on `guides`, `tools`, `categories`, `tags`
-   - ✅ Cover list/detail/CRUD, error handling, pagination/query behaviors
-   - ✅ 39 unit tests written
+خروجی این فاز: سیستم از حالت «قابل اجرا روی لپتاپ» به «قابل استقرار و قابل پشتیبانی» می رسد
 
 ---
 
-### 🚧 In Progress
+## Phase 4 — Staging Readiness
 
-7. **Finalize Guides Contract**
-   - Owner: Backend
-   - Estimate: 1–2 days
-   - Dependencies: Task 6
-   - 🚧 Align `guides` API with `docs/API Contract.md`
-   - 🚧 Standardize params, response shape, behavior, semantics
-   - ⬜ Add integration tests
+هدف: staging را به محیط واقعی تمرین release تبدیل کنیم، نه صرفا یک deploy نمایشی.
 
-8. **Finalize Tools Contract**
-   - Owner: Backend
-   - Estimate: 1–2 days
-   - Dependencies: Task 6
-   - 🚧 Align `tools` API with docs
-   - 🚧 Standardize naming, semantics, filtering, list/detail behavior
-   - ⬜ Add integration tests
+### 4.1 تکمیل Docker و startup production-like
+- تثبیت Dockerfileهای API/Web و `docker-compose`
+- healthcheck و startup command واقعی
+- تضمین سازگاری build artifactها با env contract
+- معیار پذیرش:
+  - `docker compose up --build` محیط کامل سرویس ها را بالا بیاورد
+  - health endpoints بعد از boot پایدار باشند
+- verify:
+  - `docker compose -f infra/docker/docker-compose.yml config`
+  - smoke test compose بالا آمده
 
-9. **Finalize Categories & Tags Contracts**
-   - Owner: Backend
-   - Estimate: 1 day
-   - Dependencies: Task 6
-   - 🚧 Standardize naming, validation, response envelope
-   - 🚧 CRUD/query behavior across modules
-   - ⬜ Add integration tests
+### 4.2 pipeline استقرار staging
+- ساخت workflow build/publish/deploy برای branch یا tag مشخص
+- ثبت artifact قابل ردیابی با commit SHA
+- اجرای smoke test بعد از deploy
+- معیار پذیرش:
+  - یک push مشخص به staging قابل انتشار و قابل rollback باشد
+  - artifact و version هر deploy قابل رهگیری باشد
+- verify:
+  - اجرای staging deploy dry-run یا release candidate deploy
 
-10. **Review Error/Trace/Logging Readiness**
-    - Owner: Backend / Platform
-    - Estimate: 1 day
-    - Dependencies: Task 13 (error handling unification)
-    - 🚧 Standardize log lines
-    - ✅ Ensure `traceId` coverage
-    - 🚧 Add basic in-memory request metrics + health/live/ready probes
-    - ⬜ Identify metrics/exporter gaps
-    - 🚧 Define minimal staging observability backlog: exporter, retention, alert thresholds
+### 4.3 داده و عملیات staging
+- دیتابیس staging با migration workflow واقعی
+- seed حداقلی برای smoke و regression
+- backup/restore rehearsal در حد baseline
+- معیار پذیرش:
+  - staging از نظر lifecycle دیتابیس شبیه production باشد
+  - release روی staging همان مسیر production را تمرین کند
 
----
-
-## Recommended Execution Order
-
-1. ✅ Stabilize dependency/build/CI baseline (P0–P1)
-2. 🚧 Harden/test API for guides and tools (P2)
-3. 🔵 Complete guide flow in web (P3)
-4. 🔵 Complete tools flow in web (P3)
-5. ⬜ Decide search scope (P4)
-6. ⬜ Connect content pipeline (P4)
-7. ⬜ Security/cache/migration readiness (P5)
-8. ⬜ Staging/CD/observability/load test/final checklist (P5)
+خروجی این فاز: staging محیطی می شود که واقعاً readiness تولید را اثبات می کند
 
 ---
 
-## Top Production Gaps
+## Phase 5 — Production Cutover
 
-### 1. Full API Implementation Alignment with `docs/API Contract.md`
-**Impact:** High
-**Effort:** Medium
-**Status:** P2 in progress
+هدف: اولین استقرار production را با حداقل ریسک و حداکثر قابلیت بازگشت انجام دهیم.
 
-All endpoints must match documented contracts for params, response shape, behavior, and semantics.
+### 5.1 pre-production gate
+- اجرای full verify روی candidate نهایی
+- load baseline برای list/detail/search
+- dependency audit و secret scan
+- معیار پذیرش:
+  - `pnpm lint && pnpm typecheck && pnpm test && pnpm build` سبز باشد
+  - bottleneckهای واضح قبل از cutover شناسایی شده باشند
 
----
+### 5.2 launch checklist
+- تایید health, logging, alerting, backup, rollback, DNS/SSL, env parity
+- تایید owner برای release window و incident handling
+- معیار پذیرش:
+  - هیچ dependency عملیاتی بحرانی بدون owner یا runbook نمانده باشد
 
-### 2. Final Quality Gate and Production-Grade CI
-**Impact:** High
-**Effort:** Low
-**Status:** P1 complete
+### 5.3 controlled production release
+- deploy مرحله ای
+- smoke test فوری بعد از release
+- مانیتور کردن error rate, latency, readiness, DB saturation
+- معیار پذیرش:
+  - سیستم بعد از release پایدار بماند
+  - rollback در صورت failure کمتر از یک runbook استاندارد نیاز داشته باشد
 
-CI must enforce lint/test/typecheck/build as blocking merge criteria.
-
----
-
-### 3. Removal of Parallel/Inconsistent Web Paths
-**Impact:** Medium
-**Effort:** Medium
-**Status:** P3 planned
-
-Adopt a single canonical API client layer; eliminate redundant fetch patterns.
-
----
-
-### 4. End-to-End Content Ingestion Wired into DB/API
-**Impact:** High
-**Effort:** High
-**Status:** P4 planned
-
-`packages/content` must be operationalized with ingestion/indexing/update pipeline connected to DB/API.
+خروجی این فاز: production واقعی با release process، monitoring، و rollback عملیاتی
 
 ---
 
-### 5. Future-Facing Schema Parts Need Explicit Scope or Deferment
-**Impact:** Low
-**Effort:** Low
-**Status:** Documentation task
+## 4) بک لاگ اجرایی اولویت دار
 
-Clarify which models are active vs. reserved; document execution scope or explicit deferral.
+این ها کارهایی هستند که باید قبل از هر feature جدید انجام شوند:
 
----
-
-## Current Phase Exit Criteria
-
-**Phase 2 (Core Content Platform) is healthy when:**
-
-- ✅ Docs match codebase
-- ✅ Installs reproducible via mirror
-- 🚧 API/web route inventory documented
-- 🚧 Guides/tools priority flows verified end-to-end
-- ⬜ Next search/intelligence work starts from explicit updated notes
+| Priority | Item | چرا الان مهم است |
+|---|---|---|
+| P0 | Drizzle lifecycle + env contract | بدون این مورد، deploy و migration قابل اتکا نیست |
+| P0 | Content ingestion real pipeline | بدون داده واقعی، search و AI نمایشی می مانند |
+| P0 | Web search route | یکی از مسیرهای اصلی محصول هنوز operational نیست |
+| P0 | API integration/error-path tests | quality gate فعلی برای release کافی نیست |
+| P1 | Security baseline | قبل از public exposure باید abuse و input risk کنترل شود |
+| P1 | Observability exporter + alerts | production بدون detection عملا قابل پشتیبانی نیست |
+| P1 | Staging deploy pipeline | بدون staging واقعی، production rollout پرریسک است |
+| P2 | Load/security validation | برای cutover نهایی لازم است، نه برای شروع توسعه |
 
 ---
 
-## Next Actions
+## 5) Definition of Done برای هر فاز
 
-1. Complete P2 tasks 7–10 (API contract finalization)
-2. Begin P3 tasks 11–14 (web product completion)
-3. Define search scope (P4 task 15)
-4. Document active vs. reserved schema models
+یک فاز فقط وقتی done است که همه موارد زیر برقرار باشند:
+- کد merge شده باشد
+- verifyهای همان surface اجرا و سبز باشند
+- runbook یا contract مرتبط به روز شده باشد
+- نزدیک ترین consumer یا deployment path validate شده باشد
+- مورد جدید نیاز به توضیح شفاهی برای اجرا نداشته باشد
+
+---
+
+## 6) دستورات استاندارد verify
+
+### API
+```bash
+pnpm verify:api
+```
+
+### Web
+```bash
+pnpm verify:web
+```
+
+### Repository-wide release gate
+```bash
+pnpm lint
+pnpm typecheck
+pnpm test
+pnpm build
+```
+
+### Health checks
+```bash
+pnpm doctor
+pnpm health
+```
 
 ---
 
-## Detailed Sprint Execution
+## 7) سیاست نگهداری roadmap
 
-For granular task breakdown and daily tracking, see `SPRINT-TASKS-100.md`.
-
----
+- هر سند اجرایی موازی که همین اطلاعات را تکرار کند باید حذف شود.
+- اگر task جدید به این roadmap اضافه شد، باید در یکی از phaseهای بالا جا بگیرد؛ backlog پراکنده ممنوع است.
+- وضعیت هر آیتم باید با شواهد کد، اسکریپت یا محیط اجرا به روز شود؛ نه بر اساس برداشت کلی.
+- این فایل باید کوتاه، اجرایی و production-facing بماند.

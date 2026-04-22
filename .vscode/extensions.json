@@ -2,16 +2,6 @@
   "recommendations": [
     "dbaeumer.vscode-eslint",
     "esbenp.prettier-vscode",
-    "ms-vscode.vscode-typescript-next",
-    "vitest.explorer",
-    "bradlc.vscode-tailwindcss",
-    "editorconfig.editorconfig",
-    "eamodio.gitlens",
-    "gruntfuggly.todo-tree",
-    "DavidAnson.vscode-markdownlint",
-    "yzhang.markdown-all-in-one",
-    "github.vscode-github-actions",
-    "ms-azuretools.vscode-docker",
-    "usernamehw.errorlens"
+    "bradlc.vscode-tailwindcss"
   ]
 }

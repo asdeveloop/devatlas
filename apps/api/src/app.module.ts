@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 
+import { ObservabilityModule } from './common/interceptors/observability.module';
 import configuration from './config/configuration';
 import { envSchema } from './config/env.validation';
-import { ObservabilityModule } from './common/interceptors/observability.module';
 import { AiModule } from './modules/ai/ai.module';
 import { CategoriesModule } from './modules/categories/categories.module';
 import { ContentRelationsModule } from './modules/content-relations/content-relations.module';

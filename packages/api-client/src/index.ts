@@ -56,6 +56,28 @@ interface AskAiBody {
   limit?: number;
 }
 
+interface SearchBody {
+  query: string;
+  limit?: number;
+}
+
+interface SearchResultItem {
+  id: string;
+  contentType: 'guide' | 'tool';
+  title: string;
+  description: string;
+  category: string;
+  url: string;
+  tags: string[];
+  score: number;
+}
+
+interface SearchResponse {
+  query: string;
+  results: SearchResultItem[];
+  total: number;
+}
+
 interface AskAiResponse {
   id: string;
   question: string;
@@ -298,6 +320,11 @@ export class AiClient {
   constructor(private readonly http: HttpClient) {}
   getSummary(params: GetAiSummaryParams) { return this.http.request<ApiResponse<AiSummaryDetail>>(`/api/v1/ai/summaries/${encodeURIComponent(params.contentType)}/${encodeURIComponent(params.slug)}`); }
   ask(body: AskAiBody) { return this.http.request<ApiResponse<AskAiResponse>>('/api/v1/ai/ask', { method: 'POST', body: JSON.stringify(body) }); }
+}
+
+export class SearchClient {
+  constructor(private readonly http: HttpClient) {}
+  search(body: SearchBody) { return this.http.request<ApiResponse<SearchResponse>>('/api/v1/search', { method: 'POST', body: JSON.stringify(body) }); }
 }
 
 export class CategoriesClient {

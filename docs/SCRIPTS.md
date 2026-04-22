@@ -43,13 +43,21 @@
 
 ### Database Scripts (Drizzle)
 
-اسکریپت های Drizzle هنوز به صورت کامل در `apps/api/package.json` expose نشده اند و باید از فایل های واقعی زیر استفاده شوند:
+| Script        | Command                                            | Description |
+| ------------- | -------------------------------------------------- | ----------- |
+| `db:generate` | `drizzle-kit generate --config src/db/drizzle.config.ts` | Generate a new SQL migration from the current schema |
+| `db:migrate`  | `drizzle-kit migrate --config src/db/drizzle.config.ts`  | Apply pending migrations to the target database |
+| `db:check`    | `drizzle-kit check --config src/db/drizzle.config.ts`    | Validate migration history against the schema output |
+| `db:export`   | `drizzle-kit export --config src/db/drizzle.config.ts`   | Export the full schema diff as SQL from the current state |
 
-- config: `apps/api/src/db/drizzle.config.ts`
-- migration runner: `apps/api/src/db/migrate.ts`
-- schema: `apps/api/src/db/schema/*`
+اجرای production-like دیتابیس در این repo باید این ترتیب را دنبال کند:
 
-تا قبل از اضافه شدن اسکریپت های رسمی، هر تغییر دیتابیس باید همراه با runbook مستند و اعتبارسنجی محلی انجام شود.
+1. `pnpm --filter @devatlas/api db:generate`
+2. migration SQL را بازبینی و commit کنید
+3. `pnpm --filter @devatlas/api db:check`
+4. `pnpm --filter @devatlas/api db:migrate`
+
+Rollback در فاز فعلی خودکار نشده؛ rollback باید با migration جبرانی جدید انجام شود، نه ویرایش دستی migrationهای commit شده.
 
 ---
 

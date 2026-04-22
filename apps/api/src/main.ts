@@ -1,4 +1,5 @@
 import { ValidationPipe, VersioningType } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
@@ -9,6 +10,9 @@ import { TransformInterceptor } from './common/interceptors/transform.intercepto
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  const configService = app.get(ConfigService);
+  const port = configService.get<number>('app.port', 3001);
+  const corsOrigin = configService.get<string>('app.corsOrigin', 'http://localhost:3000');
 
   app.enableVersioning({
     type: VersioningType.URI,
@@ -17,7 +21,7 @@ async function bootstrap() {
 
   app.setGlobalPrefix('api');
   app.enableCors({
-    origin: '*',
+    origin: corsOrigin,
     credentials: false,
   });
 
@@ -42,7 +46,7 @@ async function bootstrap() {
   app.useGlobalInterceptors(app.get(RequestLoggerInterceptor), new TransformInterceptor());
   app.useGlobalFilters(new HttpExceptionFilter());
 
-  await app.listen(process.env.PORT || 3000);
+  await app.listen(port);
 }
 
 void bootstrap();

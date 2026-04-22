@@ -4,6 +4,10 @@
   "private": true,
   "scripts": {
     "build": "tsc --project tsconfig.build.json --outDir dist --incremental false",
+    "db:check": "drizzle-kit check --config src/db/drizzle.config.ts",
+    "db:export": "drizzle-kit export --config src/db/drizzle.config.ts",
+    "db:generate": "drizzle-kit generate --config src/db/drizzle.config.ts",
+    "db:migrate": "drizzle-kit migrate --config src/db/drizzle.config.ts",
     "dev": "nest start --watch",
     "lint": "eslint src --ext .ts --max-warnings=0",
     "start": "node dist/main.js",

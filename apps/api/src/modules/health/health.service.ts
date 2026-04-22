@@ -1,7 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
 import { RequestMetricsService } from '../../common/interceptors/request-metrics.service';
-import type { DrizzleService } from '../database/drizzle.service';
+import { DrizzleService } from '../database/drizzle.service';
 
 interface RouteMetrics {
   key: string;
@@ -55,8 +55,8 @@ export interface ReadinessReport {
 @Injectable()
 export class HealthService {
   constructor(
-    private readonly drizzle: DrizzleService,
-    private readonly requestMetrics: RequestMetricsService,
+    @Inject(DrizzleService) private readonly drizzle: DrizzleService,
+    @Inject(RequestMetricsService) private readonly requestMetrics: RequestMetricsService,
   ) {}
 
   getLiveness(): LivenessReport {

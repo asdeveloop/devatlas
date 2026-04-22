@@ -19,7 +19,7 @@
     "typecheck": "turbo run typecheck",
     "typecheck:api": "pnpm --filter @devatlas/api typecheck",
     "typecheck:web": "pnpm --filter @devatlas/web typecheck",
-    "verify:api": "pnpm lint:api && pnpm typecheck:api && pnpm test:api",
+    "verify:api": "pnpm --filter @devatlas/api db:check && pnpm lint:api && pnpm typecheck:api && pnpm test:api",
     "verify:web": "pnpm lint:web && pnpm typecheck:web && pnpm test:web",
     "agent:verify": "node scripts/agent-verify.mjs",
     "agent:context": "node scripts/agent-context.mjs",
@@ -65,7 +65,7 @@
     ]
   },
   "engines": {
-  "node": ">=20.11.0 <21",
-  "pnpm": ">=8"
-}
+    "node": ">=20.11.0 <23",
+    "pnpm": ">=8"
+  }
 }

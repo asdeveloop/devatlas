@@ -3,7 +3,7 @@ import type {
   ExecutionContext,
   NestInterceptor,
 } from '@nestjs/common';
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import type { Request, Response } from 'express';
 import type { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
@@ -16,7 +16,7 @@ import { RequestMetricsService } from './request-metrics.service';
 export class RequestLoggerInterceptor implements NestInterceptor {
   private readonly logger = new Logger('HTTP');
 
-  constructor(private readonly requestMetrics: RequestMetricsService) {}
+  constructor(@Inject(RequestMetricsService) private readonly requestMetrics: RequestMetricsService) {}
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
     const ctx = context.switchToHttp();
