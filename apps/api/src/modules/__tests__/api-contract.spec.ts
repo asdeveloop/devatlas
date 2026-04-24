@@ -299,6 +299,20 @@ describeIfDatabase('API contract', () => {
     expect(Array.isArray(invalidSearchJson.error.message)).toBe(true);
   });
 
+  it('validates search query length boundaries', async () => {
+    const tooLongQuery = 'a'.repeat(201);
+    const tooLongSearchRes = await fetch(`${baseUrl}/api/v1/search`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ query: tooLongQuery, limit: 10 }),
+    });
+    const tooLongSearchJson = await tooLongSearchRes.json();
+
+    expect(tooLongSearchRes.status).toBe(400);
+    expect(tooLongSearchJson.error?.status).toBe(400);
+    expect(Array.isArray(tooLongSearchJson.error?.message)).toBe(true);
+  });
+
   it('verifies AI summaries and Q&A flows', async () => {
     const [category] = await testDb!.db.insert(categories).values({ name: 'AI', slug: 'ai' }).returning();
     const [tag] = await testDb!.db.insert(tags).values({ name: 'Agents', slug: 'agents' }).returning();
@@ -539,6 +553,9 @@ describeIfDatabase('API contract', () => {
     expect(successJson.data.metrics).toMatchObject({
       totalRequests: expect.any(Number),
       totalErrors: 0,
+      errorRate: 0,
+      validationFailures: 0,
+      rateLimitedRequests: 0,
       statusClasses: expect.arrayContaining([
         expect.objectContaining({ label: '2xx' }),
       ]),

@@ -12,8 +12,19 @@ async function main(): Promise<void> {
     const searchIndexingService = app.get(SearchIndexingService);
 
     console.log('Rebuilding search documents...');
-    await searchIndexingService.rebuildSearchDocuments();
+    const result = await searchIndexingService.rebuildSearchDocuments();
+
     console.log('Search reindex complete.');
+    console.log(
+      JSON.stringify({
+        event: 'search-reindex-complete',
+        summary: {
+          guides: result.guides,
+          tools: result.tools,
+          total: result.total,
+        },
+      }),
+    );
   } finally {
     await app.close();
   }

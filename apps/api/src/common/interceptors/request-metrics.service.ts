@@ -5,6 +5,7 @@ interface RequestMetricSample {
   route: string;
   statusCode: number;
   durationMs: number;
+  errorCode?: string;
 }
 
 interface RouteMetricSnapshot {
@@ -29,6 +30,9 @@ interface DurationBucketSnapshot {
 export interface RequestMetricsSnapshot {
   totalRequests: number;
   totalErrors: number;
+  errorRate: number;
+  validationFailures: number;
+  rateLimitedRequests: number;
   averageDurationMs: number;
   statusClasses: StatusClassSnapshot[];
   durationBuckets: DurationBucketSnapshot[];
@@ -48,6 +52,8 @@ export class RequestMetricsService {
   private totalRequests = 0;
   private totalErrors = 0;
   private totalDurationMs = 0;
+  private validationFailures = 0;
+  private rateLimitedRequests = 0;
   private readonly routeMetrics = new Map<string, RouteMetricState>();
   private readonly statusClassCounts = new Map<RequestMetricsSnapshot['statusClasses'][number]['label'], number>([
     ['2xx', 0],
@@ -67,6 +73,14 @@ export class RequestMetricsService {
 
     if (sample.statusCode >= 400) {
       this.totalErrors += 1;
+    }
+
+    if (sample.errorCode === 'BAD_REQUEST') {
+      this.validationFailures += 1;
+    }
+
+    if (sample.errorCode === 'RATE_LIMITED') {
+      this.rateLimitedRequests += 1;
     }
 
     this.incrementStatusClass(sample.statusCode);
@@ -106,6 +120,9 @@ export class RequestMetricsService {
     return {
       totalRequests: this.totalRequests,
       totalErrors: this.totalErrors,
+      errorRate: this.totalRequests === 0 ? 0 : this.round((this.totalErrors / this.totalRequests) * 100),
+      validationFailures: this.validationFailures,
+      rateLimitedRequests: this.rateLimitedRequests,
       averageDurationMs: this.totalRequests === 0 ? 0 : this.round(this.totalDurationMs / this.totalRequests),
       statusClasses: this.toNamedCounts(this.statusClassCounts),
       durationBuckets: this.toNamedCounts(this.durationBucketCounts),

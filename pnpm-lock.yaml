@@ -86,6 +86,9 @@ importers:
 
   apps/api:
     dependencies:
+      '@devatlas/content':
+        specifier: workspace:*
+        version: link:../../packages/content
       '@devatlas/types':
         specifier: workspace:*
         version: link:../../packages/types

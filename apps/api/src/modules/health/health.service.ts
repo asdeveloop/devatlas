@@ -15,9 +15,12 @@ interface RouteMetrics {
 interface HealthMetrics {
   totalRequests: number;
   totalErrors: number;
+  errorRate: number;
+  validationFailures: number;
+  rateLimitedRequests: number;
   averageDurationMs: number;
   statusClasses: Array<{
-    label: '2xx' | '3xx' | '4xx' | '5xx';
+      label: '2xx' | '3xx' | '4xx' | '5xx';
     count: number;
   }>;
   durationBuckets: Array<{

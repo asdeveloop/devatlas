@@ -25,6 +25,14 @@ describeIfDb('HealthService integration', () => {
       route: '/api/v1/guides/:slug',
       statusCode: 404,
       durationMs: 320,
+      errorCode: 'BAD_REQUEST',
+    });
+    requestMetrics.record({
+      method: 'POST',
+      route: '/api/v1/search',
+      statusCode: 429,
+      durationMs: 22,
+      errorCode: 'RATE_LIMITED',
     });
     service = new HealthService(
       { db: testDb.db } as unknown as DrizzleService,
@@ -45,12 +53,15 @@ describeIfDb('HealthService integration', () => {
     expect(result.service).toBe('devatlas-api');
     expect(result.timestamp).toMatch(/T/);
     expect(result.metrics).toMatchObject({
-      totalRequests: 2,
-      totalErrors: 1,
+      totalRequests: 3,
+      totalErrors: 2,
+      errorRate: 66.67,
+      validationFailures: 1,
+      rateLimitedRequests: 1,
     });
     expect(result.metrics.statusClasses).toContainEqual({ label: '2xx', count: 1 });
-    expect(result.metrics.statusClasses).toContainEqual({ label: '4xx', count: 1 });
-    expect(result.metrics.durationBuckets).toContainEqual({ label: '<100ms', count: 1 });
+    expect(result.metrics.statusClasses).toContainEqual({ label: '4xx', count: 2 });
+    expect(result.metrics.durationBuckets).toContainEqual({ label: '<100ms', count: 2 });
     expect(result.metrics.durationBuckets).toContainEqual({ label: '300ms+', count: 1 });
     expect(result.metrics.routes).toContainEqual(
       expect.objectContaining({

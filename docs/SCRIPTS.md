@@ -1,7 +1,7 @@
 # Scripts Reference
 
 > DevAtlas Platform — Canonical script definitions for all packages.
-> Last updated: 1405/01/29 (2026-04-18)
+> Last updated: 1405/02/03 (2026-04-23)
 
 ---
 
@@ -18,6 +18,42 @@
 | `format`        | `prettier --write .`             | Format entire codebase                   |
 | `format:check`  | `prettier --check .`             | Check formatting without writing         |
 | `postinstall`   | `—`                              | No ORM engine prep needed with Drizzle   |
+| `search:smoke`  | `node scripts/search-smoke.mjs`   | Run API smoke checks and optional pipeline smoke for search |
+| `deploy:staging` | `node scripts/deploy/staging-release.mjs` | Run the repo-driven staging deploy helper over SSH |
+
+Examples:
+
+```bash
+# smoke-only against local API
+pnpm search:smoke -- --api http://127.0.0.1:3001 --query React
+
+# run search:reindex and validate summary output too
+pnpm search:smoke -- --api http://127.0.0.1:3001 --pipeline
+```
+
+Flags:
+
+- `--api <url>`: API base URL (default `http://127.0.0.1:3001` or `API_BASE_URL`)
+- `--query <text>`: search text to execute (default `React`)
+- `--require-positive`: enforce `search.total > 0` in smoke result
+- `--pipeline`: runs `pnpm --filter @devatlas/api search:reindex` and validates machine-readable summary
+
+Staging deploy helper examples:
+
+```bash
+# smoke-only against the current staging release with temporary TLS
+pnpm deploy:staging -- --skip-deploy --insecure
+
+# sync remote repo snapshot on the VPS, deploy, then run public smoke checks
+pnpm deploy:staging -- --sync-remote --insecure
+```
+
+Flags:
+
+- `--sync-remote`: refresh the VPS repo snapshot from remote before building
+- `--ref <git-ref>`: deploy a specific remote ref on the VPS
+- `--skip-deploy`: run smoke checks only
+- `--insecure`: allow smoke checks against the current self-signed staging cert
 
 ### Notes
 
@@ -51,6 +87,13 @@
 | `db:export`   | `drizzle-kit export --config src/db/drizzle.config.ts`   | Export the full schema diff as SQL from the current state |
 | `content:ingest` | `ts-node --project tsconfig.json src/scripts/ingest-content.ts` | Parse MDX content from `CONTENT_DIR` and upsert categories/tags/guides/tools plus relations and search documents |
 | `search:reindex` | `ts-node --project tsconfig.json src/scripts/reindex-search.ts` | Rebuild `search_documents` explicitly instead of doing index work on read traffic |
+| `search:verify` | `vitest run --passWithNoTests --config vitest.config.ts src/modules/search/__tests__/search.service.spec.ts src/modules/search/__tests__/search-indexing.service.spec.ts src/modules/__tests__/api-contract.spec.ts` | Run production-grade search contract + service + indexing checks |
+
+در اجرای `search:reindex`، خروجی machine-readable شامل خلاصهٔ تعداد بازسازی شده ارسال می‌شود:
+
+```json
+{"event":"search-reindex-complete","summary":{"guides":42,"tools":18,"total":60}}
+```
 
 اجرای production-like دیتابیس در این repo باید این ترتیب را دنبال کند:
 

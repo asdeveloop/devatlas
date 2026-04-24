@@ -1,6 +1,6 @@
 # DevAtlas Production Roadmap
 
-آخرین بازبینی: 2025-02-14
+آخرین بازبینی: 1405/02/02 (2026-04-22)
 وضعیت مبنا: بر اساس ساختار واقعی ریپو، اسکریپت های `package.json`، مسیرهای فعال `apps/api` و `apps/web`، و آرتیفکت های موجود در `infra/docker`
 
 این فایل تنها منبع تصمیم گیری برای اجرای پروژه تا رسیدن به استقرار production است. هدف این roadmap اضافه کردن «مستندات بیشتر» نیست؛ هدف، تبدیل وضعیت فعلی ریپو به یک محصول قابل استقرار، قابل پشتیبانی و قابل توسعه است.
@@ -113,6 +113,15 @@
   - `pnpm test:web`
   - `pnpm build:web`
 
+وضعیت فعلی:
+- `route /search` فعال است و با `apps/web/lib/api-client.ts` یکپارچه شده
+- query-state و persistence از URL انجام می‌شود
+- حالت های loading (`loading.tsx`) و error (`error.tsx`) برای تجربه کاربر اضافه شده‌اند
+- محدودیت طول کوئری و پیام خطای کنترل‌شده در صفحه search برای UX production-grade اعمال شد
+- `search:reindex` در API یک خروجی سازگار با observability تولید می‌کند:
+  - `{"event":"search-reindex-complete","summary":{"guides":<n>,"tools":<m>,"total":<n+m>}}`
+- برای smoke/staging validation یک اسکریپت خودکار `pnpm search:smoke` در سطح root اضافه شد (موارد `--api`, `--query`, `--pipeline`).
+
 ### 2.3 تثبیت contracts بین API و Web
 - بازبینی routeها و DTOهای consumer-facing برای `guides`, `tools`, `categories`, `search`
 - حذف fetchهای پراکنده باقیمانده و enforce کردن API client واحد
@@ -151,6 +160,9 @@
 - استانداردسازی log fields و correlation ids
 - افزودن metric برای latency, DB, search, error rate
 - تعریف seam برای exporter/monitoring backend
+- وضعیت فعلی:
+  - لاگ های API روی خطاها `traceId` و `errorCode` را کنار route و status ثبت می کنند
+  - health metrics علاوه بر latency، `errorRate`، `validationFailures` و `rateLimitedRequests` را هم گزارش می کند
 - معیار پذیرش:
   - بتوان latency و failure را روی API/Web تشخیص داد
   - health فقط heartbeat نباشد و به عملیات کمک کند
@@ -246,8 +258,7 @@
 |---|---|---|
 | P0 | Drizzle lifecycle + env contract | بدون این مورد، deploy و migration قابل اتکا نیست |
 | P0 | Content ingestion real pipeline | بدون داده واقعی، search و AI نمایشی می مانند |
-| P0 | Web search route | یکی از مسیرهای اصلی محصول هنوز operational نیست |
-| P0 | API integration/error-path tests | quality gate فعلی برای release کافی نیست |
+| P0 | API integration/error-path tests برای search + search-results | quality gate برای مسیر اصلی تا phase 2 کامل نشده است |
 | P1 | Security baseline | قبل از public exposure باید abuse و input risk کنترل شود |
 | P1 | Observability exporter + alerts | production بدون detection عملا قابل پشتیبانی نیست |
 | P1 | Staging deploy pipeline | بدون staging واقعی، production rollout پرریسک است |

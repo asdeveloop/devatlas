@@ -12,6 +12,8 @@ export const metadata: Metadata = {
   description: 'Search guides and tools across DevAtlas.',
 };
 
+const MAX_QUERY_LENGTH = 200;
+
 type SearchPageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
@@ -27,7 +29,17 @@ function getQueryValue(value: string | string[] | undefined): string {
 export default async function SearchPage({ searchParams }: SearchPageProps) {
   const params = await searchParams;
   const query = getQueryValue(params['q']).trim();
-  const response = query ? await searchContent(query) : null;
+  const isQueryTooLong = query.length > MAX_QUERY_LENGTH;
+  let response = null;
+  let searchError: string | null = null;
+
+  if (query && !isQueryTooLong) {
+    try {
+      response = await searchContent(query);
+    } catch (error) {
+      searchError = error instanceof Error ? error.message : 'Search is temporarily unavailable. Try again in a moment.';
+    }
+  }
 
   return (
     <AppPageShell>
@@ -51,12 +63,24 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
           </button>
         </form>
 
-        {query ? (
+        {isQueryTooLong ? (
+          <p className="rounded-lg border border-red-300 bg-red-50 px-4 py-6 text-sm text-red-700 dark:border-red-800 dark:bg-red-950/30 dark:text-red-300">
+            Query is too long. Please use up to {MAX_QUERY_LENGTH} characters.
+          </p>
+        ) : query ? (
           <div className="space-y-4">
-            <p className="text-sm text-neutral-500 dark:text-neutral-400">
-              {response?.total ?? 0} result(s) for "{query}".
-            </p>
-            <SearchResults query={query} results={response?.results ?? []} />
+            {searchError ? (
+              <p className="rounded-lg border border-red-300 bg-red-50 px-4 py-6 text-sm text-red-700 dark:border-red-800 dark:bg-red-950/30 dark:text-red-300">
+                Search failed. {searchError}
+              </p>
+            ) : (
+              <>
+                <p className="text-sm text-neutral-500 dark:text-neutral-400">
+                  {response?.total ?? 0} result(s) for "{query}".
+                </p>
+                <SearchResults query={query} results={response?.results ?? []} />
+              </>
+            )}
           </div>
         ) : (
           <p className="rounded-lg border border-dashed border-neutral-300 px-4 py-10 text-center text-neutral-500 dark:border-neutral-700 dark:text-neutral-400">

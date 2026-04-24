@@ -13,6 +13,9 @@
   "typescript.preferences.importModuleSpecifier": "non-relative",
   "typescript.preferences.importModuleSpecifierEnding": "minimal",
   "typescript.updateImportsOnFileMove.enabled": "always",
+  "continue.experimental.autocomplete.enabled": true,
+  "continue.experimental.autocomplete.model": "autocomplete",
+  "editor.inlineSuggest.enabled": true,
 
   "eslint.useFlatConfig": true,
   "eslint.validate": [
@@ -21,9 +24,7 @@
     "typescript",
     "typescriptreact"
   ],
-  "eslint.workingDirectories": [
-    { "mode": "auto" }
-  ],
+  "eslint.workingDirectories": [{ "mode": "auto" }],
 
   "files.exclude": {
     "**/.turbo": true,
@@ -54,12 +55,7 @@
     "MD033": false
   },
 
-  "todo-tree.general.tags": [
-    "TODO",
-    "DOING",
-    "BLOCKED",
-    "VERIFY"
-  ],
+  "todo-tree.general.tags": ["TODO", "DOING", "BLOCKED", "VERIFY"],
   "todo-tree.regex.regex": "(^\\s*[-*]\\s*`?($TAGS)`?\\b|//\\s*($TAGS)\\b|#\\s*($TAGS)\\b|<!--\\s*($TAGS)\\b)",
   "todo-tree.tree.showCountsInTree": true,
   "todo-tree.highlights.defaultHighlight": {
@@ -95,10 +91,7 @@
     "infra/**/*.{yml,yaml}"
   ],
 
-  "errorLens.enabledDiagnosticLevels": [
-    "error",
-    "warning"
-  ],
+  "errorLens.enabledDiagnosticLevels": ["error", "warning"],
 
   "turbo.runOnSave": false
 }

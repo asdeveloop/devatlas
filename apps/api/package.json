@@ -12,6 +12,7 @@
     "dev": "nest start --watch",
     "lint": "eslint src --ext .ts --max-warnings=0",
     "search:reindex": "ts-node --project tsconfig.json src/scripts/reindex-search.ts",
+    "search:verify": "vitest run --passWithNoTests --config vitest.config.ts src/modules/search/__tests__/search.service.spec.ts src/modules/search/__tests__/search-indexing.service.spec.ts src/modules/__tests__/api-contract.spec.ts",
     "start": "node dist/main.js",
     "test": "vitest run --passWithNoTests --config vitest.config.ts",
     "typecheck": "tsc --noEmit"

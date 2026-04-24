@@ -59,7 +59,7 @@ export class SearchRepository {
     }).execute();
   }
 
-  async replaceIndexWithGuides(): Promise<void> {
+  async replaceIndexWithGuides(): Promise<number> {
     await this.drizzle.db.delete(searchDocuments).where(eq(searchDocuments.contentType, 'guide')).execute();
 
     const guideRows = await this.drizzle.db
@@ -81,7 +81,7 @@ export class SearchRepository {
       .execute();
 
     if (!guideRows.length) {
-      return;
+      return 0;
     }
 
     await this.drizzle.db.insert(searchDocuments).values(
@@ -97,9 +97,11 @@ export class SearchRepository {
         url: guide.url,
       })),
     ).execute();
+
+    return guideRows.length;
   }
 
-  async replaceIndexWithTools(): Promise<void> {
+  async replaceIndexWithTools(): Promise<number> {
     await this.drizzle.db.delete(searchDocuments).where(eq(searchDocuments.contentType, 'tool')).execute();
 
     const toolRows = await this.drizzle.db
@@ -121,7 +123,7 @@ export class SearchRepository {
       .execute();
 
     if (!toolRows.length) {
-      return;
+      return 0;
     }
 
     await this.drizzle.db.insert(searchDocuments).values(
@@ -137,5 +139,7 @@ export class SearchRepository {
         url: tool.url,
       })),
     ).execute();
+
+    return toolRows.length;
   }
 }
