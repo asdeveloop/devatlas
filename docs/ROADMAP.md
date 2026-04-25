@@ -54,6 +54,10 @@
 - تکمیل اسکریپت های رسمی DB در `apps/api/package.json`
 - تثبیت workflowهای `generate`, `migrate`, `check`, `seed` و rollback
 - حذف یا تعیین تکلیف artifactهای باقیمانده غیرلازم مثل مسیرهای legacy دیتابیس
+- وضعیت فعلی:
+  - اسکریپت های رسمی `db:migrate`, `db:seed`, `db:rollback:plan` در `apps/api/package.json` ثبت شده اند
+  - `db:migrate` با fail-fast روی `DATABASE_URL` و مسیر canonical `drizzle/` اجرا می شود
+  - rollback به صورت migration جبرانی در `docs/deployment/database-runbook.md` و `db:rollback:plan` operational شده است
 - معیار پذیرش:
   - تیم بتواند local و staging را فقط با اسکریپت های رسمی repo بالا بیاورد
   - migration جدید بدون دستورهای دستی پراکنده قابل اجرا و rollback باشد
@@ -263,6 +267,31 @@
 | P1 | Observability exporter + alerts | production بدون detection عملا قابل پشتیبانی نیست |
 | P1 | Staging deploy pipeline | بدون staging واقعی، production rollout پرریسک است |
 | P2 | Load/security validation | برای cutover نهایی لازم است، نه برای شروع توسعه |
+
+### 4.1) صف اجرای پیشنهادی
+
+ترتیب زیر، ترتیب اجرایی canonical برای ادامه کار است. اگر تیم کوچک است، فقط آیتم های `Now` را همزمان باز کنید. آیتم جدید نباید خارج از این صف شروع شود مگر اینکه blocker عملیاتی را باز کند.
+
+| Queue | Priority | Task | Owner | Depends On | Acceptance Snapshot | Verify |
+|---|---|---|---|---|---|---|
+| Done | P0 | DB-01: تکمیل lifecycle رسمی Drizzle برای `generate/check/migrate/seed/rollback` | API | - | local و staging از flow رسمی repo استفاده می کنند؛ rollback به صورت migration compensating و runbook روشن شده است | `pnpm --filter @devatlas/api typecheck && pnpm --filter @devatlas/api test` |
+| Now | P0 | ENV-01: تکمیل env contract و fail-fast برای API/Web | Platform | DB-01 | `.env.example` کامل باشد؛ startup روی env ناقص fail کند؛ matrix محیط ها روشن و versioned باشد | `pnpm doctor` |
+| Now | P0 | INGEST-01: اتصال ingestion واقعی `@devatlas/content` به DB/relations/search | API | DB-01, ENV-01 | ingest بدون دستکاری دستی DB انجام شود و داده بعد از ingest در API/search دیده شود | `pnpm --filter @devatlas/api test` |
+| Now | P0 | SEARCH-TEST-01: integration/error-path tests برای search و search-results | API | INGEST-01 | happy path و error path جستجو quality gate داشته باشند | `pnpm verify:api` |
+| Next | P1 | CI-01: هم راستاسازی CI با `verify:api` و `verify:web` | Platform | SEARCH-TEST-01 | PR و release pipeline دقیقا همان اسکریپت های repo را اجرا کنند | `pnpm verify:api && pnpm verify:web` |
+| Next | P1 | OBS-01: exporter/alerts برای latency, error rate, readiness, DB saturation | Platform | ENV-01 | failure detection بدون SSH ممکن باشد و alert حداقلی فعال شود | `pnpm health` |
+| Next | P1 | RUNBOOK-01: runbook عملیاتی release/migration/rollback/incident | Platform | DB-01, ENV-01, OBS-01 | release و rollback بدون دانش شفاهی قابل اجرا باشند | dry-run روی staging checklist |
+| Next | P1 | STAGING-PIPE-01: pipeline قابل ردیابی staging با artifact و commit SHA | Platform | CI-01, RUNBOOK-01 | deploy staging قابل رهگیری، smoke و rollback باشد | `pnpm deploy:staging -- --skip-deploy --insecure` |
+| Later | P1 | STAGING-DATA-01: seed, backup/restore rehearsal و DB lifecycle شبیه prod | Platform | STAGING-PIPE-01 | staging از نظر data lifecycle شبیه production شود | staging dry-run |
+| Later | P2 | CUTOVER-01: load baseline, dependency audit, secret scan, launch checklist | Platform | همه آیتم های قبلی | release candidate برای production gate آماده باشد | `pnpm lint && pnpm typecheck && pnpm test && pnpm build` |
+
+### 4.2) قانون انتخاب کار بعدی
+
+- اگر `DB-01` done نشده، هیچ task جدید deploy/data را شروع نکنید.
+- اگر ingest هنوز manual است، feature جدید روی search یا AI باز نکنید.
+- اگر `SEARCH-TEST-01` سبز نیست، release candidate نسازید.
+- اگر alerting و runbook نداریم، staging را production-ready تلقی نکنید.
+- اگر pipeline staging artifact traceability ندارد، production cutover را شروع نکنید.
 
 ---
 

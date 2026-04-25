@@ -82,9 +82,11 @@ Flags:
 | Script        | Command                                            | Description |
 | ------------- | -------------------------------------------------- | ----------- |
 | `db:generate` | `drizzle-kit generate --config src/db/drizzle.config.ts` | Generate a new SQL migration from the current schema |
-| `db:migrate`  | `drizzle-kit migrate --config src/db/drizzle.config.ts`  | Apply pending migrations to the target database |
+| `db:migrate`  | `ts-node --project tsconfig.json src/db/migrate.ts`  | Apply pending migrations to the target database with fail-fast env/path checks |
 | `db:check`    | `drizzle-kit check --config src/db/drizzle.config.ts`    | Validate migration history against the schema output |
 | `db:export`   | `drizzle-kit export --config src/db/drizzle.config.ts`   | Export the full schema diff as SQL from the current state |
+| `db:seed`     | `ts-node --project tsconfig.json src/scripts/db-seed.ts` | Run the canonical content-backed seed flow using `CONTENT_DIR` |
+| `db:rollback:plan` | `ts-node --project tsconfig.json src/scripts/db-rollback-plan.ts` | Print the compensating-migration rollback checklist for the latest Drizzle migration |
 | `content:ingest` | `ts-node --project tsconfig.json src/scripts/ingest-content.ts` | Parse MDX content from `CONTENT_DIR` and upsert categories/tags/guides/tools plus relations and search documents |
 | `search:reindex` | `ts-node --project tsconfig.json src/scripts/reindex-search.ts` | Rebuild `search_documents` explicitly instead of doing index work on read traffic |
 | `search:verify` | `vitest run --passWithNoTests --config vitest.config.ts src/modules/search/__tests__/search.service.spec.ts src/modules/search/__tests__/search-indexing.service.spec.ts src/modules/__tests__/api-contract.spec.ts` | Run production-grade search contract + service + indexing checks |
@@ -101,10 +103,20 @@ Flags:
 2. migration SQL را بازبینی و commit کنید
 3. `pnpm --filter @devatlas/api db:check`
 4. `pnpm --filter @devatlas/api db:migrate`
-5. `pnpm --filter @devatlas/api content:ingest` after setting `CONTENT_DIR`
+5. `pnpm --filter @devatlas/api db:seed` after setting `CONTENT_DIR`
 6. `pnpm --filter @devatlas/api search:reindex` only when you need to rebuild `search_documents` from DB state without re-importing content
 
-Rollback در فاز فعلی خودکار نشده؛ rollback باید با migration جبرانی جدید انجام شود، نه ویرایش دستی migrationهای commit شده.
+برای rollback، مسیر canonical همچنان migration جبرانی جدید است، نه ویرایش migrationهای commit شده. قبل از rollback plan این دستور را اجرا کنید:
+
+```bash
+pnpm --filter @devatlas/api db:rollback:plan
+```
+
+نکات عملیاتی:
+
+- `db:seed` به `CONTENT_DIR` نیاز دارد و flow رسمی ingest را اجرا می کند.
+- اگر بعد از seed نیاز به rebuild صریح search داشتید، `SEARCH_REINDEX_AFTER_SEED=1 pnpm --filter @devatlas/api db:seed` را اجرا کنید.
+- `db:migrate` حالا از `src/db/migrate.ts` اجرا می شود تا `DATABASE_URL` و مسیر `drizzle/` را fail-fast چک کند.
 
 ### Runtime Security Baseline
 
