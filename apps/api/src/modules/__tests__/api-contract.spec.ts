@@ -299,6 +299,24 @@ describeIfDatabase('API contract', () => {
     expect(Array.isArray(invalidSearchJson.error.message)).toBe(true);
   });
 
+  it('rejects whitespace-only search queries before they hit the search path', async () => {
+    const whitespaceSearchRes = await fetch(`${baseUrl}/api/v1/search`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ query: '   ', limit: 5 }),
+    });
+    const whitespaceSearchJson = await whitespaceSearchRes.json();
+
+    expect(whitespaceSearchRes.status).toBe(400);
+    expect(whitespaceSearchJson).toMatchObject({
+      success: false,
+      error: {
+        status: 400,
+      },
+    });
+    expect(Array.isArray(whitespaceSearchJson.error.message)).toBe(true);
+  });
+
   it('validates search query length boundaries', async () => {
     const tooLongQuery = 'a'.repeat(201);
     const tooLongSearchRes = await fetch(`${baseUrl}/api/v1/search`, {
@@ -537,6 +555,14 @@ describeIfDatabase('API contract', () => {
       database: 'connected',
       service: 'devatlas-api',
     });
+
+    const metricsRes = await fetch(`${baseUrl}/api/v1/health/metrics`);
+    const metricsText = await metricsRes.text();
+
+    expect(metricsRes.status).toBe(200);
+    expect(metricsRes.headers.get('content-type')).toContain('text/plain');
+    expect(metricsText).toContain('devatlas_api_up');
+    expect(metricsText).toContain('devatlas_api_requests_total');
   });
 
   it('verifies traceId propagation for success and error responses', async () => {
@@ -624,6 +650,9 @@ describeIfDatabase('API contract', () => {
       post: expect.any(Object),
     });
     expect(swaggerDocument.paths['/api/v1/health']).toMatchObject({
+      get: expect.any(Object),
+    });
+    expect(swaggerDocument.paths['/api/v1/health/metrics']).toMatchObject({
       get: expect.any(Object),
     });
     expect(swaggerDocument.paths['/api/v1/health/live']).toMatchObject({

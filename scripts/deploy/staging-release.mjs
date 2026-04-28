@@ -25,6 +25,10 @@ function run(command, commandArgs, options = {}) {
   });
 }
 
+function runGit(args) {
+  return execFileSync('git', args, { encoding: 'utf8' }).trim();
+}
+
 const host = getArg('host', process.env['DEVATLAS_STAGING_HOST'] ?? '185.3.124.93');
 const user = getArg('user', process.env['DEVATLAS_STAGING_USER'] ?? 'deploy');
 const keyPath = getArg('key', process.env['DEVATLAS_STAGING_KEY'] ?? '/home/dev/.ssh/id_ed25519');
@@ -40,6 +44,11 @@ const smokeUrl = getArg(
 const syncRemote = hasFlag('sync-remote') ? '1' : process.env['DEVATLAS_SYNC_REMOTE'] ?? '0';
 const skipDeploy = hasFlag('skip-deploy');
 const insecure = hasFlag('insecure');
+const smokeQuery = getArg('smoke-query', process.env['DEVATLAS_SMOKE_QUERY'] ?? 'React');
+const releaseLabel = getArg('release-label', process.env['DEVATLAS_RELEASE_LABEL'] ?? 'staging-deploy');
+const commitRef = targetRef || runGit(['rev-parse', 'HEAD']);
+const shortCommit = runGit(['rev-parse', '--short', commitRef]);
+const commitMessage = runGit(['log', '-1', '--pretty=format:%s', commitRef]);
 
 const sshArgs = [
   '-i',
@@ -55,6 +64,10 @@ if (!skipDeploy) {
   const remoteCommand = [
     `export DEVATLAS_SYNC_REMOTE=${JSON.stringify(syncRemote)}`,
     `export DEVATLAS_SMOKE_BASE_URL=${JSON.stringify(smokeUrl)}`,
+    `export DEVATLAS_RELEASE_LABEL=${JSON.stringify(releaseLabel)}`,
+    `export DEVATLAS_RELEASE_COMMIT=${JSON.stringify(shortCommit)}`,
+    `export DEVATLAS_RELEASE_SHA=${JSON.stringify(commitRef)}`,
+    `export DEVATLAS_RELEASE_MESSAGE=${JSON.stringify(commitMessage)}`,
     targetRef ? `export DEVATLAS_TARGET_REF=${JSON.stringify(targetRef)}` : '',
     remoteScript,
   ]
@@ -64,6 +77,11 @@ if (!skipDeploy) {
   run('ssh', [...sshArgs, remoteCommand]);
 }
 
+console.log('[deploy:staging] release context:');
+console.log(`[deploy:staging] label=${releaseLabel}`);
+console.log(`[deploy:staging] commit=${shortCommit}`);
+console.log(`[deploy:staging] message=${commitMessage}`);
+
 const curlArgs = ['-fsS'];
 if (insecure) {
   curlArgs.push('-k');
@@ -72,5 +90,13 @@ if (insecure) {
 run('curl', [...curlArgs, `${smokeUrl}/api/v1/health/live`]);
 run('curl', [...curlArgs, `${smokeUrl}/api/v1/health/ready`]);
 run('curl', [...curlArgs, smokeUrl]);
+run('curl', [...curlArgs, `${smokeUrl}/api/v1/health`]);
+run('curl', [...curlArgs, `${smokeUrl}/api/v1/health/metrics`]);
+
+const smokeArgs = ['search:smoke', '--', '--api', smokeUrl, '--query', smokeQuery];
+if (insecure) {
+  smokeArgs.push('--insecure');
+}
+run('pnpm', smokeArgs);
 
 console.log('[deploy:staging] pass');

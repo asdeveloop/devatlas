@@ -28,8 +28,17 @@ Current public URL:
 5. Run smoke checks for:
    - `/api/v1/health/live`
    - `/api/v1/health/ready`
+   - `/api/v1/health`
+   - `/api/v1/health/metrics`
+   - `POST /api/v1/search`
    - web root
 6. Roll back to the previous symlink target if deploy fails.
+
+Artifact traceability:
+
+- release helper now reports deployment label and commit short SHA in logs.
+- `pnpm staging:readiness -- --sync-remote ...` also writes a machine-readable manifest under `tmp/staging-readiness/`.
+- command surface: `pnpm deploy:staging -- --release-label <slug>`
 
 ## Local Operator Command
 
@@ -47,10 +56,16 @@ Useful flags:
 - `--key <path>`: override SSH key path
 - `--remote-script <path>`: override remote deploy entrypoint
 - `--smoke-url <url>`: override public smoke base URL
+- `--smoke-query <text>`: query for canonical `POST /api/v1/search` smoke (default `React`)
 - `--skip-deploy`: run smoke checks only
 - `--insecure`: allow smoke checks against temporary self-signed TLS
+- `--release-label <slug>`: write deployment label to helper logs
 
 ## Current TLS Note
+
+Full runbook for release/migration/rollback/incident is in:
+
+- `docs/deployment/operations-runbook.md`
 
 Staging currently uses a temporary self-signed certificate for `staging.alirezasafeidev.ir`.
 

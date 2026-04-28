@@ -85,4 +85,25 @@ describeIfDb('HealthService integration', () => {
       service: 'devatlas-api',
     });
   });
+
+  it('exports alert-friendly metrics for scraping backends', async () => {
+    const report = await service.exportMetrics();
+
+    expect(report.contentType).toBe('text/plain; version=0.0.4; charset=utf-8');
+    expect(report.alerts).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: 'api_database_ready',
+          status: 'ok',
+        }),
+        expect.objectContaining({
+          key: 'api_error_rate',
+          status: 'critical',
+        }),
+      ]),
+    );
+    expect(report.body).toContain('devatlas_api_up{service="devatlas-api",environment=');
+    expect(report.body).toContain('devatlas_api_error_rate 66.67');
+    expect(report.body).toContain('devatlas_api_alert_status{key="api_database_ready",status="ok"} 0');
+  });
 });

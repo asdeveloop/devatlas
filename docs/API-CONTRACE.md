@@ -107,6 +107,13 @@ interface HealthPayload {
 }
 ```
 
+### `GET /api/v1/health/metrics`
+
+Returns Prometheus-style plain text metrics for scrape backends and alert pipelines.
+
+- `content-type`: `text/plain; version=0.0.4; charset=utf-8`
+- includes readiness, request totals, error rate, average latency, validation failures, rate-limited requests, per-route aggregates, and derived alert gauges
+
 ## Categories
 
 ### `GET /api/v1/categories`

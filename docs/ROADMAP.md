@@ -69,6 +69,11 @@
 - تکمیل `.env.example` برای API و Web
 - تعریف contract حداقلی env: `DATABASE_URL`, `NEXT_PUBLIC_API_BASE_URL`, app URLs, logging/telemetry vars
 - fail-fast برای env ناقص در startup
+- وضعیت فعلی:
+  - templateهای versioned در `.env.example`, `apps/api/.env.example`, `apps/web/.env.example` هم راستا شدند
+  - API روی `APP_BASE_URL` و `DATABASE_URL` در startup fail-fast می کند
+  - Web روی `NEXT_PUBLIC_SITE_URL` و `NEXT_PUBLIC_API_BASE_URL` در startup fail-fast می کند
+  - matrix محیط ها در `docs/deployment/env-matrix.md` ثبت شده است
 - معیار پذیرش:
   - اجرای local بدون حدس زدن env ممکن باشد
   - staging/prod env matrix شفاف و versioned باشد
@@ -80,6 +85,11 @@
 - بازبینی workflowها برای استفاده از اسکریپت های واقعی package-scoped و root
 - اضافه کردن مسیر verify سریع برای PR و مسیر verify کامل برای release
 - جلوگیری از drift بین CI و اسکریپت های local
+- وضعیت فعلی:
+  - GitHub Actions روی مسیر سریع `pnpm doctor`, `pnpm verify:api`, `pnpm verify:web` هم راستا شد
+  - pushها علاوه بر مسیر سریع، release gate کامل `pnpm lint && pnpm typecheck && pnpm test && pnpm build` را اجرا می کنند
+  - envهای لازم برای API/Web در CI versioned و صریح شدند تا bootstrap با local scripts drift نکند
+  - workflow موازی GitLab هم به همین contract ها و نسخه `pnpm@10.33.2` sync شد
 - معیار پذیرش:
   - CI دقیقا همان چیزهایی را اجرا کند که تیم محلی اجرا می کند
   - build شکسته یا test شکسته قبل از merge متوقف شود
@@ -99,6 +109,11 @@
 - تعریف یک entrypoint واقعی برای ingestion: CLI job یا admin-only workflow
 - ذخیره خروجی ingest در جداول search/content relations/API
 - پشتیبانی از reindex incremental و full rebuild
+- وضعیت فعلی:
+  - entrypoint رسمی `pnpm --filter @devatlas/api content:ingest` فعال است و از `CONTENT_DIR` به عنوان contract استفاده می کند
+  - ingest خروجی `@devatlas/content` را در جداول `guides/tools`, `content_relations`, `search_documents` sync می کند
+  - ingest حالا summary ماشین خوان `{"event":"content-ingest-complete","summary":...}` برای smoke/ops منتشر می کند
+  - integration test نزدیک این flow در `apps/api/src/scripts/ingest-content.spec.ts` اضافه شده و در صورت وجود `TEST_DATABASE_URL` این مسیر را تا API/search validate می کند
 - معیار پذیرش:
   - داده جدید بدون دستکاری دستی در DB وارد سیستم شود
   - پس از ingest، داده در API و search قابل مشاهده باشد
@@ -124,7 +139,7 @@
 - محدودیت طول کوئری و پیام خطای کنترل‌شده در صفحه search برای UX production-grade اعمال شد
 - `search:reindex` در API یک خروجی سازگار با observability تولید می‌کند:
   - `{"event":"search-reindex-complete","summary":{"guides":<n>,"tools":<m>,"total":<n+m>}}`
-- برای smoke/staging validation یک اسکریپت خودکار `pnpm search:smoke` در سطح root اضافه شد (موارد `--api`, `--query`, `--pipeline`).
+- برای smoke/staging validation اسکریپت های canonical `pnpm search:smoke` و `pnpm ingest:smoke` در سطح root اضافه شدند (موارد `--api`, `--query`, `--pipeline`, `--ingest-pipeline`, `--content-dir`).
 
 ### 2.3 تثبیت contracts بین API و Web
 - بازبینی routeها و DTOهای consumer-facing برای `guides`, `tools`, `categories`, `search`
@@ -167,6 +182,8 @@
 - وضعیت فعلی:
   - لاگ های API روی خطاها `traceId` و `errorCode` را کنار route و status ثبت می کنند
   - health metrics علاوه بر latency، `errorRate`، `validationFailures` و `rateLimitedRequests` را هم گزارش می کند
+  - endpoint جدید `GET /api/v1/health/metrics` خروجی scrape-friendly برای readiness, error rate, latency, route metrics و alert gauges می دهد
+  - alert baseline برای `database readiness`, `error rate`, `latency proxy`, و `rate-limited requests` داخل exporter محاسبه می شود
 - معیار پذیرش:
   - بتوان latency و failure را روی API/Web تشخیص داد
   - health فقط heartbeat نباشد و به عملیات کمک کند
@@ -275,10 +292,10 @@
 | Queue | Priority | Task | Owner | Depends On | Acceptance Snapshot | Verify |
 |---|---|---|---|---|---|---|
 | Done | P0 | DB-01: تکمیل lifecycle رسمی Drizzle برای `generate/check/migrate/seed/rollback` | API | - | local و staging از flow رسمی repo استفاده می کنند؛ rollback به صورت migration compensating و runbook روشن شده است | `pnpm --filter @devatlas/api typecheck && pnpm --filter @devatlas/api test` |
-| Now | P0 | ENV-01: تکمیل env contract و fail-fast برای API/Web | Platform | DB-01 | `.env.example` کامل باشد؛ startup روی env ناقص fail کند؛ matrix محیط ها روشن و versioned باشد | `pnpm doctor` |
-| Now | P0 | INGEST-01: اتصال ingestion واقعی `@devatlas/content` به DB/relations/search | API | DB-01, ENV-01 | ingest بدون دستکاری دستی DB انجام شود و داده بعد از ingest در API/search دیده شود | `pnpm --filter @devatlas/api test` |
-| Now | P0 | SEARCH-TEST-01: integration/error-path tests برای search و search-results | API | INGEST-01 | happy path و error path جستجو quality gate داشته باشند | `pnpm verify:api` |
-| Next | P1 | CI-01: هم راستاسازی CI با `verify:api` و `verify:web` | Platform | SEARCH-TEST-01 | PR و release pipeline دقیقا همان اسکریپت های repo را اجرا کنند | `pnpm verify:api && pnpm verify:web` |
+| Done | P0 | ENV-01: تکمیل env contract و fail-fast برای API/Web | Platform | DB-01 | `.env.example` کامل است؛ startup روی env ناقص fail می کند؛ matrix محیط ها versioned شده است | `pnpm doctor` |
+| Now | P0 | INGEST-01: اتصال ingestion واقعی `@devatlas/content` به DB/relations/search | API | DB-01, ENV-01 | ingest بدون دستکاری دستی DB انجام می شود؛ summary ماشین خوان دارد؛ smoke canonical از طریق `pnpm ingest:smoke` قابل اجرا است؛ داده بعد از ingest در API/search دیده می شود | `pnpm --filter @devatlas/api test` |
+| Now | P0 | SEARCH-TEST-01: integration/error-path tests برای search و search-results | API | INGEST-01 | happy path و error path جستجو quality gate دارند؛ whitespace-only query قبل از search reject می شود؛ query logging و DTO boundaries پوشش داده شده اند | `pnpm verify:api` |
+| Done | P1 | CI-01: هم راستاسازی CI با `verify:api` و `verify:web` | Platform | SEARCH-TEST-01 | PR path با `doctor/verify:api/verify:web` و push path با release gate کامل دقیقا از scriptهای repo استفاده می کنند | `pnpm verify:api && pnpm verify:web` |
 | Next | P1 | OBS-01: exporter/alerts برای latency, error rate, readiness, DB saturation | Platform | ENV-01 | failure detection بدون SSH ممکن باشد و alert حداقلی فعال شود | `pnpm health` |
 | Next | P1 | RUNBOOK-01: runbook عملیاتی release/migration/rollback/incident | Platform | DB-01, ENV-01, OBS-01 | release و rollback بدون دانش شفاهی قابل اجرا باشند | dry-run روی staging checklist |
 | Next | P1 | STAGING-PIPE-01: pipeline قابل ردیابی staging با artifact و commit SHA | Platform | CI-01, RUNBOOK-01 | deploy staging قابل رهگیری، smoke و rollback باشد | `pnpm deploy:staging -- --skip-deploy --insecure` |
